@@ -42,6 +42,7 @@ Takes about 10 minutes. Everything below can be copied straight into Discord.
 
 Moony is a free desktop launcher for Roblox, with its own bootstrapper, server regions, playtime tracking, friends, mods, an in-game HUD and illustrated themes.
 
+⬇️ Website: https://moonylauncher.xyz
 ⬇️ Download: https://github.com/johwnsss1-arch/moony/releases/latest
 📜 Read #rules, then say hi in #general!
 🛠️ Need help? Post in #support.
