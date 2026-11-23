@@ -92,8 +92,8 @@ function cleanEnv() {
   for (const k of Object.keys(env)) if (k.startsWith("PORTABLE_EXECUTABLE")) delete env[k];
   return env;
 }
-function launchInstalled() {
-  spawn(exePath(), [], { cwd: installDir(), detached: true, stdio: "ignore", env: cleanEnv() }).unref();
+function launchInstalled(args = []) {
+  spawn(exePath(), args, { cwd: installDir(), detached: true, stdio: "ignore", env: cleanEnv() }).unref();
 }
 
 /* ---------- Interactive installer window ---------- */
@@ -109,7 +109,7 @@ function installerWindow() {
     try { await install(opts, (p) => win.webContents.send("setup:progress", p)); return { ok: true }; }
     catch (e) { return { ok: false, error: e.message }; }
   });
-  ipcMain.on("setup:launch", () => { launchInstalled(); setTimeout(() => app.quit(), 300); });
+  ipcMain.on("setup:launch", (_e, link) => { launchInstalled(link ? ["--link-account"] : []); setTimeout(() => app.quit(), 300); });
   ipcMain.on("setup:close", () => app.quit());
   ipcMain.on("setup:minimize", () => win.minimize());
 }

@@ -60,7 +60,16 @@
   body.finished .progress, body.finished .opts, body.finished #installBtn, body.finished #cancelBtn { display: none; }
   body.finished .done { display: flex; }
   body.finished #launchBtn { display: inline-flex; }
-  #launchBtn { display: none; }
+  #launchBtn, #linkBtn, #skipBtn { display: none; }
+  /* First install: offer to link a Roblox account right away. */
+  body.finished.fresh #launchBtn { display: none; }
+  body.finished.fresh #linkBtn { display: inline-flex; }
+  body.finished.fresh #skipBtn { display: inline-flex; align-items: center; }
+  #linkBtn:hover svg { transform: rotate(-12deg) scale(1.08); }
+  .link-card { display: none; align-items: center; gap: 12px; margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: rgba(139,125,255,.1); border: 1px solid rgba(139,125,255,.25); font-size: 12.5px; color: #c9c3ff; line-height: 1.45; animation: cardIn .5s cubic-bezier(.2,1.3,.4,1) both; }
+  .link-card svg { flex: none; width: 22px; height: 22px; color: #b8aeff; }
+  body.finished.fresh .link-card { display: flex; }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(8px); } }
 </style>
 </head>
 <body>
@@ -83,14 +92,17 @@
     </div>
 
     <div class="progress"><div class="bar"><div class="fill" id="fill"></div></div><div class="step" id="step">Starting…</div></div>
-    <div class="done"><b>Moony is ready</b><span class="step">Sign in with Roblox inside Moony to get started.</span></div>
+    <div class="done"><b>Moony is ready</b><span class="step" id="doneText">Sign in with Roblox inside Moony to get started.</span></div>
+    <div class="link-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Link your Roblox account to see friends, servers and your playtime. You sign in on Roblox's own page. Moony never sees your password.</span></div>
     <div class="err" id="err"></div>
 
     <div class="grow"></div>
     <div class="actions">
       <button class="btn ghost" id="cancelBtn" onclick="setup.close()">Cancel</button>
       <button class="btn primary" id="installBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg><span id="installLabel">Install</span></button>
-      <button class="btn primary" id="launchBtn" onclick="setup.launch()"><span>Launch Moony</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
+      <button class="btn ghost" id="skipBtn" onclick="setup.launch(false)">Skip for now</button>
+      <button class="btn primary" id="linkBtn" onclick="setup.launch(true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span>Link Roblox account</span></button>
+      <button class="btn primary" id="launchBtn" onclick="setup.launch(false)"><span>Launch Moony</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
     </div>
   </div>
 </div>
@@ -110,7 +122,10 @@
     document.body.className = "busy";
     document.getElementById("err").style.display = "none";
     const r = await setup.install({ desktop: document.getElementById("desktop").checked, startup: document.getElementById("startup").checked });
-    if (r.ok) document.body.className = "finished";
+    if (r.ok) {
+      document.body.className = q.get("update") ? "finished" : "finished fresh";
+      if (!q.get("update")) document.getElementById("doneText").textContent = "One last step.";
+    }
     else { document.body.className = ""; const e = document.getElementById("err"); e.textContent = "Install failed: " + r.error; e.style.display = "block"; }
   };
 </script>

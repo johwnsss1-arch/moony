@@ -64,6 +64,10 @@ contextBridge.exposeInMainWorld("orbit", {
     openFolder: () => ipcRenderer.invoke("gameview:folder"),
     save: (dataUrl) => ipcRenderer.invoke("gameview:save", dataUrl),
   },
+  linkAccount: {
+    take: () => ipcRenderer.invoke("app:take-link"),
+    onRequest: (cb) => { const h = () => cb(); ipcRenderer.on("app:link-account", h); return () => ipcRenderer.removeListener("app:link-account", h); },
+  },
   feedback: {
     send: (payload) => ipcRenderer.invoke("feedback:send", payload),
   },

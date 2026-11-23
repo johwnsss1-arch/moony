@@ -281,6 +281,15 @@ export function AppProvider({ children }) {
   // Saved private (VIP) server links.
   const [privateServers, setPrivateServers] = usePersisted("privateServers", []);
 
+  // Installer "Link Roblox account": open Roblox sign-in right away.
+  useEffect(() => {
+    const l = window.orbit?.linkAccount;
+    if (!l) return;
+    const go = () => l.take().then((v) => { if (v) signIn(); });
+    go();
+    return l.onRequest(go);
+  }, [signIn]);
+
   // Disconnected from a game: offer to rejoin the same server.
   const [rejoinOffer, setRejoinOffer] = useState(null);
   useEffect(() => {

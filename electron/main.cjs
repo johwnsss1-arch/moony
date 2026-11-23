@@ -19,7 +19,10 @@ app.setAppUserModelId("Moony"); // Windows needs this for notifications
 const INSTALLED_DIR = path.join(process.env.LOCALAPPDATA || "", "Programs", "Moony").toLowerCase();
 const IS_SETUP = (!!process.env.PORTABLE_EXECUTABLE_FILE && !process.execPath.toLowerCase().startsWith(INSTALLED_DIR)) || process.argv.includes("--uninstall");
 if (!IS_SETUP && !app.requestSingleInstanceLock()) { app.quit(); process.exit(0); }
+// The installer can start Moony with --link-account to go straight to Roblox sign-in.
+let pendingLink = process.argv.includes("--link-account");
 app.on("second-instance", (_e, argv) => {
+  if (argv.includes("--link-account")) { pendingLink = true; if (win && !win.isDestroyed()) win.webContents.send("app:link-account"); }
   const link = argv.find((a) => /^roblox(-player)?:/i.test(a));
   if (link) return handleRobloxLink(link);
   if (win) { if (win.isMinimized()) win.restore(); win.show(); win.focus(); }
@@ -282,6 +285,7 @@ ipcMain.handle("auth:login", () => new Promise((resolve) => {
   loginWin.loadURL("https://www.roblox.com/login");
 }));
 
+ipcMain.handle("app:take-link", () => { const v = pendingLink; pendingLink = false; return v; });
 ipcMain.handle("auth:logout", async (_e, userId) => {
   const cookie = getCookie(userId);
   if (cookie) await roblox.logout(cookie); // ends the session on Roblox's side too

@@ -8,6 +8,7 @@ export const CHANGELOG = [
       "Send feedback straight to the Moony team from the speech-bubble button in the title bar.",
       "This popup, so you always know what changed.",
       "New HUD widget: a small \"Made with Moony\" tag for your clips (HUD tab).",
+      "New installs can link a Roblox account straight from the installer.",
       "Moony is now open source on GitHub.",
     ],
   },
