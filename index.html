@@ -8,11 +8,11 @@
 <meta property="og:title" content="Moony" />
 <meta property="og:description" content="A free, open-source Roblox launcher for Windows." />
 <meta property="og:image" content="img/app/home.jpg" />
-<meta name="theme-color" content="#09090b" />
+<meta name="theme-color" content="#07060f" />
 <link rel="icon" href="img/icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
 :root {
   --bg: #09090b; --bg-2: #111113; --line: #1f1f23; --line-2: #2a2a30;
@@ -64,7 +64,7 @@ img { display: block; max-width: 100%; }
 .steps { padding: 20vh 0 30vh; }
 .step { min-height: 90vh; display: flex; flex-direction: column; justify-content: center; opacity: .25; transition: opacity .5s; }
 .step.on { opacity: 1; }
-.step .label { margin-bottom: 14px; }
+.step .label { margin-bottom: 14px; align-self: flex-start; }
 .step h2 { margin: 0 0 14px; font-size: clamp(32px, 3.6vw, 46px); line-height: 1.05; letter-spacing: -.04em; font-weight: 800; }
 .step p { margin: 0; color: var(--text-2); font-size: 18px; max-width: 340px; }
 .stage-col { position: relative; }
@@ -137,6 +137,54 @@ footer a:hover { color: var(--text); }
   section { padding: 80px 0; }
 }
 @media (max-width: 480px) { .nav-right .btn span { display: none; } .nav-right .btn { width: 42px; padding: 0; } }
+
+/* ---- Moony vibe (matches banner + videos) ---- */
+:root { --bg: #07060f; --bg-2: rgba(255,255,255,.03); --line: rgba(184,174,255,.12); --line-2: rgba(184,174,255,.22); --text-2: #b4b0c8; --text-3: #7d78a0; --acc: #8b7dff; --acc-2: #b8aeff; --pink: #ff6ec4; }
+body { background: var(--bg); }
+.bgfx { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.bgfx .blob { position: absolute; border-radius: 50%; filter: blur(140px); }
+.bgfx .b1 { width: 70vw; height: 60vw; left: -20vw; top: -25vw; background: #6a5cff; opacity: .32; animation: drift 22s ease-in-out infinite alternate; }
+.bgfx .b2 { width: 60vw; height: 50vw; right: -20vw; bottom: -25vw; background: #ff4fb0; opacity: .2; animation: drift 26s ease-in-out infinite alternate-reverse; }
+.bgfx .grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size: 64px 64px; -webkit-mask-image: radial-gradient(60% 50% at 50% 30%, #000, transparent); mask-image: radial-gradient(60% 50% at 50% 30%, #000, transparent); }
+.bgfx canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+@keyframes drift { to { transform: translate(8vw, 6vw) scale(1.1); } }
+h1, h2, .brand, .end h2 { font-family: "Bricolage Grotesque", Inter, sans-serif; }
+.grad { background: linear-gradient(180deg, #fff, #c9c3ff 60%, #8b7dff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.label { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 99px; color: var(--acc-2); background: rgba(139,125,255,.14); border: 1px solid rgba(184,174,255,.3); font-size: 11.5px; letter-spacing: .14em; }
+.btn.solid { background: #fff; color: #0b0b10; border-color: #fff; box-shadow: 0 12px 40px -8px rgba(139,125,255,.6); }
+.btn { border-color: var(--line-2); }
+.btn:hover { background: rgba(139,125,255,.12); border-color: rgba(184,174,255,.4); }
+.nav.scrolled { background: rgba(7,6,15,.72); }
+.pill { border-color: rgba(184,174,255,.3); background: rgba(139,125,255,.1); color: var(--acc-2); }
+.pill b { background: var(--acc); color: #fff; }
+/* Hero: banner composition */
+.hero { padding: 140px 0 60px; overflow: hidden; }
+.hero::before { display: none; }
+.hero-logo { position: relative; width: 108px; margin: 0 auto 6px; filter: drop-shadow(0 0 50px rgba(170,160,255,.9)); animation: float 6s ease-in-out infinite; }
+@keyframes float { 50% { transform: translateY(-10px); } }
+.hero h1 { letter-spacing: -.045em; }
+.hero h1 .dim { color: inherit; }
+.side-win { position: absolute; top: 120px; width: 560px; aspect-ratio: 16/10; border-radius: 16px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 40px 100px rgba(0,0,0,.8), 0 0 120px rgba(139,125,255,.3); opacity: .55; pointer-events: none; -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent); mask-image: linear-gradient(90deg, #000 40%, transparent); }
+.side-win img { width: 100%; height: 100%; object-fit: cover; }
+.side-win.l { left: -260px; transform: perspective(1400px) rotateY(28deg); }
+.side-win.r { right: -260px; transform: perspective(1400px) rotateY(-28deg); -webkit-mask-image: linear-gradient(270deg, #000 40%, transparent); mask-image: linear-gradient(270deg, #000 40%, transparent); }
+.chips { position: relative; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 22px; }
+/* Story + cards */
+.frame { border: 0; border-radius: 20px; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 0 0 8px rgba(139,125,255,.06), 0 50px 120px -30px rgba(0,0,0,.9), 0 0 140px rgba(139,125,255,.28); }
+.frame::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(115deg, rgba(255,255,255,.1), transparent 30%); }
+.step h2 em, .sec-head h2 em, .end h2 em { font-style: normal; background: linear-gradient(180deg, #fff, #c9c3ff 55%, #8b7dff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.dots i.on { background: var(--acc-2); }
+.card { background: linear-gradient(180deg, rgba(139,125,255,.07), rgba(255,255,255,.015)); backdrop-filter: blur(6px); }
+.card:hover { border-color: rgba(184,174,255,.4); box-shadow: 0 20px 60px -20px rgba(139,125,255,.45); }
+.card svg { color: var(--acc-2); }
+.ticks svg { color: var(--acc-2); }
+.end::before { background: radial-gradient(closest-side, rgba(139,125,255,.25), transparent); }
+.end img { filter: drop-shadow(0 0 50px rgba(170,160,255,.9)); }
+@media (max-width: 900px) {
+  .side-win { display: none; }
+  .stage-col { background: linear-gradient(180deg, var(--bg) 85%, transparent); }
+  .hero-logo { width: 84px; }
+}
 </style>
 </head>
 <body>
@@ -147,6 +195,7 @@ footer a:hover { color: var(--text); }
   <symbol id="ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" opacity=".3"/><path d="m8 12.5 2.7 2.7L16.5 9"/></symbol>
 </svg>
 
+<div class="bgfx" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="grid"></div><canvas id="stars"></canvas></div>
 <header class="nav" id="nav">
   <div class="wrap">
     <a class="brand" href="#"><img src="img/icon.png" alt="" /> Moony</a>
@@ -161,28 +210,30 @@ footer a:hover { color: var(--text); }
 
 <main>
   <div class="hero">
+    <div class="side-win l"><img src="img/app/home.jpg" alt=""></div><div class="side-win r"><img src="img/app/themes-kawaii.jpg" alt=""></div>
     <div class="wrap">
+      <img class="hero-logo reveal" src="img/icon.png" alt="">
       <span class="pill reveal"><b data-version>v1.0.8</b> Free · Open source · Windows</span>
-      <h1 class="reveal" style="--d:.08s">Roblox, <span class="dim">but</span> better.</h1>
+      <h1 class="reveal" style="--d:.08s">Roblox, but <span class="grad">better.</span></h1>
       <p class="reveal" style="--d:.16s">A faster, cleaner launcher. Pick your server, track your time, make it yours.</p>
       <div class="hero-cta reveal" style="--d:.24s">
         <a class="btn solid lg" data-download><svg><use href="#dl"/></svg> Download for Windows</a>
         <a class="btn lg" href="#tour">Take the tour</a>
       </div>
-      <div class="hero-meta reveal" style="--d:.3s">Windows 10 and 11 · No password needed</div>
+      <div class="chips reveal" style="--d:.3s"><span class="label">Free</span><span class="label">Windows</span><span class="label">Open source</span></div>
     </div>
   </div>
 
   <div class="story" id="tour">
     <div class="wrap story-grid">
       <div class="steps">
-        <div class="step" data-shot="home" data-cam="1.0,0,0" data-cur="0.33,0.3"><div class="label">01 · Home</div><h2>Every game, one click away.</h2><p>Top games and your favourites, ready when you open it.</p></div>
-        <div class="step" data-shot="home" data-cam="1.6,0.02,0.4" data-cur="0.2,0.62"><div class="label">02 · Discover</div><h2>Find something new.</h2><p>Popular and trending games, always up to date.</p></div>
-        <div class="step" data-shot="servers" data-cam="1.0,0,0" data-cur="0.18,0.47"><div class="label">03 · Servers</div><h2>Pick the server. Skip the lag.</h2><p>See every server's ping and size before you join.</p></div>
-        <div class="step" data-shot="servers" data-cam="1.7,0.55,0.48" data-cur="0.86,0.71"><div class="label">04 · Ping</div><h2>Lowest ping wins.</h2><p>Join the closest server in one click.</p></div>
-        <div class="step" data-shot="market" data-cam="1.0,0,0" data-cur="0.31,0.45"><div class="label">05 · Marketplace</div><h2>Shop without a browser.</h2><p>Browse items and outfits right inside Moony.</p></div>
-        <div class="step" data-shot="themes-kawaii" data-cam="1.0,0,0" data-cur="0.55,0.33"><div class="label">06 · Themes</div><h2>Make it yours.</h2><p>Eleven themes, each with its own art and a little pet.</p></div>
-        <div class="step" data-shot="themes-cyberpunk" data-cam="1.0,0,0" data-cur="0.6,0.73"><div class="label">07 · Themes</div><h2>Switch any time.</h2><p>One click and the whole app changes.</p></div>
+        <div class="step" data-shot="home" data-cam="1.0,0,0" data-cur="0.33,0.3"><div class="label">01 · Home</div><h2>Every game, one click <em>away.</em></h2><p>Top games and your favourites, ready when you open it.</p></div>
+        <div class="step" data-shot="home" data-cam="1.6,0.02,0.4" data-cur="0.2,0.62"><div class="label">02 · Discover</div><h2>Find something <em>new.</em></h2><p>Popular and trending games, always up to date.</p></div>
+        <div class="step" data-shot="servers" data-cam="1.0,0,0" data-cur="0.18,0.47"><div class="label">03 · Servers</div><h2>Pick the server. Skip the <em>lag.</em></h2><p>See every server's ping and size before you join.</p></div>
+        <div class="step" data-shot="servers" data-cam="1.7,0.55,0.48" data-cur="0.86,0.71"><div class="label">04 · Ping</div><h2>Lowest ping <em>wins.</em></h2><p>Join the closest server in one click.</p></div>
+        <div class="step" data-shot="market" data-cam="1.0,0,0" data-cur="0.31,0.45"><div class="label">05 · Marketplace</div><h2>Shop without a <em>browser.</em></h2><p>Browse items and outfits right inside Moony.</p></div>
+        <div class="step" data-shot="themes-kawaii" data-cam="1.0,0,0" data-cur="0.55,0.33"><div class="label">06 · Themes</div><h2>Make it <em>yours.</em></h2><p>Eleven themes, each with its own art and a little pet.</p></div>
+        <div class="step" data-shot="themes-cyberpunk" data-cam="1.0,0,0" data-cur="0.6,0.73"><div class="label">07 · Themes</div><h2>Switch any <em>time.</em></h2><p>One click and the whole app changes.</p></div>
       </div>
       <div class="stage-col">
         <div class="stage-sticky">
@@ -198,7 +249,7 @@ footer a:hover { color: var(--text); }
 
   <section id="more">
     <div class="wrap">
-      <div class="sec-head reveal"><div class="label">And more</div><h2>Small things that add up.</h2></div>
+      <div class="sec-head reveal"><div class="label">And more</div><h2>Small things that add <em>up.</em></h2></div>
       <div class="cards">
         <div class="card reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h3>Playtime</h3><p>See your hours in every game.</p></div>
         <div class="card reveal" style="--d:.06s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h4M7 16h10"/></svg><h3>In-game HUD</h3><p>Clock, timer and music on top of your game.</p></div>
@@ -212,7 +263,7 @@ footer a:hover { color: var(--text); }
 
   <section id="safe" style="border-top:1px solid var(--line)">
     <div class="wrap trust">
-      <div class="sec-head reveal" style="margin:0"><div class="label">Safety</div><h2>Open source. Nothing hidden.</h2><p>Every line of Moony's code is public on GitHub.</p></div>
+      <div class="sec-head reveal" style="margin:0"><div class="label">Safety</div><h2>Open source. Nothing <em>hidden.</em></h2><p>Every line of Moony's code is public on GitHub.</p></div>
       <ul class="ticks reveal" style="--d:.1s">
         <li><svg><use href="#ok"/></svg><span><b>Sign in on Roblox's page.</b> We never see your password.</span></li>
         <li><svg><use href="#ok"/></svg><span><b>Your login stays on your PC.</b></span></li>
@@ -224,7 +275,7 @@ footer a:hover { color: var(--text); }
 
   <section id="faq" style="border-top:1px solid var(--line)">
     <div class="wrap">
-      <div class="sec-head reveal"><div class="label">FAQ</div><h2>Questions.</h2></div>
+      <div class="sec-head reveal"><div class="label">FAQ</div><h2><em>Questions.</em></h2></div>
       <div class="faq-list reveal">
         <details><summary>Is Moony safe?</summary><p>Yes. You sign in on Roblox's own page, and the code is public. Only download Moony from here or GitHub.</p></details>
         <details><summary>Can I get banned?</summary><p>No. Moony isn't a cheat. It launches Roblox the normal way.</p></details>
@@ -238,7 +289,7 @@ footer a:hover { color: var(--text); }
   <div class="end">
     <div class="wrap">
       <img class="reveal" src="img/icon.png" alt="" />
-      <h2 class="reveal">Make Roblox yours.</h2>
+      <h2 class="reveal">Make Roblox <em>yours.</em></h2>
       <p class="reveal" style="--d:.06s">Free for Windows.</p>
       <div class="hero-cta reveal" style="--d:.12s"><a class="btn solid lg" data-download><svg><use href="#dl"/></svg> Download Moony</a><a class="btn lg" data-discord><svg><use href="#dc"/></svg> Discord</a></div>
     </div>
@@ -328,6 +379,18 @@ function onScroll() {
 addEventListener("scroll", onScroll, { passive: true });
 addEventListener("resize", onScroll);
 onScroll();
+</script>
+<script>
+(() => { const c = document.getElementById("stars"); if (!c || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const x = c.getContext("2d"); let W, H, P = [];
+  const size = () => { const d = Math.min(devicePixelRatio || 1, 2); W = c.width = innerWidth * d; H = c.height = innerHeight * d;
+    P = Array.from({ length: Math.round(innerWidth / 22) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: (0.6 + Math.random() * 1.6) * d, v: (0.1 + Math.random() * 0.35) * d, p: Math.random() * 6 })); };
+  size(); addEventListener("resize", size);
+  const tick = (t) => { x.clearRect(0, 0, W, H);
+    for (const s of P) { s.y -= s.v; if (s.y < -5) s.y = H + 5; const a = 0.15 + 0.4 * (0.5 + 0.5 * Math.sin(t / 700 + s.p));
+      x.beginPath(); x.arc(s.x, s.y, s.r, 0, 7); x.fillStyle = "rgba(200,192,255," + a + ")"; x.shadowColor = "#b8aeff"; x.shadowBlur = 8; x.fill(); }
+    requestAnimationFrame(tick); };
+  requestAnimationFrame(tick); })();
 </script>
 </body>
 </html>
