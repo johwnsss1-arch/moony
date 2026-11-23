@@ -22,3 +22,20 @@ To share with a friend, just send them `Moony-Setup-<version>.exe` (or the relea
 It installs for their user only, with no admin prompt. It's not code-signed, so Windows
 SmartScreen shows "Windows protected your PC" → **More info → Run anyway**. Signing it needs
 a paid code-signing certificate.
+
+## Major updates: add a showcase video
+For a big release, record the live showcase (dev server running: `npm run dev`):
+```
+ORIENT=landscape npx electron trailer/live-record.cjs     # trailer/out/moony-live-landscape.mp4
+```
+1. Copy it to `release/moony-showcase.mp4` and add it to the `gh release create` command.
+2. In `src/lib/changelog.js`, give that version's entry a video so it plays in the What's New popup:
+   `video: "https://github.com/<your-name>/moony/releases/download/vX.Y.Z/moony-showcase.mp4"`
+3. Mention it in the release notes.
+
+Other edits for TikTok (portrait):
+```
+EDIT=beforeafter AUDIO_START=13.4 ORIENT=portrait npx electron trailer/live-record.cjs
+EDIT=themes      AUDIO_START=13   ORIENT=portrait npx electron trailer/live-record.cjs
+```
+Music and sound effects come from `node trailer/song2.cjs`.

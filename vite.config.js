@@ -35,7 +35,7 @@ const CSP = [
   "script-src 'self' file:",
   "style-src 'self' file: 'unsafe-inline'",
   "img-src 'self' file: data: blob: https: moony-shot:",
-  "media-src 'self' file: data: blob: moony-shot:",
+  "media-src 'self' file: data: blob: moony-shot: https://github.com https://objects.githubusercontent.com https://release-assets.githubusercontent.com",
   "font-src 'self' file: data:",
   "connect-src 'self' file: data: blob:",
   "object-src 'none'",

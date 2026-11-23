@@ -196,3 +196,5 @@
 .eng-nudge > svg { flex: none; color: var(--accent); }
 .eng-nudge div { flex: 1; display: flex; flex-direction: column; }
 .eng-nudge small { color: var(--text-3); font-size: 12px; }
+.eng-new { width: 560px; }
+.eng-vid { display: block; width: 100%; aspect-ratio: 16/9; margin: 0 0 12px; border-radius: 12px; background: #000; border: 1px solid var(--line-2); object-fit: cover; }

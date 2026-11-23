@@ -2,6 +2,16 @@
 // Add an entry here for every release.
 export const CHANGELOG = [
   {
+    version: "1.0.8",
+    title: "See Moony in action",
+    video: "https://github.com/johwnsss1-arch/moony/releases/download/v1.0.8/moony-showcase.mp4",
+    poster: "https://github.com/johwnsss1-arch/moony/releases/download/v1.0.8/moony-showcase.jpg",
+    items: [
+      "Major updates now come with a showcase video, right here.",
+      "Fixed a small glitch in this What's New popup.",
+    ],
+  },
+  {
     version: "1.0.7",
     title: "Feedback, What's new and Made with Moony",
     items: [

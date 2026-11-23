@@ -33,13 +33,14 @@ export function WhatsNew() {
   if (!settings.tourDone || !seen || seen === VERSION) return null;
   const entries = CHANGELOG.filter((c) => cmp(c.version, seen) > 0);
   const close = () => updateSettings({ lastSeenVersion: VERSION });
-  if (!entries.length) { close(); return null; }
+  if (!entries.length) return null;
   return (
     <Modal onClose={close} className="eng-new">
       <div className="eng-hero"><Sparkles size={22} /><div><small>What's new</small><h2>Moony {VERSION}</h2></div></div>
       {entries.map((c) => (
         <section key={c.version} className="eng-sec">
           <h3>{c.title} <span>v{c.version}</span></h3>
+          {c.video && <video className="eng-vid" src={c.video} poster={c.poster} controls autoPlay muted loop playsInline />}
           <ul>{c.items.map((t, i) => <li key={i} style={{ animationDelay: `${i * 60}ms` }}>{t}</li>)}</ul>
         </section>
       ))}
