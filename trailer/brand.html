@@ -1,0 +1,39 @@
+<!doctype html>
+<html><head><meta charset="UTF-8" />
+<script type="module">
+import "@fontsource/fredoka/latin-600.css";
+import "@fontsource-variable/inter";
+document.fonts.ready.then(() => (window.brandReady = true));
+</script>
+<style>
+html, body { margin: 0; overflow: hidden; background: #08070f; }
+.c { position: relative; overflow: hidden; background: radial-gradient(80% 80% at 50% 110%, #3a2a8a 0%, #1d1850 35%, #0b0a18 75%); font-family: "Fredoka", sans-serif; color: #fff; }
+.stars { position: absolute; inset: 0; background-image:
+  radial-gradient(2px 2px at 12% 18%, #fff, transparent), radial-gradient(1.5px 1.5px at 30% 70%, #fff, transparent),
+  radial-gradient(2.5px 2.5px at 78% 22%, #fff, transparent), radial-gradient(1.5px 1.5px at 88% 64%, #fff, transparent),
+  radial-gradient(2px 2px at 55% 12%, #fff, transparent), radial-gradient(1.5px 1.5px at 42% 40%, #cfc8ff, transparent),
+  radial-gradient(2px 2px at 66% 84%, #fff, transparent), radial-gradient(1.5px 1.5px at 20% 88%, #cfc8ff, transparent);
+  background-size: 50% 50%; opacity: .8; }
+.glow { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(139,125,255,.6), transparent 65%); filter: blur(30px); }
+.hills { position: absolute; left: -5%; right: -5%; bottom: -2%; height: 22%; background: #0a0818; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+.word { background: linear-gradient(180deg, #fff, #c9c3ff 60%, #8b7dff); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1; }
+/* Profile picture */
+#pfp { width: 1000px; height: 1000px; display: flex; align-items: center; justify-content: center; }
+#pfp .glow { width: 900px; height: 900px; }
+#pfp img { position: relative; width: 640px; filter: drop-shadow(0 0 60px rgba(170,160,255,.8)); }
+/* Banner */
+#banner { width: 1500px; height: 500px; display: flex; align-items: center; justify-content: center; gap: 50px; }
+#banner .glow { width: 700px; height: 700px; left: 200px; top: -100px; }
+#banner img { position: relative; width: 250px; filter: drop-shadow(0 0 40px rgba(170,160,255,.8)); }
+#banner .txt { position: relative; }
+#banner .word { font-size: 170px; font-weight: 600; }
+#banner p { margin: 14px 0 0 6px; font-family: "Inter Variable", sans-serif; font-size: 36px; font-weight: 600; color: #d9d4ff; letter-spacing: .02em; }
+#banner .pill { display: inline-block; margin-top: 22px; margin-left: 6px; padding: 10px 26px; border-radius: 999px; background: linear-gradient(135deg, #a89bff, #6a5cff); font-family: "Inter Variable", sans-serif; font-size: 26px; font-weight: 700; box-shadow: 0 10px 30px rgba(106,92,255,.5); }
+</style></head>
+<body>
+<div id="pfp" class="c"><div class="stars"></div><div class="glow"></div><div class="hills"></div><img src="/build/icon.png" /></div>
+<div id="banner" class="c"><div class="stars"></div><div class="glow"></div><div class="hills" style="height:18%"></div>
+  <img src="/build/icon.png" />
+  <div class="txt"><div class="word">Moony</div><p>The Roblox launcher that's actually yours</p><span class="pill">Free for Windows · Themes · Pets · HUD</span></div>
+</div>
+</body></html>

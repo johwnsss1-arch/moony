@@ -1,0 +1,198 @@
+/* ===================== Pets ===================== */
+.pets { position: fixed; left: 0; right: 0; bottom: 0; height: 120px; pointer-events: none; z-index: 4; overflow: hidden; }
+.pet { position: absolute; left: 0; bottom: 6px; width: 40px; height: 40px; animation: pet-cross var(--dur) linear var(--delay) infinite; will-change: transform; }
+.pet.small { transform: scale(.75); bottom: 4px; }
+.pet svg { display: block; overflow: visible; filter: drop-shadow(0 3px 4px rgba(0,0,0,.35)); }
+@keyframes pet-cross { from { transform: translateX(-60px); } to { transform: translateX(calc(100vw + 60px)); } }
+.pet.small { animation-name: pet-cross-s; }
+@keyframes pet-cross-s { from { transform: translateX(-60px) scale(.75); } to { transform: translateX(calc(100vw + 60px)) scale(.75); } }
+.pet-legs .l1 { transform-origin: 50% 0; transform-box: fill-box; animation: leg .45s ease-in-out infinite alternate; }
+.pet-legs .l2 { transform-origin: 50% 0; transform-box: fill-box; animation: leg .45s ease-in-out infinite alternate-reverse; }
+@keyframes leg { from { transform: rotate(-22deg); } to { transform: rotate(22deg); } }
+.pet-tail { transform-origin: 100% 100%; transform-box: fill-box; animation: tail 1.6s ease-in-out infinite alternate; }
+@keyframes tail { from { transform: rotate(-12deg); } to { transform: rotate(14deg); } }
+.pet-walk .pet-bob, .pet-scuttle .pet-bob { animation: bob .45s ease-in-out infinite alternate; }
+@keyframes bob { to { transform: translateY(-2px); } }
+.pet-hop .pet-bob { animation: hop .9s cubic-bezier(.3,0,.5,1) infinite; }
+@keyframes hop { 0%, 100% { transform: translateY(0) scale(1.06, .94); } 15% { transform: translateY(0) scale(1); } 50% { transform: translateY(-22px) scale(.96, 1.05); } 85% { transform: translateY(0); } }
+.pet-hop .pet-ear { transform-origin: 50% 100%; transform-box: fill-box; animation: tail .9s ease-in-out infinite alternate; }
+.pet-waddle .pet-bob { animation: waddle .5s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+@keyframes waddle { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
+.pet-fly { bottom: auto; top: calc(100% - 110px); }
+.pet-fly .pet-bob { animation: flyy 2.4s ease-in-out infinite; }
+@keyframes flyy { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-26px); } }
+.pet-wing { transform-origin: 50% 100%; transform-box: fill-box; animation: flap .22s ease-in-out infinite alternate; }
+.pet-wing.w2 { animation-direction: alternate-reverse; }
+@keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(.35); } }
+.pet-prop { transform-origin: 50% 50%; transform-box: fill-box; animation: flap .08s linear infinite alternate; }
+.pet-swim { bottom: 40px; }
+.pet-swim .pet-bob { animation: swim 3s ease-in-out infinite; }
+@keyframes swim { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-14px) rotate(3deg); } }
+.pet-swim .pet-tail { animation-duration: .35s; transform-origin: 100% 50%; }
+.frame.no-anim .pets { display: none; }
+
+/* ===================== Theme frames & controls v4 ===================== */
+/* Every theme gets its own window border, title bar, sidebar, buttons,
+   toggles, chips and inputs. */
+.frame { --frame-r: 12px; }
+.frame::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 60; border-radius: inherit; }
+.frame .btn, .frame .chip, .frame .input, .frame .toggle, .frame .nav-btn { transition: transform .15s, box-shadow .2s, background .2s, border-color .2s, filter .2s; }
+.frame .btn:hover:not(:disabled) { transform: translateY(-1px); }
+
+/* ---- Midnight: moonlit glass, silver rim ---- */
+.theme-midnight::after { box-shadow: inset 0 0 0 1px rgba(170,160,255,.22), inset 0 1px 0 rgba(255,255,255,.08); }
+.theme-midnight .titlebar { background: linear-gradient(180deg, rgba(139,125,255,.08), transparent); }
+.theme-midnight .btn.primary { border-radius: 999px; background: linear-gradient(135deg, #a89bff, #6a5cff) !important; }
+.theme-midnight .toggle.on { background: linear-gradient(90deg, #6a5cff, #a89bff); box-shadow: 0 0 12px rgba(139,125,255,.5); }
+.theme-midnight .toggle.on .knob { background: radial-gradient(circle at 35% 35%, #fff, #e6e1ff); box-shadow: 0 0 8px #fff; }
+
+/* ---- Kawaii: candy buttons, puffy pills, stitched frame ---- */
+.theme-kawaii::after { border: 3px dotted rgba(255,156,200,.45); border-radius: 14px; inset: 3px; }
+.theme-kawaii .titlebar { background: repeating-linear-gradient(90deg, rgba(255,156,200,.12) 0 14px, rgba(255,255,255,.05) 14px 28px); border-bottom: 2px dashed rgba(255,156,200,.35); }
+.theme-kawaii .btn { border-radius: 999px !important; font-weight: 700; }
+.theme-kawaii .btn.primary { box-shadow: inset 0 -3px 0 rgba(180,40,110,.35), inset 0 2px 0 rgba(255,255,255,.5), 0 6px 0 -1px #c2407e, 0 10px 18px rgba(255,111,174,.35) !important; }
+.theme-kawaii .btn.primary:active:not(:disabled) { transform: translateY(3px) !important; box-shadow: inset 0 -2px 0 rgba(180,40,110,.35), 0 2px 0 #c2407e !important; }
+.theme-kawaii .btn.secondary, .theme-kawaii .btn.ghost { background: rgba(255,156,200,.1); border: 2px solid rgba(255,156,200,.35); color: #ffd6e8; }
+.theme-kawaii .chip { border-radius: 999px; border: 2px solid rgba(255,156,200,.25); }
+.theme-kawaii .chip.on { background: #ff8cbf; color: #fff; border-color: #fff3; }
+.theme-kawaii .toggle { height: 24px; border: 2px solid rgba(255,156,200,.4); background: #3a1d30; }
+.theme-kawaii .toggle.on { background: #ff8cbf; }
+.theme-kawaii .toggle.on .knob::after { content: "♥"; position: absolute; inset: 0; font-size: 10px; line-height: 16px; text-align: center; color: #ff6fae; }
+.theme-kawaii .input { border-radius: 999px; border: 2px solid rgba(255,156,200,.3); }
+.theme-kawaii .nav-btn { border-radius: 50%; }
+.theme-kawaii .nav-btn.on { background: rgba(255,140,191,.22); box-shadow: 0 0 0 2px rgba(255,140,191,.5) !important; }
+
+/* ---- Anime Night: neon tube outlines ---- */
+.theme-anime::after { box-shadow: inset 0 0 0 1px rgba(255,111,168,.55), inset 0 0 22px rgba(255,111,168,.15), inset 0 0 0 4px rgba(120,130,255,.12); }
+.theme-anime .titlebar { border-bottom: 1px solid rgba(255,111,168,.35); box-shadow: 0 1px 12px rgba(255,111,168,.2); }
+.theme-anime .btn.primary { background: transparent !important; border: 1.5px solid #ff7eb6; color: #ffe0ee; box-shadow: 0 0 10px rgba(255,111,168,.55), inset 0 0 10px rgba(255,111,168,.35) !important; text-shadow: 0 0 6px #ff6fa8; }
+.theme-anime .btn.primary:hover:not(:disabled) { background: rgba(255,111,168,.18) !important; }
+.theme-anime .btn.secondary, .theme-anime .btn.ghost { border: 1.5px solid rgba(154,166,255,.5); box-shadow: 0 0 8px rgba(154,166,255,.25); background: transparent; }
+.theme-anime .chip.on { background: transparent; border-color: #ff7eb6; box-shadow: 0 0 10px rgba(255,111,168,.45); }
+.theme-anime .toggle.on { background: #1a1030; border: 1.5px solid #ff7eb6; box-shadow: 0 0 10px rgba(255,111,168,.6); }
+.theme-anime .toggle.on .knob { background: #ff7eb6; box-shadow: 0 0 8px #ff6fa8; }
+.theme-anime .input:focus { box-shadow: 0 0 0 1px #ff7eb6, 0 0 14px rgba(255,111,168,.4); }
+
+/* ---- Halloween: wooden-crate frame, carved buttons ---- */
+.theme-halloween::after { border: 4px solid transparent; border-image: repeating-linear-gradient(90deg, #3a2010 0 22px, #2a160a 22px 26px) 4; box-shadow: inset 0 0 40px rgba(255,138,31,.12); }
+.theme-halloween .titlebar { background: linear-gradient(180deg, rgba(120,60,20,.35), transparent); }
+.theme-halloween .btn { border-radius: 4px 14px 4px 14px !important; }
+.theme-halloween .btn.primary { box-shadow: inset 0 -3px 0 #7a3000, 0 0 18px rgba(255,138,31,.45) !important; color: #1a0a00; font-weight: 800; }
+.theme-halloween .btn.secondary, .theme-halloween .btn.ghost { background: rgba(90,40,120,.25); border: 1px solid rgba(160,90,200,.4); }
+.theme-halloween .toggle.on { background: linear-gradient(90deg, #6a2a90, #ff8a1f); }
+.theme-halloween .toggle.on .knob { background: #ffb347; box-shadow: 0 0 10px #ff8a1f; }
+.theme-halloween .chip.on { background: rgba(255,138,31,.25); border-color: #ff8a1f; }
+
+/* ---- Christmas: candy-cane window, gift-wrap buttons ---- */
+.theme-christmas::after { border: 4px solid transparent; border-image: repeating-linear-gradient(45deg, #d4263a 0 10px, #f4f4f4 10px 20px) 4; }
+.theme-christmas .titlebar { background: linear-gradient(180deg, rgba(212,38,58,.22), transparent); }
+.theme-christmas .titlebar::after { content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 6px; background: radial-gradient(circle at 6px 0, #fff 4px, transparent 4.5px) 0 0 / 14px 6px repeat-x; opacity: .8; pointer-events: none; }
+.theme-christmas .btn.primary { background: linear-gradient(90deg, transparent 44%, #ffd166 44% 56%, transparent 56%), linear-gradient(180deg, #e03a4c, #a81828) !important; }
+.theme-christmas .btn.secondary, .theme-christmas .btn.ghost { background: rgba(30,110,60,.25); border: 1px solid rgba(80,180,110,.4); }
+.theme-christmas .toggle.on { background: repeating-linear-gradient(45deg, #d4263a 0 5px, #fff 5px 10px); }
+.theme-christmas .toggle.on .knob { background: #1e7a42; }
+.theme-christmas .chip.on { background: #1e7a42; border-color: #ffd166; }
+
+/* ---- Ocean: porthole rim, bubble buttons ---- */
+.theme-ocean::after { box-shadow: inset 0 0 0 2px rgba(120,210,255,.25), inset 0 0 60px rgba(0,80,140,.35); border-radius: 16px; }
+.theme-ocean .btn { border-radius: 999px !important; }
+.theme-ocean .btn.primary { background: radial-gradient(120% 120% at 30% 20%, #8fe6ff, #1e9cd8 60%, #0a5a90) !important; box-shadow: inset 0 2px 4px rgba(255,255,255,.5), 0 6px 18px rgba(30,156,216,.45) !important; }
+.theme-ocean .btn.secondary, .theme-ocean .btn.ghost { background: rgba(90,200,255,.08); border: 1px solid rgba(120,210,255,.3); }
+.theme-ocean .toggle.on { background: linear-gradient(90deg, #0a5a90, #3fd0ff); }
+.theme-ocean .toggle.on .knob { background: radial-gradient(circle at 35% 30%, #fff, #bfefff 60%, #7fd8ff); }
+.theme-ocean .chip { border-radius: 999px; }
+.theme-ocean .nav-btn.on { border-radius: 50%; background: rgba(63,208,255,.15); }
+
+/* ---- Forest: carved wood buttons, leafy frame ---- */
+.theme-forest::after { box-shadow: inset 0 0 0 3px #2a2414, inset 0 0 0 4px rgba(232,196,122,.35); }
+.theme-forest .titlebar { background: linear-gradient(180deg, rgba(60,50,20,.5), transparent); }
+.theme-forest .btn { border-radius: 8px !important; }
+.theme-forest .btn.primary { background: repeating-linear-gradient(92deg, #a8722e 0 6px, #96642a 6px 9px, #b07a36 9px 15px) !important; color: #fff8e6; box-shadow: inset 0 -3px 0 #5a3a14, inset 0 1px 0 rgba(255,240,200,.35), 0 4px 10px rgba(0,0,0,.4) !important; text-shadow: 0 1px 0 #4a2a0a; }
+.theme-forest .btn.secondary, .theme-forest .btn.ghost { background: rgba(90,130,60,.18); border: 1px solid rgba(140,180,90,.35); }
+.theme-forest .toggle.on { background: #5a8a3a; }
+.theme-forest .toggle.on .knob { background: #e8c47a; }
+.theme-forest .chip.on { background: rgba(90,138,58,.4); border-color: #9cc46a; }
+
+/* ---- Cyberpunk: HUD brackets, hard-edged neon ---- */
+.theme-cyberpunk::after {
+  background:
+    linear-gradient(#f5e400, #f5e400) 0 0 / 26px 2px, linear-gradient(#f5e400, #f5e400) 0 0 / 2px 26px,
+    linear-gradient(#f5e400, #f5e400) 100% 0 / 26px 2px, linear-gradient(#f5e400, #f5e400) 100% 0 / 2px 26px,
+    linear-gradient(#00f0ff, #00f0ff) 0 100% / 26px 2px, linear-gradient(#00f0ff, #00f0ff) 0 100% / 2px 26px,
+    linear-gradient(#00f0ff, #00f0ff) 100% 100% / 26px 2px, linear-gradient(#00f0ff, #00f0ff) 100% 100% / 2px 26px;
+  background-repeat: no-repeat; box-shadow: inset 0 0 0 1px rgba(255,43,214,.25);
+}
+.theme-cyberpunk .titlebar { border-bottom: 1px solid rgba(245,228,0,.35); background: repeating-linear-gradient(-45deg, rgba(245,228,0,.05) 0 6px, transparent 6px 12px); }
+.theme-cyberpunk .btn.primary { background: #f5e400 !important; color: #0a0a12; font-family: "Orbitron", sans-serif; text-transform: uppercase; letter-spacing: .06em; font-size: 11px; box-shadow: 4px 4px 0 #ff2bd6 !important; }
+.theme-cyberpunk .btn.primary:hover:not(:disabled) { box-shadow: -4px 4px 0 #00f0ff !important; }
+.theme-cyberpunk .btn.secondary, .theme-cyberpunk .btn.ghost { background: transparent; border: 1px solid #00f0ff; color: #00f0ff; }
+.theme-cyberpunk .toggle { border-radius: 0; }
+.theme-cyberpunk .toggle .knob { border-radius: 0; }
+.theme-cyberpunk .toggle.on { background: #ff2bd6; }
+.theme-cyberpunk .toggle.on .knob { background: #f5e400; }
+.theme-cyberpunk .chip, .theme-cyberpunk .input { border-radius: 0; }
+.theme-cyberpunk .chip.on { background: #00f0ff22; border-color: #00f0ff; color: #00f0ff; }
+.theme-cyberpunk .nav-btn { border-radius: 0; }
+.theme-cyberpunk .nav-btn.on { box-shadow: inset 3px 0 0 #f5e400, 0 0 14px rgba(245,228,0,.3) !important; }
+
+/* ---- Galaxy: orbit ring rim, nebula buttons ---- */
+.theme-galaxy::after { box-shadow: inset 0 0 0 1px rgba(200,170,255,.3), inset 0 0 80px rgba(120,60,200,.18); }
+.theme-galaxy .btn.primary { border-radius: 999px; background: linear-gradient(120deg, #5a7cff, #b06aff 50%, #ff7ad9) !important; background-size: 200% 100% !important; animation: nebula 6s linear infinite; }
+@keyframes nebula { to { background-position: 200% 0; } }
+.theme-galaxy .btn.secondary, .theme-galaxy .btn.ghost { border: 1px solid rgba(200,170,255,.35); background: rgba(120,80,220,.12); }
+.theme-galaxy .toggle.on { background: linear-gradient(90deg, #5a7cff, #ff7ad9); }
+.theme-galaxy .toggle.on .knob { box-shadow: 0 0 0 3px rgba(255,255,255,.2), 0 0 10px #fff; }
+.theme-galaxy .nav-btn.on { border-radius: 50%; box-shadow: 0 0 0 1px rgba(200,170,255,.5), 0 0 18px rgba(176,106,255,.4) !important; }
+
+/* ---- Sunset: retro chrome, striped sun buttons ---- */
+.theme-sunset::after { box-shadow: inset 0 0 0 2px rgba(255,143,90,.35), inset 0 -40px 60px -30px rgba(255,94,154,.25); }
+.theme-sunset .titlebar { background: linear-gradient(180deg, rgba(255,143,90,.14), transparent); }
+.theme-sunset .btn.primary { background: linear-gradient(180deg, #ffd166 0 30%, #ff8f5a 30% 38%, #ff8f5a 38% 60%, #ff5e9a 60% 66%, #ff5e9a 66%) !important; color: #2a0a1a; font-weight: 800; border-radius: 6px; }
+.theme-sunset .btn.secondary, .theme-sunset .btn.ghost { border: 1px solid rgba(255,143,90,.4); background: rgba(255,94,154,.08); }
+.theme-sunset .toggle.on { background: linear-gradient(90deg, #ff5e9a, #ffd166); }
+.theme-sunset .chip.on { background: linear-gradient(90deg, #ff8f5a55, #ff5e9a55); border-color: #ff8f5a; }
+
+/* ---- Mono: editorial, sharp ink lines ---- */
+.theme-mono::after { box-shadow: inset 0 0 0 1px #fff3; }
+.theme-mono .btn { border-radius: 0 !important; }
+.theme-mono .btn.primary { background: #fff !important; color: #000; box-shadow: none !important; }
+.theme-mono .btn.primary:hover:not(:disabled) { background: #000 !important; color: #fff; box-shadow: inset 0 0 0 1px #fff !important; filter: none; }
+.theme-mono .btn.secondary, .theme-mono .btn.ghost { background: transparent; border: 1px solid #fff5; }
+.theme-mono .toggle, .theme-mono .toggle .knob, .theme-mono .chip, .theme-mono .input { border-radius: 0; }
+.theme-mono .toggle.on { background: #fff; }
+.theme-mono .toggle.on .knob { background: #000; }
+.theme-mono .chip.on { background: #fff; color: #000; }
+
+/* ===================== What's new, feedback, "found us" ===================== */
+.eng-modal { width: 460px; padding: 26px 26px 22px; background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 10%, #131419), #131419 40%); }
+.eng-hero { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.eng-hero > svg { flex: none; width: 44px; height: 44px; padding: 11px; border-radius: 14px; color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 40%, transparent); }
+.eng-hero small { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-3); }
+.eng-hero h2 { margin: 2px 0 0; font-family: var(--display, inherit); font-size: 21px; }
+.eng-sec + .eng-sec { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.eng-sec h3 { margin: 0 0 8px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.eng-sec h3 span { font-size: 11px; font-weight: 600; color: var(--text-3); }
+.eng-sec ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+.eng-sec li { position: relative; padding-left: 18px; font-size: 13px; line-height: 1.45; color: var(--text-2); animation: engIn .4s var(--ease, ease) both; }
+.eng-sec li::before { content: ""; position: absolute; left: 3px; top: 7px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+@keyframes engIn { from { opacity: 0; transform: translateY(6px); } }
+.eng-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+.eng-kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+.eng-kind { display: flex; align-items: center; justify-content: center; gap: 7px; height: 38px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--surface-2); color: var(--text-2); font-weight: 600; font-size: 13px; transition: .15s; }
+.eng-kind:hover { color: var(--text); }
+.eng-kind.on { color: #fff; border-color: color-mix(in srgb, var(--accent) 60%, transparent); background: color-mix(in srgb, var(--accent) 20%, var(--surface-2)); }
+.eng-text { width: 100%; height: 120px; padding: 10px 12px; resize: none; font: inherit; font-size: 13px; line-height: 1.5; box-sizing: border-box; }
+.eng-note { margin: 8px 0 0; font-size: 11.5px; color: var(--text-3); }
+.eng-stack { position: absolute; right: 18px; bottom: 18px; z-index: 90; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; pointer-events: none; }
+.eng-card { pointer-events: auto; position: relative; width: 340px; padding: 14px 16px; border-radius: 14px; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(14px); border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line-2)); box-shadow: 0 18px 50px rgba(0,0,0,.5); animation: engCard .45s cubic-bezier(.2,1.3,.4,1) both; }
+@keyframes engCard { from { opacity: 0; transform: translateY(20px) scale(.96); } }
+.eng-card > b { display: block; font-size: 13.5px; margin: 0 22px 10px 0; }
+.eng-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.eng-chips .chip { height: 28px; font-size: 12px; }
+.eng-other { display: flex; gap: 6px; margin-top: 10px; }
+.eng-other .input { flex: 1; height: 30px; }
+.eng-x { position: absolute; right: 8px; top: 8px; }
+.eng-nudge { display: flex; align-items: center; gap: 12px; }
+.eng-nudge > svg { flex: none; color: var(--accent); }
+.eng-nudge div { flex: 1; display: flex; flex-direction: column; }
+.eng-nudge small { color: var(--text-3); font-size: 12px; }

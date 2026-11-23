@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:;" />
+<title>Install Moony</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; font-family: "Segoe UI Variable Text", "Segoe UI", sans-serif; color: #ececf1; user-select: none; }
+  .win { position: absolute; inset: 8px; border-radius: 20px; overflow: hidden; display: grid; grid-template-columns: 236px 1fr; background: #121318; border: 1px solid rgba(255,255,255,.1); box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+  .art { position: relative; background: radial-gradient(120% 80% at 30% 10%, #3a2f86 0%, #17152b 55%, #0b0b12 100%); overflow: hidden; -webkit-app-region: drag; }
+  .art i { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #fff; animation: tw 3s ease-in-out infinite; }
+  .moon { position: absolute; left: 50%; top: 92px; width: 130px; height: 130px; transform: translateX(-50%); filter: drop-shadow(0 10px 30px rgba(139,125,255,.55)); animation: float 4s ease-in-out infinite; }
+  .brand { position: absolute; left: 0; right: 0; top: 240px; text-align: center; font-size: 34px; font-weight: 700; letter-spacing: .02em; background: linear-gradient(180deg,#fff6d8,#fff 45%,#c9c3ff); -webkit-background-clip: text; color: transparent; }
+  .tag { position: absolute; left: 0; right: 0; top: 286px; text-align: center; font-size: 12px; color: #b9b6d6; }
+  .ver { position: absolute; left: 0; right: 0; bottom: 16px; text-align: center; font-size: 11px; color: #7d7aa0; }
+  .main { position: relative; padding: 34px 30px 26px; display: flex; flex-direction: column; -webkit-app-region: drag; }
+  .ctl { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; -webkit-app-region: no-drag; }
+  .ctl button { width: 30px; height: 28px; border: 0; border-radius: 8px; background: transparent; color: #8b8d98; font-size: 15px; cursor: pointer; }
+  .ctl button:hover { background: rgba(255,255,255,.08); color: #fff; }
+  .ctl .x:hover { background: #e5293b; }
+  h1 { margin: 0; font-size: 24px; font-weight: 700; }
+  p.lead { margin: 6px 0 18px; color: #a4a6b3; font-size: 13.5px; line-height: 1.5; }
+  .opts { display: flex; flex-direction: column; gap: 10px; -webkit-app-region: no-drag; }
+  label.opt { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 11px; background: #1a1b21; border: 1px solid rgba(255,255,255,.06); cursor: pointer; font-size: 13px; }
+  label.opt:hover { border-color: rgba(255,255,255,.12); }
+  label.opt small { display: block; color: #6c6e7b; font-size: 11.5px; margin-top: 1px; }
+  .sw { position: relative; width: 36px; height: 21px; flex: none; border-radius: 21px; background: #2c2d36; transition: background .2s; }
+  .sw::after { content: ""; position: absolute; left: 2px; top: 2px; width: 17px; height: 17px; border-radius: 50%; background: #d4d5dc; transition: transform .25s cubic-bezier(.34,1.4,.5,1); }
+  input { display: none; }
+  input:checked + .sw { background: #8b7dff; }
+  input:checked + .sw::after { transform: translateX(15px); background: #fff; }
+  .where { margin-top: 12px; font-size: 11.5px; color: #6c6e7b; word-break: break-all; }
+  .grow { flex: 1; }
+  .actions { display: flex; justify-content: flex-end; gap: 8px; -webkit-app-region: no-drag; }
+  .btn { height: 42px; padding: 0 22px; border: 0; border-radius: 11px; font: inherit; font-weight: 650; font-size: 14px; cursor: pointer; transition: transform .12s, filter .15s; }
+  .btn:active { transform: scale(.97); }
+  .primary { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 9px; height: 46px; padding: 0 26px; border-radius: 14px; color: #fff; letter-spacing: .01em;
+    background: linear-gradient(135deg,#a597ff 0%,#7c6cff 45%,#5b4bec 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(0,0,0,.18), 0 8px 24px rgba(124,108,255,.45), 0 0 0 1px rgba(255,255,255,.08); transition: transform .15s, box-shadow .2s, filter .15s; }
+  .primary::before { content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%; background: linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent); transform: skewX(-20deg); animation: shine 3.2s ease-in-out infinite; }
+  .primary svg { width: 17px; height: 17px; flex: none; transition: transform .25s; }
+  .primary:hover { transform: translateY(-1px); filter: brightness(1.08); box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(0,0,0,.18), 0 12px 32px rgba(124,108,255,.6), 0 0 0 1px rgba(255,255,255,.14); }
+  .primary:hover svg { transform: translateY(2px); }
+  #launchBtn:hover svg { transform: translateX(3px); }
+  @keyframes shine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+  .ghost { height: 46px; border-radius: 14px; }
+  .ghost { color: #a4a6b3; background: transparent; border: 1px solid rgba(255,255,255,.12); }
+  .progress { display: none; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .bar { height: 7px; border-radius: 7px; background: rgba(255,255,255,.08); overflow: hidden; }
+  .fill { height: 100%; width: 0; border-radius: 7px; background: linear-gradient(90deg,#8b7dff,#c9c3ff); transition: width .35s cubic-bezier(.2,.8,.2,1); }
+  .step { font-size: 12.5px; color: #a4a6b3; }
+  .done { display: none; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .done b { font-size: 18px; }
+  .err { color: #ff8a96; font-size: 12.5px; margin-top: 6px; display: none; }
+  @keyframes float { 50% { transform: translate(-50%, -7px); } }
+  @keyframes tw { 50% { opacity: .2; } }
+  body.busy .opts, body.busy #installBtn, body.busy #cancelBtn { display: none; }
+  body.busy .progress { display: flex; }
+  body.finished .progress, body.finished .opts, body.finished #installBtn, body.finished #cancelBtn { display: none; }
+  body.finished .done { display: flex; }
+  body.finished #launchBtn { display: inline-flex; }
+  #launchBtn { display: none; }
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="art" id="art">
+    <svg class="moon" viewBox="0 0 32 32"><defs><linearGradient id="g" x1="5" y1="4" x2="24" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#fff6d8"/><stop offset=".55" stop-color="#c9c3ff"/><stop offset="1" stop-color="#8b7dff"/></linearGradient><mask id="m"><rect width="32" height="32" fill="#fff"/><circle cx="21" cy="11.5" r="10" fill="#000"/></mask></defs><circle cx="15" cy="17" r="12" fill="url(#g)" mask="url(#m)"/><path d="M25.5 3.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill="#fff6d8"/></svg>
+    <div class="brand">Moony</div>
+    <div class="tag">a launcher for Roblox</div>
+    <div class="ver" id="ver"></div>
+  </div>
+  <div class="main">
+    <div class="ctl"><button onclick="setup.minimize()" title="Minimize">&#8211;</button><button class="x" onclick="setup.close()" title="Close">&times;</button></div>
+    <h1 id="title">Install Moony</h1>
+    <p class="lead" id="lead">Faster Roblox launches, your playtime, friends, servers, mods and an in-game HUD, all in one place.</p>
+
+    <div class="opts">
+      <label class="opt"><input type="checkbox" id="desktop" checked /><span class="sw"></span><span>Desktop shortcut<small>Put Moony on your desktop</small></span></label>
+      <label class="opt"><input type="checkbox" id="startup" /><span class="sw"></span><span>Start with Windows<small>Open Moony quietly when you sign in</small></span></label>
+      <div class="where" id="where"></div>
+    </div>
+
+    <div class="progress"><div class="bar"><div class="fill" id="fill"></div></div><div class="step" id="step">Starting…</div></div>
+    <div class="done"><b>Moony is ready</b><span class="step">Sign in with Roblox inside Moony to get started.</span></div>
+    <div class="err" id="err"></div>
+
+    <div class="grow"></div>
+    <div class="actions">
+      <button class="btn ghost" id="cancelBtn" onclick="setup.close()">Cancel</button>
+      <button class="btn primary" id="installBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg><span id="installLabel">Install</span></button>
+      <button class="btn primary" id="launchBtn" onclick="setup.launch()"><span>Launch Moony</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
+    </div>
+  </div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search);
+  document.getElementById("ver").textContent = "Version " + q.get("version");
+  document.getElementById("where").textContent = "Installs to " + q.get("dir") + " (no admin rights needed)";
+  if (q.get("update")) {
+    document.getElementById("title").textContent = "Update Moony";
+    document.getElementById("lead").textContent = "Moony is already installed. This replaces it with version " + q.get("version") + ". Your settings and sign-in are kept.";
+    document.getElementById("installLabel").textContent = "Update to " + q.get("version");
+  }
+  const art = document.getElementById("art");
+  for (let i = 0; i < 45; i++) { const s = document.createElement("i"); s.style.left = (i * 37 % 100) + "%"; s.style.top = (i * 53 % 100) + "%"; s.style.animationDelay = (i % 7) * 0.4 + "s"; s.style.opacity = 0.3 + (i * 7 % 10) / 14; art.appendChild(s); }
+  setup.onProgress((p) => { document.getElementById("fill").style.width = p.pct + "%"; document.getElementById("step").textContent = p.step; });
+  document.getElementById("installBtn").onclick = async () => {
+    document.body.className = "busy";
+    document.getElementById("err").style.display = "none";
+    const r = await setup.install({ desktop: document.getElementById("desktop").checked, startup: document.getElementById("startup").checked });
+    if (r.ok) document.body.className = "finished";
+    else { document.body.className = ""; const e = document.getElementById("err"); e.textContent = "Install failed: " + r.error; e.style.display = "block"; }
+  };
+</script>
+</body>
+</html>

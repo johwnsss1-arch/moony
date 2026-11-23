@@ -1,0 +1,96 @@
+{
+  "name": "orbit-launcher",
+  "private": true,
+  "version": "1.0.7",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "desktop": "concurrently -k -n vite,app \"vite --port 5174 --strictPort\" \"wait-on tcp:5174 && node electron/dev.cjs\"",
+    "start": "vite build && electron .",
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "dist": "vite build && electron-builder --win portable && node build/make-feed.cjs"
+  },
+  "dependencies": {
+    "@xhayper/discord-rpc": "^1.2.1",
+    "fflate": "^0.8.2",
+    "koffi": "^2.9.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "@fontsource-variable/inter": "^5.1.0",
+    "@fontsource/baloo-2": "^5.3.0",
+    "@fontsource/creepster": "^5.3.0",
+    "@fontsource/fredoka": "^5.1.0",
+    "@fontsource/m-plus-rounded-1c": "^5.3.0",
+    "@fontsource/mountains-of-christmas": "^5.3.0",
+    "@fontsource/orbitron": "^5.3.0",
+    "@fontsource/pacifico": "^5.3.0",
+    "@fontsource/space-grotesk": "^5.3.0",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.4.1",
+    "concurrently": "^9.1.0",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "three": "^0.170.0",
+    "vite": "^6.3.5",
+    "wait-on": "^8.0.1"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true,
+    "electron@33.2.1": true,
+    "koffi@2.9.2": true
+  },
+  "productName": "Moony",
+  "description": "Moony, a Roblox launcher",
+  "author": "Moony",
+  "build": {
+    "appId": "app.moony.launcher",
+    "productName": "Moony",
+    "copyright": "Moony",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "!electron/dev.cjs",
+      "build/icon.png",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/koffi/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "executableName": "Moony"
+    },
+    "portable": {
+      "artifactName": "Moony-Setup-${version}.${ext}",
+      "unpackDirName": "MoonySetup",
+      "requestExecutionLevel": "user"
+    }
+  },
+  "moony": {
+    "updateUrl": "https://github.com/johwnsss1-arch/moony/releases/latest/download/latest.json"
+  }
+}

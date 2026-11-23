@@ -1,0 +1,20 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./moony.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moony</title>
+  </head>
+  <body style="margin:0">
+    <!-- Shown until the app finishes loading (React replaces it). -->
+    <div id="root">
+      <div style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0a0b0e;border-radius:14px;font-family:Segoe UI,sans-serif;color:#a4a6b3;font-size:13px">
+        <img src="./moony.svg" width="56" height="56" alt="" style="animation:moonyPulse 1.4s ease-in-out infinite" />
+        <span>Loading Moony…</span>
+      </div>
+      <style>@keyframes moonyPulse{50%{opacity:.45;transform:scale(.94)}}</style>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
