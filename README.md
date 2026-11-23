@@ -34,8 +34,6 @@ Requires Node 20+ on Windows. See [RELEASING.md](RELEASING.md) for publishing up
 |---|---|
 | `electron/` | Main process: launching Roblox, sessions, installer, updater, HUD overlay |
 | `src/` | React UI (pages, components, themes) |
-| `trailer/` | Trailer / TikTok edits, song generator and renderer |
-| `website/` | The Moony website (GitHub Pages) |
 
 ## License
 [MIT](LICENSE)

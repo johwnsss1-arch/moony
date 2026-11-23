@@ -29,3 +29,5 @@ trailer/out/
 .claude/
 *.mp4
 !website/media/*.mp4
+trailer/
+website/
