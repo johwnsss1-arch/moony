@@ -329,11 +329,15 @@ async function badges(universeId, userId) {
 
 /* ---------- Marketplace ---------- */
 const CATALOG_CATS = { all: 1, accessories: 11, clothing: 3, bodyparts: 4, animations: 12, heads: 4 };
-async function catalog({ keyword = "", category = "all", sort = "relevance", cursor = "", minPrice, maxPrice } = {}) {
+async function catalog({ keyword = "", category = "all", sort = "relevance", cursor = "", minPrice, maxPrice, period, paidOnly } = {}) {
   const q = new URLSearchParams({ Category: String(CATALOG_CATS[category] ?? 1), Limit: "30" });
   const sorts = { relevance: 0, favorited: 1, sales: 2, updated: 3, priceLow: 4, priceHigh: 5 };
   q.set("SortType", String(sorts[sort] ?? 0));
   if (sort === "priceLow") q.set("SortAggregation", "5");
+  // Sales/favorites over a time window: 1 = past day, 3 = past week, 5 = all time.
+  if (["day", "week", "all"].includes(period) && (sort === "sales" || sort === "favorited")) q.set("SortAggregation", { day: "1", week: "3", all: "5" }[period]);
+  // Paid, on-sale items only (no freebies, nothing off sale).
+  if (paidOnly) { q.set("IncludeNotForSale", "false"); if (minPrice == null || minPrice === "") minPrice = 1; }
   if (keyword) q.set("Keyword", String(keyword).slice(0, 100));
   if (cursor) q.set("Cursor", cursor);
   if (minPrice != null && minPrice !== "") q.set("MinPrice", String(Number(minPrice)));
@@ -350,7 +354,7 @@ async function catalog({ keyword = "", category = "all", sort = "relevance", cur
     items: r.data.map((x) => ({
       id: x.id, type: x.itemType, name: x.name, description: x.description || "", creator: x.creatorName, creatorVerified: x.creatorHasVerifiedBadge,
       price: x.lowestPrice ?? x.price ?? null, offSale: x.price == null && !x.lowestPrice, limited: (x.itemRestrictions || []).some((r) => /Limited/i.test(r)),
-      favorites: x.favoriteCount ?? 0, image: img[x.itemType + x.id] ?? null,
+      favorites: x.favoriteCount ?? 0, image: img[x.itemType + x.id] ?? null, assetType: x.assetType ?? null, bundleType: x.bundleType ?? null,
     })),
   };
 }

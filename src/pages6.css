@@ -350,3 +350,16 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .co-name { font: 800 24px var(--display); background: linear-gradient(180deg, #fff, #b8aeff); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .co-pills { display: flex; gap: 6px; }
 .co-pills i { font-style: normal; font-size: 9.5px; font-weight: 700; padding: 4px 8px; border-radius: 99px; background: rgba(255,255,255,.08); border: 1px solid rgba(184,174,255,.35); color: #fff; }
+
+/* ---- Marketplace feed ---- */
+.mk-modes button { display: inline-flex; align-items: center; gap: 6px; }
+.mk-free { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); }
+.item-tag.why { left: 8px; right: auto; background: rgba(0,0,0,.6); color: #fff; }
+.item-tag.why.fy { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+.item-meta { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; }
+.item-fav { display: inline-flex; align-items: center; gap: 3px; color: var(--text-3); font-size: 11px; }
+.feed-sentinel { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 26px 0 40px; color: var(--text-3); font-size: 13px; min-height: 40px; }
+
+/* ---- Idle: Moony is in the background, so nothing decorative moves ---- */
+.frame.idle *, .frame.idle *::before, .frame.idle *::after { animation-play-state: paused !important; }
+.frame.idle .snow, .frame.idle .pets { visibility: hidden; }

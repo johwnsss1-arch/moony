@@ -79,6 +79,17 @@ function Frame() {
   }, [settings.scale]);
   useEffect(() => { window.orbit?.setRadius?.(settings.winRadius ?? 16); }, [settings.winRadius]);
   useEffect(() => window.orbit?.clips?.onSaved(({ file }) => toast(`Clip saved: ${file.split(/[\\/]/).pop()}`, "success")), [toast]);
+  // When Moony isn't the window you're using (e.g. you're in a game), freeze
+  // every decorative animation so it stops using CPU/GPU in the background.
+  const [idle, setIdle] = useState(false);
+  useEffect(() => {
+    let t;
+    const off = () => { clearTimeout(t); t = setTimeout(() => setIdle(true), 3000); };
+    const on = () => { clearTimeout(t); setIdle(false); };
+    window.addEventListener("blur", off); window.addEventListener("focus", on);
+    document.addEventListener("visibilitychange", () => (document.hidden ? setIdle(true) : on()));
+    return () => { clearTimeout(t); window.removeEventListener("blur", off); window.removeEventListener("focus", on); };
+  }, []);
   // At big scales or small windows there isn't room for the side panel; hide
   // it until there is (measured in scaled CSS pixels, not screen pixels).
   const [narrow, setNarrow] = useState(false);
@@ -124,7 +135,7 @@ function Frame() {
   }, [settings.reduceMotion]);
   const style = { "--win-r": `${settings.winRadius ?? 16}px`, ...theme.vars, "--accent": a, "--accent-2": b, "--amb-1": theme.ambient[0], "--amb-2": theme.ambient[1], "--amb-3": theme.ambient[2], "--wm-1": theme.wordmark[0], "--wm-2": theme.wordmark[1], "--wm-3": theme.wordmark[2] };
   const festive = !!theme.festive;
-  const cls = ["frame", isDesktop && "desktop", max && "maximized", settings.reduceMotion && "reduce-motion", settings.ambience && "ambience", showPanel && "with-panel", festive && "festive", (settings.themeArt !== false || bgUrl) && "has-art", settings.reduceMotion && "no-anim", `theme-${theme.id}`].filter(Boolean).join(" ");
+  const cls = ["frame", isDesktop && "desktop", max && "maximized", settings.reduceMotion && "reduce-motion", settings.ambience && "ambience", showPanel && "with-panel", festive && "festive", (settings.themeArt !== false || bgUrl) && "has-art", settings.reduceMotion && "no-anim", idle && "idle", `theme-${theme.id}`].filter(Boolean).join(" ");
   const key = page + JSON.stringify(route.param?.id ?? route.param?.universeId ?? "");
 
   return (

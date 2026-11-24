@@ -2,6 +2,16 @@
 // Add an entry here for every release.
 export const CHANGELOG = [
   {
+    version: "1.0.11",
+    title: "A Marketplace that knows you",
+    items: [
+      "Marketplace: a For you feed that learns what you like, plus Trending and Popular.",
+      "Free and off-sale items are hidden unless you turn them on in Filters.",
+      "Endless scrolling, with tags showing why each item is there.",
+      "Moony now freezes its animations while it's in the background, so it uses far less CPU while you play.",
+    ],
+  },
+  {
     version: "1.0.10",
     title: "Clips, and a smoother Moony",
     items: [
