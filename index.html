@@ -16,11 +16,11 @@
 <meta property="og:image:alt" content="Moony launcher" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:image" content="https://moonylauncher.xyz/img/og.jpg" />
-<meta name="theme-color" content="#8b7dff" />
+<meta name="theme-color" content="#000000" />
 <link rel="icon" href="img/icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
 :root {
   --bg: #09090b; --bg-2: #111113; --line: #1f1f23; --line-2: #2a2a30;
@@ -193,6 +193,44 @@ h1, h2, .brand, .end h2 { font-family: "Bricolage Grotesque", Inter, sans-serif;
   .stage-col { background: linear-gradient(180deg, var(--bg) 85%, transparent); }
   .hero-logo { width: 84px; }
 }
+
+/* ---- Black edition (v2) ---- */
+:root { --bg: #000; --bg-2: #0a0a0a; --line: #1c1c1c; --line-2: #2a2a2a; --text: #f5f5f5; --text-2: #a3a3a3; --text-3: #6b6b6b; --acc: #fff; --acc-2: #d4d4d4; }
+body { background: #000; color: var(--text); }
+.bgfx .blob, .bgfx canvas { display: none; }
+.bgfx .grid { background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px); background-size: 80px 80px; -webkit-mask-image: radial-gradient(70% 55% at 50% 0%, #000, transparent); mask-image: radial-gradient(70% 55% at 50% 0%, #000, transparent); }
+.bgfx::after { content: ""; position: absolute; inset: -50%; opacity: .07; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>"); }
+.side-win { display: none; }
+.nav.scrolled { background: rgba(0,0,0,.7); border-color: #1a1a1a; }
+.hero { padding: 150px 0 70px; }
+.hero-logo { width: 64px; filter: drop-shadow(0 0 24px rgba(255,255,255,.25)); animation: none; margin-bottom: 18px; }
+.kicker { display: inline-block; font: 600 13px Inter, sans-serif; letter-spacing: .22em; text-transform: uppercase; color: var(--text-2); padding: 8px 14px; border: 1px solid #262626; border-radius: 99px; }
+.hero h1 { font-family: "Bricolage Grotesque", Inter, sans-serif; font-size: clamp(48px, 8.4vw, 112px); letter-spacing: -.045em; line-height: .95; margin: 22px auto 22px; max-width: 1000px; }
+.mark { position: relative; display: inline-block; font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -.01em; padding: 0 .06em; }
+.pencil { position: absolute; left: -2%; right: -2%; bottom: -.16em; width: 104%; height: .42em; overflow: visible; }
+.pencil path { fill: none; stroke: #fff; stroke-width: 3.2; stroke-linecap: round; stroke-dasharray: 340; stroke-dashoffset: 340; animation: pencil 1.1s .55s cubic-bezier(.6,.05,.3,1) forwards; }
+.pencil path + path { stroke-width: 2; opacity: .75; animation-delay: .95s; animation-duration: .9s; }
+@keyframes pencil { to { stroke-dashoffset: 0; } }
+.hero p { color: var(--text-2); max-width: 600px; }
+.pill { border-color: #262626; background: #0a0a0a; color: var(--text-2); }
+.pill b { background: #fff; color: #000; }
+.label { color: var(--text-2); background: transparent; border-color: #262626; }
+.btn { border-color: #2a2a2a; }
+.btn:hover { background: #141414; border-color: #3a3a3a; }
+.btn.solid { background: #fff; color: #000; border-color: #fff; box-shadow: none; }
+.btn.solid:hover { background: #e5e5e5; }
+.grad, .step h2 em, .sec-head h2 em, .end h2 em { background: none; -webkit-text-fill-color: currentColor; color: #fff; font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -.01em; }
+.frame { border-radius: 14px; box-shadow: 0 0 0 1px #262626, 0 60px 140px -40px rgba(0,0,0,.9), 0 0 0 10px rgba(255,255,255,.02); will-change: transform; }
+.frame::after { background: linear-gradient(115deg, rgba(255,255,255,.07), transparent 30%); }
+.step { transition: opacity .6s, transform .6s cubic-bezier(.2,.8,.2,1); transform: translateX(-8px); }
+.step.on { transform: none; }
+.dots i.on { background: #fff; }
+.card { background: #0a0a0a; border-color: #1c1c1c; backdrop-filter: none; }
+.card:hover { border-color: #333; box-shadow: none; transform: translateY(-3px); }
+.card svg, .ticks svg { color: #fff; }
+.end::before { background: radial-gradient(closest-side, rgba(255,255,255,.06), transparent); }
+.end img { filter: drop-shadow(0 0 30px rgba(255,255,255,.25)); }
+footer { border-color: #1a1a1a; }
 </style>
 </head>
 <body>
@@ -222,8 +260,9 @@ h1, h2, .brand, .end h2 { font-family: "Bricolage Grotesque", Inter, sans-serif;
     <div class="wrap">
       <img class="hero-logo reveal" src="img/icon.png" alt="">
       <span class="pill reveal"><b data-version>v1.0.8</b> Free · Open source · Windows</span>
-      <h1 class="reveal" style="--d:.08s">Roblox, but <span class="grad">better.</span></h1>
-      <p class="reveal" style="--d:.16s">A faster, cleaner launcher. Pick your server, track your time, make it yours.</p>
+      <div class="kicker reveal" style="--d:.04s">Custom Roblox launcher</div>
+      <h1 class="reveal" style="--d:.08s">The #1 on the <span class="mark">market<svg class="pencil" viewBox="0 0 300 40" preserveAspectRatio="none" aria-hidden="true"><path d="M4 26 C 60 14, 120 30, 180 20 S 270 12, 296 22"/><path d="M14 33 C 80 24, 150 36, 230 28 S 280 26, 292 30"/></svg></span></h1>
+      <p class="reveal" style="--d:.16s">Pick the fastest server, track your hours, tune your FPS and make Roblox look the way you want. Free, open source, 3 MB.</p>
       <div class="hero-cta reveal" style="--d:.24s">
         <a class="btn solid lg" data-download><svg><use href="#dl"/></svg> Download for Windows</a>
         <a class="btn lg" href="#tour">Take the tour</a>
@@ -246,8 +285,6 @@ h1, h2, .brand, .end h2 { font-family: "Bricolage Grotesque", Inter, sans-serif;
       <div class="stage-col">
         <div class="stage-sticky">
           <div class="frame" id="frame">
-            <svg class="cursor" id="cursor" viewBox="0 0 24 24"><path d="M4 2.5 20 11l-7 1.8-3.6 7.2z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>
-            <div class="tap" id="tap"></div>
           </div>
           <div class="dots" id="dots"></div>
         </div>
@@ -329,9 +366,9 @@ document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
 // ---- Scroll story ----
 // Each step names a screenshot, a camera (zoom, focus x, focus y as 0-1 of the
-// image) and where the cursor points. As you scroll, the frame cross-fades to
-// that screen, the camera glides in, and the cursor moves and taps.
-const frame = document.getElementById("frame"), cursor = document.getElementById("cursor"), tap = document.getElementById("tap"), dotsEl = document.getElementById("dots");
+// image). As you scroll, the frame cross-fades to that screen, the camera
+// glides in and the window swings gently from side to side.
+const frame = document.getElementById("frame"), dotsEl = document.getElementById("dots");
 const steps = [...document.querySelectorAll(".step")];
 const shots = {};
 for (const s of steps) {
@@ -339,7 +376,7 @@ for (const s of steps) {
   if (shots[id]) continue;
   const d = document.createElement("div"); d.className = "shot";
   const img = new Image(); img.src = `img/app/${id}.jpg`; img.alt = ""; img.decoding = "async";
-  d.appendChild(img); frame.insertBefore(d, cursor); shots[id] = d;
+  d.appendChild(img); frame.appendChild(d); shots[id] = d;
 }
 steps.forEach(() => dotsEl.appendChild(document.createElement("i")));
 let active = -1;
@@ -353,25 +390,20 @@ function setStep(i) {
   Object.entries(shots).forEach(([id, el]) => el.classList.toggle("on", id === s.dataset.shot));
   const [z, x, y] = s.dataset.cam.split(",").map(Number);
   Object.assign(camTo, { z, x, y });
-  const [cx, cy] = s.dataset.cur.split(",").map(Number);
-  placeCursor(cx, cy, true);
+  sideTo = i % 2 ? -1 : 1; // the app swings to the other side each step
 }
-// Cursor position is in image space, so it follows the camera.
-let cur = { x: 0.5, y: 0.5 };
-function placeCursor(x, y, click) {
-  cur = { x, y };
-  clearTimeout(placeCursor.t);
-  if (click) placeCursor.t = setTimeout(() => { tap.classList.remove("go"); void tap.offsetWidth; tap.classList.add("go"); }, 900);
-}
-function frameLoop() {
-  // ease the camera
-  for (const k of ["z", "x", "y"]) cam[k] += (camTo[k] - cam[k]) * 0.08;
-  const W = frame.clientWidth, H = frame.clientHeight;
-  const t = `translate(${-cam.x * W * (cam.z - 1)}px, ${-cam.y * H * (cam.z - 1)}px) scale(${cam.z})`;
+let side = 0, sideTo = 1;
+function frameLoop(now) {
+  // ease the camera, plus a slow side-to-side pan so the UI is always moving
+  for (const k of ["z", "x", "y"]) cam[k] += (camTo[k] - cam[k]) * 0.06;
+  side += (sideTo - side) * 0.05;
+  const W = frame.clientWidth, H = frame.clientHeight, t0 = (now || 0) / 1000;
+  const z = Math.max(cam.z, 1.08) + 0.02 * Math.sin(t0 * 0.6);
+  const fx = cam.x + 0.06 * Math.sin(t0 * 0.35) * (cam.z > 1.2 ? 0.4 : 1), fy = cam.y + 0.03 * Math.cos(t0 * 0.45);
+  const t = `translate(${-fx * W * (z - 1)}px, ${-fy * H * (z - 1)}px) scale(${z})`;
   for (const el of Object.values(shots)) el.firstChild.style.transform = t;
-  const px = (cur.x * W * cam.z) - cam.x * W * (cam.z - 1), py = (cur.y * H * cam.z) - cam.y * H * (cam.z - 1);
-  cursor.style.transform = `translate(${px - 5}px, ${py - 3}px)`;
-  tap.style.left = px + "px"; tap.style.top = py + "px";
+  // the whole window glides left/right and tilts toward the text
+  frame.style.transform = `perspective(1600px) translateX(${side * 18}px) rotateY(${-side * 6}deg) rotateX(${2 + Math.sin(t0 * 0.5)}deg)`;
   requestAnimationFrame(frameLoop);
 }
 requestAnimationFrame(frameLoop);

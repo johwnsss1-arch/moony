@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "note": "Moony cursor presets. kind: cursor (arrow) or crosshair (shift-lock).",
+  "items": [
+    {
+      "id": "classic-white",
+      "name": "Classic white",
+      "kind": "cursor",
+      "url": "https://moonylauncher.xyz/cursors/classic-white.png"
+    },
+    {
+      "id": "classic-black",
+      "name": "Classic black",
+      "kind": "cursor",
+      "url": "https://moonylauncher.xyz/cursors/classic-black.png"
+    },
+    {
+      "id": "moony",
+      "name": "Moony purple",
+      "kind": "cursor",
+      "url": "https://moonylauncher.xyz/cursors/moony.png"
+    },
+    {
+      "id": "neon-cyan",
+      "name": "Neon cyan",
+      "kind": "cursor",
+      "url": "https://moonylauncher.xyz/cursors/neon-cyan.png"
+    },
+    {
+      "id": "kawaii",
+      "name": "Kawaii pink",
+      "kind": "cursor",
+      "url": "https://moonylauncher.xyz/cursors/kawaii.png"
+    },
+    {
+      "id": "gold",
+      "name": "Gold",
+      "kind": "cursor",
+      "url": "https://moonylauncher.xyz/cursors/gold.png"
+    },
+    {
+      "id": "red",
+      "name": "Gamer red",
+      "kind": "cursor",
+      "url": "https://moonylauncher.xyz/cursors/red.png"
+    },
+    {
+      "id": "mini",
+      "name": "Mini white",
+      "kind": "cursor",
+      "url": "https://moonylauncher.xyz/cursors/mini.png"
+    },
+    {
+      "id": "dot",
+      "name": "Dot",
+      "kind": "crosshair",
+      "url": "https://moonylauncher.xyz/cursors/dot.png"
+    },
+    {
+      "id": "plus",
+      "name": "Plus",
+      "kind": "crosshair",
+      "url": "https://moonylauncher.xyz/cursors/plus.png"
+    },
+    {
+      "id": "ring",
+      "name": "Ring",
+      "kind": "crosshair",
+      "url": "https://moonylauncher.xyz/cursors/ring.png"
+    },
+    {
+      "id": "gap",
+      "name": "Gap cross",
+      "kind": "crosshair",
+      "url": "https://moonylauncher.xyz/cursors/gap.png"
+    }
+  ]
+}
