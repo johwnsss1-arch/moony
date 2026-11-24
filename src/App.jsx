@@ -31,6 +31,7 @@ const Market = lazy(() => import("./pages/Market"));
 const News = lazy(() => import("./pages/News"));
 const AvatarPage = lazy(() => import("./pages/AvatarPage"));
 const Tweaks = lazy(() => import("./pages/Tweaks"));
+const Versions = lazy(() => import("./pages/Versions"));
 const Chat = lazy(() => import("./pages/Chat"));
 const Hud = lazy(() => import("./pages/Hud"));
 const PageLoading = () => <div className="page"><Skeleton w={180} h={26} /><Skeleton w="45%" h={12} style={{ marginTop: 12 }} /></div>;
@@ -69,14 +70,26 @@ function Frame() {
   // theme (default) or be picked separately in Settings.
   const theme = themeById(settings.theme);
   const [a, b] = settings.accent === "theme" || !ACCENTS[settings.accent] ? theme.accent : ACCENTS[settings.accent];
-  // Interface scale: Electron's real page zoom re-lays out and re-renders text
-  // crisply (CSS zoom could blur text at sizes like 90% or 115%).
+  // Interface scale: CSS zoom on <body> (see pages6.css). The main process
+  // resets page zoom to 100% and grows the window's minimum size to match.
   useEffect(() => {
-    if (window.orbit?.setZoom) { document.documentElement.style.zoom = ""; window.orbit.setZoom(settings.scale / 100); }
-    else document.documentElement.style.zoom = settings.scale / 100;
+    const z = Math.min(1.5, Math.max(0.75, (settings.scale || 100) / 100));
+    document.documentElement.style.setProperty("--ui-scale", String(z));
+    window.orbit?.setZoom?.(z);
   }, [settings.scale]);
+  // At big scales or small windows there isn't room for the side panel; hide
+  // it until there is (measured in scaled CSS pixels, not screen pixels).
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const check = () => setNarrow(window.innerWidth / ((settings.scale || 100) / 100) < 1180);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, [settings.scale]);
+  const showPanel = settings.rightPanel && !narrow;
   // Your own background picture/GIF.
   const [bgUrl, setBgUrl] = useState(null);
+  const [bgKind, setBgKind] = useState("image");
   useEffect(() => {
     let url = null, alive = true;
     const load = () => loadBg().then((blob) => {
@@ -84,6 +97,7 @@ function Frame() {
       if (url) URL.revokeObjectURL(url);
       url = blob ? URL.createObjectURL(blob) : null;
       setBgUrl(url);
+      setBgKind(blob?.type?.startsWith("video/") ? "video" : "image");
     });
     load();
     const off = onBgChange(load);
@@ -106,15 +120,15 @@ function Frame() {
     window.addEventListener("mousemove", onMove, { passive: true });
     return () => { window.removeEventListener("mousemove", onMove); cancelAnimationFrame(raf); };
   }, [settings.reduceMotion]);
-  const style = { ...theme.vars, "--accent": a, "--accent-2": b, "--amb-1": theme.ambient[0], "--amb-2": theme.ambient[1], "--amb-3": theme.ambient[2], "--wm-1": theme.wordmark[0], "--wm-2": theme.wordmark[1], "--wm-3": theme.wordmark[2] };
+  const style = { "--win-r": `${settings.winRadius ?? 16}px`, ...theme.vars, "--accent": a, "--accent-2": b, "--amb-1": theme.ambient[0], "--amb-2": theme.ambient[1], "--amb-3": theme.ambient[2], "--wm-1": theme.wordmark[0], "--wm-2": theme.wordmark[1], "--wm-3": theme.wordmark[2] };
   const festive = !!theme.festive;
-  const cls = ["frame", isDesktop && "desktop", max && "maximized", settings.reduceMotion && "reduce-motion", settings.ambience && "ambience", settings.rightPanel && "with-panel", festive && "festive", (settings.themeArt !== false || bgUrl) && "has-art", settings.reduceMotion && "no-anim", `theme-${theme.id}`].filter(Boolean).join(" ");
+  const cls = ["frame", isDesktop && "desktop", max && "maximized", settings.reduceMotion && "reduce-motion", settings.ambience && "ambience", showPanel && "with-panel", festive && "festive", (settings.themeArt !== false || bgUrl) && "has-art", settings.reduceMotion && "no-anim", `theme-${theme.id}`].filter(Boolean).join(" ");
   const key = page + JSON.stringify(route.param?.id ?? route.param?.universeId ?? "");
 
   return (
     <div className={cls} style={style}>
       <div className="ambient" aria-hidden><span /><span /><span /></div>
-      {bgUrl && <div className="custom-bg" aria-hidden style={{ "--bg-dim": (settings.bgDim ?? 55) / 100, "--bg-blur": `${settings.bgBlur ?? 0}px` }}><img src={bgUrl} alt="" /></div>}
+      {bgUrl && <div className={"custom-bg fit-" + (settings.bgFit || "cover")} aria-hidden style={{ "--bg-dim": (settings.bgDim ?? 55) / 100, "--bg-blur": `${settings.bgBlur ?? 0}px` }}>{bgKind === "video" ? <video src={bgUrl} autoPlay loop muted playsInline /> : <img src={bgUrl} alt="" />}</div>}
       {settings.themeArt !== false && !bgUrl && <SceneArt id={theme.id} />}
       {settings.themeArt !== false && <FrameDeco id={theme.id} />}
       {settings.pets !== false && !settings.reduceMotion && <Pets id={theme.id} />}
@@ -132,6 +146,7 @@ function Frame() {
         {page === "news" && <News />}
         {page === "avatar" && <AvatarPage />}
         {page === "tweaks" && <Tweaks />}
+        {page === "versions" && <Versions />}
         {page === "chat" && <Chat />}
         {page === "hud" && <Hud />}
         {page === "library" && <Library />}
@@ -144,7 +159,7 @@ function Frame() {
         </Suspense>
         </ErrorBoundary>
       </main>
-      {settings.rightPanel && <RightPanel />}
+      {showPanel && <RightPanel />}
       {theme.particles && !settings.reduceMotion && settings.snow && <Particles key={theme.particles} kind={theme.particles} density={theme.particles === "stars" ? 0.6 : 1} />}
       <RejoinPrompt />
       <Tour />

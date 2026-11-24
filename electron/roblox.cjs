@@ -8,10 +8,27 @@ const crypto = require("crypto");
 const cache = new Map();
 const TTL = 5 * 60 * 1000;
 
-async function get(url, opts) {
+// Same request already on its way? Share it instead of asking Roblox twice.
+const inflight = new Map();
+const MAX_CACHE = 600;
+function remember(key, v) {
+  cache.delete(key);
+  cache.set(key, { t: Date.now(), v });
+  // Keep memory flat: drop the oldest answers past the cap.
+  while (cache.size > MAX_CACHE) cache.delete(cache.keys().next().value);
+}
+setInterval(() => { const now = Date.now(); for (const [k, h] of cache) if (now - h.t > TTL) cache.delete(k); }, 60e3).unref?.();
+
+function get(url, opts) {
   const key = url + (opts?.body ?? "");
   const hit = cache.get(key);
-  if (hit && Date.now() - hit.t < TTL) return hit.v;
+  if (hit && Date.now() - hit.t < TTL) return Promise.resolve(hit.v);
+  if (inflight.has(key)) return inflight.get(key);
+  const p = fetchJson(url, opts, key).finally(() => inflight.delete(key));
+  inflight.set(key, p);
+  return p;
+}
+async function fetchJson(url, opts, key) {
   let res;
   // Roblox rate-limits bursts (429): wait and retry a few times.
   for (let attempt = 0; attempt < 4; attempt++) {
@@ -21,7 +38,7 @@ async function get(url, opts) {
   }
   if (!res.ok) throw new Error(`Roblox API ${res.status} for ${new URL(url).pathname}`);
   const v = await res.json();
-  cache.set(key, { t: Date.now(), v });
+  remember(key, v);
   return v;
 }
 
@@ -47,24 +64,26 @@ async function thumbs(kind, ids, size) {
 
 const chunk = (arr, n) => Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n));
 
-async function thumbnails(universeIds) {
+// Card-sized images (576x324 banners, 256px icons) load faster and use far
+// less memory than full size; every chunk is fetched in parallel.
+async function thumbnails(universeIds, big = false) {
   const out = {};
-  for (const ids of chunk(universeIds, 50)) {
+  await Promise.all(chunk(universeIds, 50).map(async (ids) => {
     const [banners, icons] = await Promise.all([
-      get(`https://thumbnails.roblox.com/v1/games/multiget/thumbnails?universeIds=${ids.join(",")}&countPerUniverse=1&size=768x432&format=Webp`),
-      get(`https://thumbnails.roblox.com/v1/games/icons?universeIds=${ids.join(",")}&size=512x512&format=Webp`),
+      get(`https://thumbnails.roblox.com/v1/games/multiget/thumbnails?universeIds=${ids.join(",")}&countPerUniverse=1&size=${big ? "768x432" : "576x324"}&format=Webp`),
+      get(`https://thumbnails.roblox.com/v1/games/icons?universeIds=${ids.join(",")}&size=${big ? "512x512" : "256x256"}&format=Webp`),
     ]);
-    for (const b of banners.data) out[b.universeId] = { banner: b.thumbnails?.[0]?.imageUrl ?? null };
+    for (const b of banners.data) out[b.universeId] = { ...(out[b.universeId] || {}), banner: b.thumbnails?.[0]?.imageUrl ?? null };
     for (const i of icons.data) out[i.targetId] = { ...(out[i.targetId] || {}), icon: i.imageUrl ?? null };
-  }
+  }));
   return out;
 }
 
 // Descriptions + creators aren't in list endpoints; batch-fetch them.
 async function info(universeIds) {
   const out = {};
-  for (const ids of chunk(universeIds, 50)) {
-    const r = await get(`https://games.roblox.com/v1/games?universeIds=${ids.join(",")}`);
+  const pages = await Promise.all(chunk(universeIds, 50).map((ids) => get(`https://games.roblox.com/v1/games?universeIds=${ids.join(",")}`)));
+  for (const r of pages) {
     for (const g of r.data) out[g.id] = { description: g.description || "", creator: g.creator?.name || "", verified: !!g.creator?.hasVerifiedBadge, visits: g.visits, genre: g.genre_l1 || null };
   }
   return out;
@@ -156,7 +175,7 @@ async function genreGames(genre) {
 
 async function gameDetails(universeId) {
   const id = Number(universeId);
-  const [d, thumbs] = await Promise.all([get(`https://games.roblox.com/v1/games?universeIds=${id}`), thumbnails([id])]);
+  const [d, thumbs] = await Promise.all([get(`https://games.roblox.com/v1/games?universeIds=${id}`), thumbnails([id], true)]);
   const g = d.data[0];
   if (!g) throw new Error("Game not found");
   let votes = null;

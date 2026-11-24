@@ -15,40 +15,49 @@ const MOON_SVG = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><d
 
 const PAGE = (accent) => `<!doctype html><html><head><meta charset="utf-8"><style>
 html,body{margin:0;height:100%;background:transparent;overflow:hidden;font-family:"Segoe UI Variable Text","Segoe UI",sans-serif;user-select:none}
-.card{position:absolute;inset:8px;border-radius:18px;background:radial-gradient(120% 90% at 50% 0%,#232136 0%,#121318 60%);border:1px solid rgba(255,255,255,.1);box-shadow:0 18px 50px rgba(0,0,0,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#ececf1;-webkit-app-region:drag;overflow:hidden}
-.logo{width:64px;height:64px;animation:float 2.4s ease-in-out infinite;filter:drop-shadow(0 6px 18px rgba(139,125,255,.45))}
-.game{width:64px;height:64px;border-radius:16px;object-fit:cover;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none}
-.title{font-size:17px;font-weight:600;letter-spacing:.01em;text-align:center;max-width:86%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.step{font-size:12.5px;color:#a4a6b3;height:16px}
-.bar{width:72%;height:5px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden}
-.fill{height:100%;width:6%;border-radius:5px;background:linear-gradient(90deg,${accent},#c9c3ff);transition:width .5s cubic-bezier(.2,.8,.2,1)}
-.fill.indet{width:35%;animation:indet 1.1s ease-in-out infinite}
-.foot{position:absolute;bottom:12px;font-size:11px;color:#6c6e7b}
-.err{color:#ff8a96}
-.x{position:absolute;top:10px;right:12px;width:26px;height:26px;border:0;border-radius:8px;background:transparent;color:#8b8d98;font-size:17px;line-height:1;cursor:pointer;-webkit-app-region:no-drag}.x:hover{background:rgba(255,255,255,.08);color:#fff}
-@keyframes float{50%{transform:translateY(-5px)}}
-@keyframes indet{0%{transform:translateX(-110%)}100%{transform:translateX(300%)}}
+.card{position:absolute;inset:10px;border-radius:16px;overflow:hidden;color:#f2f1f7;-webkit-app-region:drag;
+  background:radial-gradient(90% 70% at 50% 0%,color-mix(in srgb,${accent} 26%,transparent),transparent 70%),linear-gradient(180deg,rgba(32,30,46,.96),rgba(18,18,26,.97));
+  border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 60px rgba(0,0,0,.55);display:flex;flex-direction:column;align-items:center}
+.top{align-self:stretch;display:flex;justify-content:space-between;padding:11px 14px 0;font-size:11.5px;color:rgba(255,255,255,.62);font-weight:600}
+.icon{margin-top:22px;width:78px;height:78px;border-radius:18px;display:grid;place-items:center;transform:rotate(-12deg);animation:bob 2.6s ease-in-out infinite;
+  background:linear-gradient(145deg,${accent},color-mix(in srgb,${accent} 55%,#1b1640));box-shadow:0 14px 34px color-mix(in srgb,${accent} 45%,transparent),inset 0 1px 0 rgba(255,255,255,.3)}
+.icon img{width:52px;height:52px}
+.icon.game{background:#000;padding:0;overflow:hidden}.icon.game img{width:100%;height:100%;object-fit:cover}
+.title{margin-top:18px;font-size:12px;color:rgba(255,255,255,.55);max-width:86%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:15px}
+.step{margin-top:4px;font-size:21px;font-weight:600;letter-spacing:-.01em;text-align:center;max-width:90%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step.err{color:#ff8a96;font-size:16px}
+.bar{margin-top:16px;width:84%;height:7px;border-radius:7px;background:rgba(255,255,255,.1);overflow:hidden}
+.fill{height:100%;width:6%;border-radius:7px;background:linear-gradient(90deg,${accent},#fff);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.fill.indet{width:28%;animation:indet 1.2s ease-in-out infinite;background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent)}
+.foot{margin-top:7px;font-size:11px;color:rgba(255,255,255,.45);height:14px}
+.cancel{margin:auto 0 16px;padding:8px 34px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:#fff;font:500 13.5px inherit;font-family:inherit;cursor:pointer;-webkit-app-region:no-drag}
+.cancel:hover{background:rgba(255,255,255,.16)}
+@keyframes bob{50%{transform:rotate(-8deg) translateY(-5px)}}
+@keyframes indet{0%{transform:translateX(-110%)}100%{transform:translateX(380%)}}
 </style></head><body><div class="card">
-<button class="x" title="Close" onclick="window.close()">&times;</button>
-<img class="logo" id="logo" src="data:image/svg+xml;base64,${Buffer.from(MOON_SVG).toString("base64")}">
-<img class="game" id="game">
-<div class="title" id="title">Moony</div>
-<div class="bar"><div class="fill" id="fill"></div></div>
+<div class="top"><span id="chan">Moony</span><span id="ver"></span></div>
+<div class="icon" id="icon"><img id="logo" src="data:image/svg+xml;base64,${Buffer.from(MOON_SVG).toString("base64")}"></div>
+<div class="title" id="title"></div>
 <div class="step" id="step">Starting…</div>
+<div class="bar"><div class="fill" id="fill"></div></div>
 <div class="foot" id="foot"></div>
+<button class="cancel" onclick="window.close()">Cancel</button>
 </div><script>
 window.setState = (s) => {
-  if (s.title != null) document.getElementById("title").textContent = s.title;
-  if (s.step != null) { const e = document.getElementById("step"); e.textContent = s.step; e.className = "step" + (s.error ? " err" : ""); }
-  if (s.foot != null) document.getElementById("foot").textContent = s.foot;
-  const f = document.getElementById("fill");
+  const $ = (id) => document.getElementById(id);
+  if (s.title != null) $("title").textContent = s.title;
+  if (s.step != null) { $("step").textContent = s.step; $("step").className = "step" + (s.error ? " err" : ""); }
+  if (s.foot != null) $("foot").textContent = s.foot;
+  if (s.channel != null) $("chan").textContent = "Channel: " + s.channel;
+  if (s.version != null) $("ver").textContent = s.version ? "Version: " + s.version : "";
+  const f = $("fill");
   if (s.progress == null) f.className = "fill indet"; else { f.className = "fill"; f.style.width = Math.max(4, Math.min(100, s.progress)) + "%"; }
-  if (s.image) { const g = document.getElementById("game"); g.src = s.image; g.style.display = "block"; document.getElementById("logo").style.display = "none"; }
+  if (s.image) { $("logo").src = s.image; $("icon").classList.add("game"); }
 };
 </script></body></html>`;
 
 class Splash {
-  constructor({ parent, width = 360, height = 260, accent = "#8b7dff", icon }) {
+  constructor({ parent, width = 440, height = 330, accent = "#8b7dff", icon }) {
     this.win = new BrowserWindow({
       width, height, frame: false, transparent: true, resizable: false, movable: true, show: false, skipTaskbar: !!parent,
       alwaysOnTop: true, backgroundColor: "#00000000", title: "Moony", icon, parent: parent || undefined,

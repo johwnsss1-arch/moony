@@ -71,9 +71,19 @@ contextBridge.exposeInMainWorld("orbit", {
   feedback: {
     send: (payload) => ipcRenderer.invoke("feedback:send", payload),
   },
+  versions: {
+    info: (ch) => ipcRenderer.invoke("versions:info", ch),
+    install: (guid) => ipcRenderer.invoke("versions:install", guid),
+    pin: (guid) => ipcRenderer.invoke("versions:pin", guid),
+    channel: (ch) => ipcRenderer.invoke("versions:channel", ch),
+    remove: (guid) => ipcRenderer.invoke("versions:remove", guid),
+    open: (guid) => ipcRenderer.invoke("versions:open", guid),
+    onProgress: (fn) => { const h = (_e, d) => fn(d); ipcRenderer.on("versions:progress", h); return () => ipcRenderer.removeListener("versions:progress", h); },
+  },
   fflags: {
     get: () => ipcRenderer.invoke("fflags:get"),
     set: (flags) => ipcRenderer.invoke("fflags:set", flags),
+    presets: () => ipcRenderer.invoke("fflags:presets"),
   },
   game: {
     onDisconnected: (cb) => { const h = (_e, v) => cb(v); ipcRenderer.on("game:disconnected", h); return () => ipcRenderer.removeListener("game:disconnected", h); },

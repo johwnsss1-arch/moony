@@ -11,6 +11,12 @@ export const WIDGETS = {
   system: { label: "PC usage", desc: "CPU and memory use" },
   visualizer: { label: "Music visualiser", desc: "Bars that move to the audio your PC is playing" },
   watermark: { label: "Made with Moony", desc: "A small Moony tag that shows up in your clips and screenshots" },
+  date: { label: "Date", desc: "Today's day and date" },
+  ping: { label: "Internet ping", desc: "Your connection's response time to Roblox" },
+  battery: { label: "Battery", desc: "Laptop battery level and charging" },
+  breaks: { label: "Break reminder", desc: "A nudge to rest your eyes every hour" },
+  crosshair: { label: "Crosshair", desc: "A clean dot crosshair in the middle of the screen" },
+  text: { label: "Custom text", desc: "Your own label, like your name or stream tag" },
 };
 
 const fmt = (ms) => { const s = Math.max(0, Math.floor(ms / 1000)); const h = Math.floor(s / 3600); return `${h ? h + ":" : ""}${String(Math.floor(s / 60) % 60).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; };
@@ -34,6 +40,22 @@ export function HudWidget({ id, state, demo }) {
       return <div className="hw hw-sys"><span><small>CPU</small><b>{state?.system?.cpu ?? 0}%</b></span><span><small>RAM</small><b>{state?.system?.ram ?? 0}%</b></span></div>;
     case "watermark":
       return <div className="hw hw-mark"><svg viewBox="0 0 24 24" width="15" height="15"><path d="M15 3a9 9 0 1 0 6 15.7A7.5 7.5 0 0 1 15 3z" fill="url(#mg)"/><defs><linearGradient id="mg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#e9e5ff"/><stop offset="1" stopColor="#8b7dff"/></linearGradient></defs></svg><span>Made with <b>Moony</b></span></div>;
+    case "date":
+      return <div className="hw"><small>{new Date(state?.time || Date.now()).toLocaleDateString(undefined, { weekday: "long" })}</small><b>{new Date(state?.time || Date.now()).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</b></div>;
+    case "ping":
+      return <PingWidget demo={demo} />;
+    case "battery":
+      return <BatteryWidget demo={demo} />;
+    case "breaks": {
+      const mins = Math.floor(((state?.time || Date.now()) - (now?.startedAt || state?.time || Date.now())) / 60000);
+      const due = mins > 0 && mins % 60 >= 58;
+      if (!due && !demo) return mins >= 60 ? <div className="hw hw-soft"><small>Played</small><b>{Math.floor(mins / 60)}h {mins % 60}m</b></div> : null;
+      return <div className="hw hw-break"><b>Time for a short break</b><small>Look away from the screen for 20 seconds</small></div>;
+    }
+    case "crosshair":
+      return <div className="hw-cross" aria-hidden><i /></div>;
+    case "text":
+      return <div className="hw hw-text"><b>{state?.prefs?.widgets?.text?.label || (demo ? "Your text here" : "")}</b></div>;
     case "visualizer":
       return <Visualizer media={state?.media} demo={demo} />;
     default:
@@ -100,6 +122,36 @@ export function Visualizer({ bars = 36, media, demo }) {
         </div>
       )}
       <canvas ref={canvas} />
+    </div>
+  );
+}
+
+function useEvery(ms, fn, deps = []) {
+  useEffect(() => { fn(); const t = setInterval(fn, ms); return () => clearInterval(t); }, deps); // eslint-disable-line
+}
+// Round-trip time of a tiny request to Roblox's edge, every 5 seconds.
+function PingWidget({ demo }) {
+  const [ms, setMs] = useState(demo ? 42 : null);
+  useEvery(5000, async () => {
+    const t0 = performance.now();
+    try { await fetch("https://www.roblox.com/favicon.ico?" + Date.now(), { mode: "no-cors", cache: "no-store" }); setMs(Math.round(performance.now() - t0)); } catch { setMs(-1); }
+  });
+  const c = ms == null || ms < 0 ? "" : ms < 80 ? "good" : ms < 160 ? "ok" : "bad";
+  return <div className={"hw hw-ping " + c}><small>Ping</small><b>{ms == null ? "…" : ms < 0 ? "Offline" : ms + " ms"}</b></div>;
+}
+function BatteryWidget({ demo }) {
+  const [b, setB] = useState(demo ? { level: 0.82, charging: false } : null);
+  useEffect(() => {
+    let bat, upd = () => bat && setB({ level: bat.level, charging: bat.charging });
+    navigator.getBattery?.().then((x) => { bat = x; upd(); x.addEventListener("levelchange", upd); x.addEventListener("chargingchange", upd); }).catch(() => {});
+    return () => { bat?.removeEventListener("levelchange", upd); bat?.removeEventListener("chargingchange", upd); };
+  }, []);
+  if (!b) return demo ? null : <div className="hw"><small>Battery</small><b>—</b></div>;
+  const pct = Math.round(b.level * 100);
+  return (
+    <div className={"hw hw-bat" + (pct <= 20 && !b.charging ? " low" : "")}>
+      <span className="bat-ico"><i style={{ width: pct + "%" }} /></span>
+      <b>{pct}%</b>{b.charging && <small>charging</small>}
     </div>
   );
 }

@@ -2,6 +2,20 @@
 // Add an entry here for every release.
 export const CHANGELOG = [
   {
+    version: "1.0.9",
+    title: "Faster, lighter and more yours",
+    items: [
+      "New Versions tab: pin any Roblox version or download one by its hash.",
+      "New bootstrapper window with channel, version and a Cancel button.",
+      "FFlags: All flags and JSON, plus a preset library that updates online.",
+      "Appearance: compact theme tiles, and custom picture, GIF or video backgrounds.",
+      "Six new HUD widgets: date, ping, battery, break reminder, crosshair and custom text.",
+      "A red dot on News when there's something new.",
+      "Rounded window corners you can adjust, and fixed interface scaling.",
+      "Games load faster and Moony uses less memory.",
+    ],
+  },
+  {
     version: "1.0.8",
     title: "See Moony in action",
     video: "https://github.com/johwnsss1-arch/moony/releases/download/v1.0.8/moony-showcase.mp4",

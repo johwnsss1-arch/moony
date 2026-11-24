@@ -1,4 +1,10 @@
 const { app, BrowserWindow, ipcMain, shell, screen, session, safeStorage, Notification, nativeImage, net, dialog, desktopCapturer, protocol } = require("electron");
+
+// Lighter on memory: a smaller JS heap that collects garbage sooner, fewer
+// helper processes, and no media-key/session services Moony doesn't use.
+app.commandLine.appendSwitch("js-flags", "--max-old-space-size=320 --optimize-for-size");
+app.commandLine.appendSwitch("disable-features", "HardwareMediaKeyHandling,MediaSessionService,SpareRendererForSitePerProcess");
+app.commandLine.appendSwitch("disable-site-isolation-trials");
 const path = require("path");
 const { pathToFileURL } = require("url");
 const { execFile, spawn } = require("child_process");
@@ -58,7 +64,7 @@ function maybeShowMain() {
   bootSplash?.close(150);
 }
 async function bootStartup() {
-  bootSplash = new Splash({ accent: "#8b7dff", icon: path.join(__dirname, "..", "build", "icon.png") });
+  bootSplash = new Splash({ width: 380, height: 300, accent: "#8b7dff", icon: path.join(__dirname, "..", "build", "icon.png") });
   const step = (s, p) => bootSplash.set({ title: "Moony", step: s, progress: p, foot: `v${app.getVersion()}` });
   try {
     step("Checking Roblox…", 15);
@@ -444,7 +450,7 @@ async function launchHandler(_e, opts) {
   const name = typeof opts?.name === "string" ? opts.name.slice(0, 80) : "Roblox";
   const icon = typeof opts?.icon === "string" && /^https:\/\/[a-z0-9.-]*rbxcdn\.com\//i.test(opts.icon) ? opts.icon : null;
   launchSplash?.close();
-  const splash = (launchSplash = new Splash({ parent: null, width: 480, height: 300, accent: "#8b7dff", icon: path.join(__dirname, "..", "build", "icon.png") }));
+  const splash = (launchSplash = new Splash({ parent: null, accent: appPrefs.accent || "#8b7dff", icon: path.join(__dirname, "..", "build", "icon.png") }));
   splash.set({ title: followUserId ? `Joining ${name}` : name, step: "Getting ready…", progress: 12, image: icon, foot: "Moony" });
   clearTimeout(launchSplashTimer);
   launchSplashTimer = setTimeout(() => splash.close(), 45000); // safety net
@@ -467,7 +473,8 @@ async function launchHandler(_e, opts) {
       rbx = await rbxinstall.ensure((p) => {
         if (p.total) splash.set({ step: `${p.phase} ${mb(p.done)} / ${mb(p.total)} MB${p.speed ? ` · ${mb(p.speed)} MB/s` : ""}`, progress: 8 + (p.done / p.total) * 40, foot: "Updating Roblox" });
         else splash.set({ step: p.phase, progress: null });
-      });
+      }, versionPrefs());
+      if (rbx) splash.set({ channel: rbx.channel || "production", version: rbx.version || "" });
     } catch (e) { console.warn("[launch] Moony's Roblox install failed:", e.message); }
     splash.set({ step: "Signing you in…", progress: 55, foot: "Moony" });
     const [ticket, fastDir] = await Promise.all([withSession(accountId, roblox.authTicket), rbx?.dir ? Promise.resolve(rbx.dir) : canFastLaunch(findPlayerDir).catch(() => null)]);
@@ -480,6 +487,7 @@ async function launchHandler(_e, opts) {
         ? `request=RequestGameJob&placeId=${placeId}&gameId=${jobId}&isPlayTogetherGame=false`
         : `request=RequestGame&placeId=${placeId}&isPlayTogetherGame=false`;
     const launcherUrl = `https://assetgame.roblox.com/game/PlaceLauncher.ashx?${request}&browserTrackerId=${tracker}`;
+    if (splash.closed) return { ok: false, cancelled: true };
     splash.set({ step: "Starting Roblox…", progress: 60 });
     let fast = false;
     if (fastDir) {
@@ -544,7 +552,7 @@ async function handleRobloxLink(uri) {
   if (!/^roblox(-player)?:/i.test(String(uri))) return;
   if (/^roblox-player:/i.test(uri)) {
     const parts = Object.fromEntries(uri.replace(/^roblox-player:/i, "").split("+").map((kv) => { const i = kv.indexOf(":"); return [kv.slice(0, i), kv.slice(i + 1)]; }));
-    const splash = new Splash({ parent: null, width: 480, height: 300, accent: "#8b7dff", icon: path.join(__dirname, "..", "build", "icon.png") });
+    const splash = new Splash({ parent: null, accent: appPrefs.accent || "#8b7dff", icon: path.join(__dirname, "..", "build", "icon.png") });
     launchSplash?.close();
     launchSplash = splash;
     clearTimeout(launchSplashTimer);
@@ -552,7 +560,9 @@ async function handleRobloxLink(uri) {
     splash.set({ title: parts.launchmode === "app" ? "Roblox" : "Joining game", step: "Checking for Roblox updates…", progress: 8, foot: "Moony bootstrapper" });
     try {
       const mb = (n) => (n / 1e6).toFixed(n > 1e8 ? 0 : 1);
-      const rbx = await rbxinstall.ensure((p) => p.total ? splash.set({ step: `${p.phase} ${mb(p.done)} / ${mb(p.total)} MB`, progress: 8 + (p.done / p.total) * 50 }) : splash.set({ step: p.phase, progress: null }));
+      const rbx = await rbxinstall.ensure((p) => p.total ? splash.set({ step: `${p.phase} ${mb(p.done)} / ${mb(p.total)} MB`, progress: 8 + (p.done / p.total) * 50 }) : splash.set({ step: p.phase, progress: null }), versionPrefs());
+      splash.set({ channel: rbx.channel || "production", version: rbx.version || "" });
+      if (splash.closed) return;
       splash.set({ step: "Starting Roblox…", progress: 70 });
       const exe = path.join(rbx.dir, "RobloxPlayerBeta.exe");
       const args = ["--app"];
@@ -722,6 +732,23 @@ function flagStatus() {
   return { flags: store.flags, installed: !!dir, version: dir ? path.basename(dir) : null, upToDate: !!dir && store.appliedVersion === path.basename(dir) };
 }
 ipcMain.handle("fflags:get", () => flagStatus());
+// Community FFlag presets, published on Moony's website so they can be updated
+// without an app release. Falls back to the copy shipped with the app.
+let presetCache = null;
+ipcMain.handle("fflags:presets", async () => {
+  if (presetCache && Date.now() - presetCache.at < 30 * 60e3) return presetCache.data;
+  let data = null, online = false;
+  try {
+    const r = await fetch("https://moonylauncher.xyz/fflags.json", { signal: AbortSignal.timeout(6000), cache: "no-store" });
+    if (r.ok) { const j = await r.json(); if (Array.isArray(j.presets)) { data = j; online = true; } }
+  } catch { /* offline */ }
+  if (!data) data = JSON.parse(fs.readFileSync(path.join(__dirname, "fflag-presets.json"), "utf8"));
+  // Only plain flag names and simple values are accepted.
+  data.presets = data.presets.filter((x) => x && typeof x.name === "string" && x.flags && typeof x.flags === "object")
+    .map((x) => ({ ...x, flags: Object.fromEntries(Object.entries(x.flags).filter(([k, v]) => /^[A-Za-z][A-Za-z0-9_]{2,100}$/.test(k) && ["string", "number", "boolean"].includes(typeof v))) }));
+  presetCache = { at: Date.now(), data: { ...data, online } };
+  return presetCache.data;
+});
 ipcMain.handle("fflags:set", (_e, flags) => {
   if (!flags || typeof flags !== "object" || Array.isArray(flags)) throw new Error("Invalid flags");
   const clean = {};
@@ -800,11 +827,53 @@ function allowLoopbackForMainWindow() {
   });
 }
 
+/* ---------- Roblox versions (Versions tab) ---------- */
+const versionsFile = () => path.join(app.getPath("userData"), "versions.json");
+function versionPrefs() { try { return JSON.parse(fs.readFileSync(versionsFile(), "utf8")); } catch { return {}; } }
+function saveVersionPrefs(p) { fs.writeFileSync(versionsFile(), JSON.stringify({ ...versionPrefs(), ...p }, null, 2)); return versionPrefs(); }
+ipcMain.handle("versions:info", async (_e, channel) => {
+  const prefs = versionPrefs();
+  let latest = null, error = null;
+  try { latest = await rbxinstall.latest(channel ?? prefs.channel); } catch (e) { error = e.message; }
+  return { latest, error, pinned: prefs.pinned || null, channel: prefs.channel || "production", installed: rbxinstall.list(), folder: rbxinstall.root() };
+});
+ipcMain.handle("versions:install", async (e, guid) => {
+  const send = (p) => { if (!e.sender.isDestroyed()) e.sender.send("versions:progress", { guid, ...p }); };
+  try { await rbxinstall.install(String(guid).trim(), String(guid).trim(), send, true); send({ phase: "done" }); return { ok: true, list: rbxinstall.list() }; }
+  catch (err) { send({ phase: "error", error: err.message }); return { ok: false, error: err.message }; }
+});
+ipcMain.handle("versions:pin", (_e, guid) => {
+  if (guid && !rbxinstall.GUID.test(guid)) return { ok: false, error: "Not a version hash" };
+  return { ok: true, prefs: saveVersionPrefs({ pinned: guid ? guid.toLowerCase() : null }) };
+});
+ipcMain.handle("versions:channel", (_e, ch) => {
+  const c = String(ch || "production").trim();
+  if (!/^[a-z0-9_-]{1,40}$/i.test(c)) return { ok: false, error: "Invalid channel name" };
+  return { ok: true, prefs: saveVersionPrefs({ channel: c.toLowerCase() === "live" ? "production" : c }) };
+});
+ipcMain.handle("versions:remove", (_e, guid) => {
+  if (versionPrefs().pinned === guid) saveVersionPrefs({ pinned: null });
+  return { ok: rbxinstall.remove(guid), list: rbxinstall.list() };
+});
+ipcMain.handle("versions:open", (_e, guid) => { const v = rbxinstall.list().find((x) => x.guid === guid); if (v) shell.openPath(v.dir); return !!v; });
+
 /* ---------- Preferences the main process needs ---------- */
 let appPrefs = { autoCloseRoblox: true };
-ipcMain.handle("ui:zoom", (_e, f) => { const z = Number(f); if (win && z >= 0.5 && z <= 2) win.webContents.setZoomFactor(z); return true; });
+// Scale is done with CSS in the page; keep Chromium's own zoom at 100% (it's
+// shared by every page from the same origin) and grow the minimum window size
+// so a larger scale never squeezes the layout.
+ipcMain.handle("ui:zoom", (_e, f) => {
+  const z = Number(f);
+  if (!win || win.isDestroyed() || !(z >= 0.5 && z <= 2)) return false;
+  win.webContents.setZoomFactor(1);
+  const [mw, mh] = [Math.round(1000 * Math.max(1, z)), Math.round(640 * Math.max(1, z))];
+  win.setMinimumSize(mw, mh);
+  const [w, h] = win.getSize();
+  if (!win.isMaximized() && (w < mw || h < mh)) win.setSize(Math.max(w, mw), Math.max(h, mh));
+  return true;
+});
 ipcMain.handle("prefs:set", (_e, p) => {
-  appPrefs = { ...appPrefs, autoCloseRoblox: !!p?.autoCloseRoblox, activeAccountId: /^d+$/.test(String(p?.activeAccountId)) ? Number(p.activeAccountId) : null };
+  appPrefs = { ...appPrefs, accent: /^#[0-9a-f]{6}$/i.test(p?.accent || "") ? p.accent : appPrefs.accent, autoCloseRoblox: !!p?.autoCloseRoblox, activeAccountId: /^d+$/.test(String(p?.activeAccountId)) ? Number(p.activeAccountId) : null };
   overlay?.setPrefs?.(p?.hud);
   // The music reader only runs while the visualiser widget is switched on.
   if (p?.hud?.enabled && p.hud.widgets?.visualizer?.on) media.start(); else media.stop();

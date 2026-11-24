@@ -51,7 +51,7 @@ export default function Hud() {
   const fallbackArt = recent[0]?.banner || favorites[0]?.banner || null;
 
   const save = (patch) => updateSettings({ hud: { ...hud, ...patch } });
-  const setWidget = (id, patch) => save({ widgets: { ...hud.widgets, [id]: { x: 93, y: 96, on: false, ...hud.widgets[id], ...patch } } });
+  const setWidget = (id, patch) => save({ widgets: { ...hud.widgets, [id]: { x: 93, y: 96, on: false, ...DEFAULT_SETTINGS.hud.widgets[id], ...hud.widgets[id], ...patch } } });
 
   const startDrag = (id) => (e) => {
     e.preventDefault();
@@ -161,6 +161,7 @@ export default function Hud() {
                 <div key={id} className={"hud-item" + (sel === id ? " sel" : "")} onClick={() => setSel(id)}>
                   <div className="grow"><b>{w.label}</b><small>{id === "visualizer" && media ? `${media.title}${media.app ? ` · ${media.app}` : ""}` : w.desc}</small></div>
                   <Toggle checked={!!hud.widgets[id]?.on} onChange={(v) => setWidget(id, { on: v })} label={w.label} />
+                  {id === "text" && hud.widgets.text?.on && <input className="input hud-text-in" maxLength={40} placeholder="Your text" value={hud.widgets.text?.label || ""} onClick={(e) => e.stopPropagation()} onChange={(e) => setWidget("text", { label: e.target.value })} />}
                 </div>
               ))}
             </div>

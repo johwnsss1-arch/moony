@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Brush, Code2, FileUp, Gauge, Pause, Play, Plus, RotateCcw, Save, Sliders, Trash2, Wand2 } from "lucide-react";
+import { Brush, Check, Code2, FileUp, Globe, Pause, Play, Plus, RefreshCw, RotateCcw, Save, Search, Sliders, Trash2, Wand2, WifiOff } from "lucide-react";
 import { useApp } from "../lib/store";
 import { fflagsApi, modsApi } from "../lib/bridge";
-import { Empty, Segmented, Select, Slider, Toggle } from "../components/ui";
+import { Empty, Segmented, Toggle } from "../components/ui";
 
 export default function Tweaks() {
   const [tab, setTab] = useState("mods");
@@ -122,137 +122,133 @@ function FontPreview({ src }) {
 }
 
 /* ===================== FFlags ===================== */
-// Flags Roblox accepts from launchers (other flags are ignored by Roblox).
-const PRESETS = [
-  { key: "DFIntTaskSchedulerTargetFps", label: "Frame rate limit", desc: "Cap or uncap the frame rate.", type: "slider", min: 30, max: 360, step: 30, off: null, preview: "fps" },
-  { key: "FIntDebugForceMSAASamples", label: "Anti-aliasing (MSAA)", desc: "Smoother edges. Higher costs more GPU.", type: "select", options: [[null, "Automatic"], [0, "Off"], [1, "1×"], [2, "2×"], [4, "4×"], [8, "8×"]], preview: "msaa" },
-  { key: "DFIntTextureQualityOverride", label: "Texture quality", desc: "Force texture detail. Also sets DFFlagTextureQualityOverrideEnabled.", type: "select", options: [[null, "Automatic"], [0, "Lowest"], [1, "Low"], [2, "Medium"], [3, "High"]], pair: "DFFlagTextureQualityOverrideEnabled", preview: "texture" },
-  { key: "FFlagDebugGraphicsPreferD3D11", label: "Graphics API", desc: "Which rendering backend Roblox prefers.", type: "renderer", preview: null },
-  { key: "FFlagDebugSkyGray", label: "Gray sky", desc: "Replaces the skybox with flat gray (can raise FPS).", type: "toggle", preview: "sky" },
-  { key: "FIntFRMMaxGrassDistance", label: "Hide grass", desc: "Removes terrain grass.", type: "toggle", on: 0, also: { FIntFRMMinGrassDistance: 0 }, preview: "grass" },
-  { key: "DFFlagDisableDPIScale", label: "Disable DPI scaling", desc: "Sharper UI on high-DPI screens; UI may look smaller.", type: "toggle" },
-  { key: "FFlagHandleAltEnterFullscreenManually", label: "Exclusive fullscreen (Alt+Enter)", desc: "Alt+Enter uses real fullscreen instead of a borderless window.", type: "toggle", on: false },
-  { key: "DFIntCSGLevelOfDetailSwitchingDistance", label: "Low detail models", desc: "Switches meshes to low detail sooner (can raise FPS).", type: "toggle", on: 0, also: { DFIntCSGLevelOfDetailSwitchingDistanceL12: 0, DFIntCSGLevelOfDetailSwitchingDistanceL23: 0, DFIntCSGLevelOfDetailSwitchingDistanceL34: 0 } },
-  { key: "DFFlagDebugPauseVoxelizer", label: "Pause lighting updates", desc: "Stops voxel lighting recalculation (can raise FPS, lighting may look stuck).", type: "toggle" },
-];
-const RENDERERS = [["auto", "Automatic"], ["FFlagDebugGraphicsPreferD3D11", "DirectX 11"], ["FFlagDebugGraphicsPreferVulkan", "Vulkan"], ["FFlagDebugGraphicsPreferOpenGL", "OpenGL"]];
+// Two views of the same flags (a table and raw JSON), plus a preset library
+// that's loaded from moonylauncher.xyz so new presets arrive without an update.
+const kindOf = (k) => (/^(D|F|S)?FFlag/.test(k) ? "Flag" : /^(D|F|S)?FInt/.test(k) ? "Int" : /^(D|F|S)?FString/.test(k) ? "String" : /^(D|F|S)?FLog/.test(k) ? "Log" : "Other");
+const parseVal = (s) => (s === "true" ? true : s === "false" ? false : /^-?\d+$/.test(s) ? Number(s) : s);
+const same = (a, b) => String(a) === String(b);
 
 function FFlags() {
   const { toast } = useApp();
   const [st, setSt] = useState(null);
   const [draft, setDraft] = useState({});
-  const [mode, setMode] = useState("easy");
+  const [mode, setMode] = useState("table");
   const [raw, setRaw] = useState("");
+  const [rawErr, setRawErr] = useState("");
   useEffect(() => { fflagsApi.get().then((s) => { setSt(s); setDraft(s.flags); }); }, []);
   const dirty = st && JSON.stringify(draft) !== JSON.stringify(st.flags);
 
   const setFlag = (k, v) => setDraft((d) => { const n = { ...d }; if (v === null || v === undefined) delete n[k]; else n[k] = v; return n; });
-  const save = async (flags = draft) => {
-    try { const s = await fflagsApi.set(flags); setSt(s); setDraft(s.flags); toast("Flags saved. Restart Roblox to apply them.", "success"); }
+  const switchMode = (m) => {
+    if (m === "json") { setRaw(JSON.stringify(draft, null, 2)); setRawErr(""); }
+    if (m === "table" && mode === "json") { try { setDraft(JSON.parse(raw || "{}")); } catch { return toast("Fix the JSON first", "error"); } }
+    setMode(m);
+  };
+  const save = async () => {
+    let flags = draft;
+    if (mode === "json") { try { flags = JSON.parse(raw || "{}"); } catch { return toast("That isn't valid JSON", "error"); } }
+    try { const s = await fflagsApi.set(flags); setSt(s); setDraft(s.flags); if (mode === "json") setRaw(JSON.stringify(s.flags, null, 2)); toast("Flags saved. Restart Roblox to apply them.", "success"); }
     catch (e) { toast(e.message.replace(/^.*Error: /, ""), "error"); }
   };
   if (!st) return null;
   if (!st.installed) return <Empty icon={Code2} title="Roblox isn't installed" text="Install Roblox, then come back." />;
+  const count = Object.keys(draft).length;
 
   return (
     <>
+      <PresetLibrary draft={draft} setDraft={(fn) => { setDraft(fn); if (mode === "json") setRaw((r) => { try { return JSON.stringify(fn(JSON.parse(r || "{}")), null, 2); } catch { return r; } }); }} />
       <div className="fflag-bar">
-        <Segmented value={mode} onChange={(m) => { setMode(m); if (m === "json") setRaw(JSON.stringify(draft, null, 2)); }} options={[{ value: "easy", label: "Presets" }, { value: "table", label: "All flags" }, { value: "json", label: "JSON" }]} />
+        <Segmented value={mode} onChange={switchMode} options={[{ value: "table", label: `All flags (${count})` }, { value: "json", label: "JSON" }]} />
         <span className="grow" />
-        {dirty && <button className="btn ghost" onClick={() => setDraft(st.flags)}>Discard</button>}
-        <button className="btn primary" disabled={!dirty && mode !== "json"} onClick={() => (mode === "json" ? (() => { try { save(JSON.parse(raw || "{}")); } catch { toast("That isn't valid JSON", "error"); } })() : save())}><Save size={14} /> Save to Roblox</button>
+        {(dirty || mode === "json") && <button className="btn ghost" onClick={() => { setDraft(st.flags); setRaw(JSON.stringify(st.flags, null, 2)); }}>Discard</button>}
+        <button className="btn primary" disabled={!dirty && mode !== "json"} onClick={save}><Save size={14} /> Save to Roblox</button>
       </div>
-      <p className="settings-foot" style={{ marginTop: 0, marginBottom: 14 }}>Roblox only accepts a limited set of flags from launchers; others are ignored. Saved flags are re-applied after Roblox updates.</p>
-
-      {mode === "easy" && (
-        <div className="fflag-grid">
-          {PRESETS.map((p) => <PresetCard key={p.key} p={p} draft={draft} setFlag={setFlag} />)}
-        </div>
-      )}
-      {mode === "table" && <FlagTable draft={draft} setFlag={setFlag} />}
-      {mode === "json" && <textarea className="json-edit" spellCheck={false} value={raw} onChange={(e) => setRaw(e.target.value)} />}
+      {mode === "table" ? <FlagTable draft={draft} setFlag={setFlag} />
+        : <>
+          <textarea className={"json-edit" + (rawErr ? " bad" : "")} spellCheck={false} value={raw}
+            onChange={(e) => { setRaw(e.target.value); try { JSON.parse(e.target.value || "{}"); setRawErr(""); } catch (x) { setRawErr(x.message); } }} />
+          <p className="settings-foot" style={{ color: rawErr ? "#ff8a96" : undefined }}>{rawErr || "Paste a JSON object of flags. Saving replaces all your flags with this."}</p>
+        </>}
+      <p className="settings-foot">Roblox only accepts flags on its launcher allowlist; others are ignored. Saved flags are put back after Roblox updates.</p>
     </>
   );
 }
 
-function PresetCard({ p, draft, setFlag }) {
-  const v = draft[p.key];
-  let control, live;
-  if (p.type === "slider") {
-    const on = v != null;
-    control = (
-      <div className="row-gap" style={{ alignItems: "center" }}>
-        <Toggle checked={on} onChange={(x) => setFlag(p.key, x ? 144 : null)} />
-        {on && <Slider value={Number(v)} min={p.min} max={p.max} step={p.step} onChange={(n) => setFlag(p.key, n)} format={(n) => `${n} FPS`} />}
-      </div>
-    );
-    live = <FpsPreview fps={on ? Number(v) : 60} />;
-  } else if (p.type === "select") {
-    const opts = p.options.map(([val, label]) => ({ value: val === null ? "auto" : String(val), label }));
-    control = <Select value={v == null ? "auto" : String(v)} width={170} options={opts} onChange={(x) => { const n = x === "auto" ? null : Number(x); setFlag(p.key, n); if (p.pair) setFlag(p.pair, n === null ? null : true); }} />;
-    if (p.preview === "texture") live = <TexturePreview level={v == null ? 3 : Number(v)} />;
-    if (p.preview === "msaa") live = <MsaaPreview samples={v == null ? 4 : Number(v)} />;
-  } else if (p.type === "renderer") {
-    const current = RENDERERS.find(([k]) => k !== "auto" && draft[k] === true)?.[0] || "auto";
-    control = <Select value={current} width={170} options={RENDERERS.map(([k, l]) => ({ value: k, label: l }))} onChange={(x) => { for (const [k] of RENDERERS) if (k !== "auto") setFlag(k, k === x ? true : null); }} />;
-  } else {
-    const onVal = p.on ?? true;
-    const on = v === onVal;
-    control = <Toggle checked={on} onChange={(x) => { setFlag(p.key, x ? onVal : null); for (const [k, val] of Object.entries(p.also || {})) setFlag(k, x ? val : null); }} />;
-    if (p.preview === "sky") live = <div className={"sky-preview" + (on ? " gray" : "")}><span /></div>;
-    if (p.preview === "grass") live = <div className={"grass-preview" + (on ? " none" : "")}><span /></div>;
-  }
+function PresetLibrary({ draft, setDraft }) {
+  const [lib, setLib] = useState(null);
+  const [tag, setTag] = useState("All");
+  useEffect(() => { fflagsApi.presets?.().then(setLib).catch(() => setLib({ presets: [] })); }, []);
+  if (!lib) return <div className="preset-lib loading"><RefreshCw size={14} className="spin" /> Loading presets…</div>;
+  const tags = ["All", ...new Set(lib.presets.map((p) => p.tag).filter(Boolean))];
+  const list = lib.presets.filter((p) => tag === "All" || p.tag === tag);
+  const applied = (p) => Object.entries(p.flags).every(([k, v]) => k in draft && same(draft[k], v));
+  const toggle = (p) => setDraft((d) => {
+    const n = { ...d };
+    if (applied(p)) for (const k of Object.keys(p.flags)) delete n[k];
+    else {
+      // Only one renderer at a time.
+      if (Object.keys(p.flags).some((k) => /^FFlagDebugGraphicsPrefer/.test(k))) for (const k of Object.keys(n)) if (/^FFlagDebugGraphicsPrefer/.test(k)) delete n[k];
+      Object.assign(n, p.flags);
+    }
+    return n;
+  });
   return (
-    <div className="fflag-card">
-      <div className="fflag-head"><div><b>{p.label}</b><small>{p.desc}</small></div>{control}</div>
-      {live && <div className="fflag-live">{live}</div>}
-      <code className="fflag-key">{p.key}</code>
+    <div className="preset-lib">
+      <div className="preset-head">
+        <b>Preset library</b>
+        <span className={"preset-src" + (lib.online ? " on" : "")}>{lib.online ? <><Globe size={12} /> Live from moonylauncher.xyz</> : <><WifiOff size={12} /> Offline copy</>}</span>
+        <span className="grow" />
+        <div className="preset-tags">{tags.map((t) => <button key={t} className={"chip" + (tag === t ? " on" : "")} onClick={() => setTag(t)}>{t}</button>)}</div>
+      </div>
+      <div className="preset-grid">
+        {list.map((p) => {
+          const on = applied(p);
+          return (
+            <button key={p.id || p.name} className={"preset-card" + (on ? " on" : "")} onClick={() => toggle(p)} title={Object.entries(p.flags).map(([k, v]) => `${k} = ${v}`).join("\n")}>
+              <span className="preset-top"><span className="preset-tag">{p.tag || "Preset"}</span><span className="preset-n">{Object.keys(p.flags).length} flag{Object.keys(p.flags).length === 1 ? "" : "s"}</span></span>
+              <b>{p.name}</b>
+              <small>{p.desc}</small>
+              <span className="preset-act">{on ? <><Check size={13} /> Added · click to remove</> : <><Plus size={13} /> Add</>}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-// Live previews: what the setting does, shown with a small animation/image.
-function FpsPreview({ fps }) {
-  const ref = useRef(null);
-  useEffect(() => {
-    let raf, last = 0, x = 0;
-    const step = (t) => {
-      if (t - last >= 1000 / fps) { x = (x + 240 / fps) % 100; if (ref.current) ref.current.style.left = x + "%"; last = t; }
-      raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [fps]);
-  return <div className="fps-preview"><span ref={ref} /><small><Gauge size={11} /> Moving at {fps} FPS</small></div>;
-}
-function TexturePreview({ level }) {
-  const size = [16, 40, 90, 400][level] ?? 400;
-  return <div className="texture-preview"><canvas ref={(c) => { if (!c) return; const g = c.getContext("2d"); c.width = size; c.height = size; for (let y = 0; y < 8; y++) for (let xx = 0; xx < 8; xx++) { g.fillStyle = (x0 => x0 ? "#b8643a" : "#8c4a2b")((xx + y) % 2); g.fillRect((xx * size) / 8, (y * size) / 8, size / 8, size / 8); } g.fillStyle = "rgba(255,255,255,0.15)"; for (let i = 0; i < 8; i++) g.fillRect(0, (i * size) / 8, size, Math.max(1, size / 80)); }} /><small>{["Lowest", "Low", "Medium", "High"][level]} detail</small></div>;
-}
-function MsaaPreview({ samples }) {
-  return <div className={"msaa-preview s" + samples}><svg viewBox="0 0 120 60" shapeRendering={samples === 0 ? "crispEdges" : "geometricPrecision"}><polygon points="10,52 60,6 110,52" fill="var(--accent)" /></svg><small>{samples === 0 ? "Jagged edges" : `${samples}× smoothing`}</small></div>;
-}
-
 function FlagTable({ draft, setFlag }) {
+  const [q, setQ] = useState("");
   const [k, setK] = useState("");
   const [v, setV] = useState("");
-  const rows = useMemo(() => Object.entries(draft).sort(([a], [b]) => a.localeCompare(b)), [draft]);
-  const parse = (s) => (s === "true" ? true : s === "false" ? false : /^-?\d+$/.test(s) ? Number(s) : s);
+  const rows = useMemo(() => Object.entries(draft).filter(([key]) => key.toLowerCase().includes(q.toLowerCase())).sort(([a], [b]) => a.localeCompare(b)), [draft, q]);
+  const add = (e) => {
+    e.preventDefault();
+    if (!/^[A-Za-z][A-Za-z0-9_]{2,100}$/.test(k.trim()) || !v.trim()) return;
+    setFlag(k.trim(), parseVal(v.trim())); setK(""); setV("");
+  };
   return (
     <div className="flag-table">
-      {rows.length === 0 && <p className="muted-text">No flags set. Add one below or use the presets.</p>}
-      {rows.map(([key, val]) => (
-        <div className="flag-row" key={key}>
-          <code>{key}</code>
-          <input className="input" value={String(val)} onChange={(e) => setFlag(key, parse(e.target.value))} />
-          <button className="btn ghost sm icon-only" title="Remove" onClick={() => setFlag(key, null)}><Trash2 size={13} /></button>
-        </div>
-      ))}
-      <form className="flag-row add" onSubmit={(e) => { e.preventDefault(); if (/^[A-Za-z][A-Za-z0-9_]{2,100}$/.test(k.trim()) && v.trim()) { setFlag(k.trim(), parse(v.trim())); setK(""); setV(""); } }}>
-        <input className="input" placeholder="FlagName (e.g. FFlagDebugSkyGray)" value={k} onChange={(e) => setK(e.target.value)} />
-        <input className="input" placeholder="Value (true, 0, text…)" value={v} onChange={(e) => setV(e.target.value)} />
-        <button className="btn secondary sm"><Plus size={13} /> Add</button>
+      <form className="flag-add" onSubmit={add}>
+        <input className="input" placeholder="FlagName, e.g. FFlagDebugSkyGray" value={k} onChange={(e) => setK(e.target.value)} />
+        <input className="input" placeholder="Value: true, 0, text…" value={v} onChange={(e) => setV(e.target.value)} />
+        <button className="btn secondary"><Plus size={14} /> Add flag</button>
       </form>
+      {Object.keys(draft).length > 6 && <div className="flag-search"><Search size={14} /><input placeholder="Search your flags" value={q} onChange={(e) => setQ(e.target.value)} /></div>}
+      {rows.length === 0 && <p className="muted-text" style={{ padding: "18px 4px" }}>{q ? "No flags match." : "No flags yet. Add one above or pick a preset."}</p>}
+      {rows.map(([key, val]) => {
+        const kind = kindOf(key);
+        return (
+          <div className="flag-row" key={key}>
+            <span className={"flag-kind k-" + kind.toLowerCase()}>{kind}</span>
+            <code title={key}>{key}</code>
+            {typeof val === "boolean"
+              ? <div className="flag-val"><Toggle checked={val} onChange={(x) => setFlag(key, x)} /><small>{String(val)}</small></div>
+              : <input className="input flag-val" value={String(val)} onChange={(e) => setFlag(key, parseVal(e.target.value))} />}
+            <button className="btn ghost sm icon-only" title="Remove" onClick={() => setFlag(key, null)}><Trash2 size={13} /></button>
+          </div>
+        );
+      })}
     </div>
   );
 }

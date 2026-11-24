@@ -1,36 +1,51 @@
 import { useEffect, useState } from "react";
-import { Bell, Brush, Check, Cpu, ExternalLink, Gamepad2, Keyboard, Lock, MessageCircle, Palette, SlidersHorizontal, UsersRound, Wrench } from "lucide-react";
+import { ImagePlus, Trash2, Bell, Brush, Check, Cpu, ExternalLink, Gamepad2, Keyboard, Lock, MessageCircle, Palette, SlidersHorizontal, UsersRound, Wrench } from "lucide-react";
 import { ACCENTS, DEFAULT_SETTINGS, useApp } from "../lib/store";
 import { THEMES, THEME_FONTS, themeById } from "../lib/themes";
 import { SceneArt } from "../components/ThemeArt";
-import { clearBg, emitBgChange, loadBg, saveBg } from "../lib/custombg";
+import { clearBg, emitBgChange, loadBg, onBgChange, saveBg } from "../lib/custombg";
 
-function CustomBgRow({ s, u }) {
-  const [has, setHas] = useState(false);
+// Custom background: picture, GIF or short video, with a live preview.
+function BackgroundCard({ s, u }) {
+  const [url, setUrl] = useState(null);
+  const [kind, setKind] = useState("image");
   const [err, setErr] = useState("");
-  useEffect(() => { loadBg().then((b) => setHas(!!b)); }, []);
-  const pick = (e) => {
-    const f = e.target.files?.[0];
-    e.target.value = "";
+  const [drag, setDrag] = useState(false);
+  useEffect(() => {
+    let cur = null, alive = true;
+    const load = () => loadBg().then((b) => { if (!alive) return; if (cur) URL.revokeObjectURL(cur); cur = b ? URL.createObjectURL(b) : null; setUrl(cur); setKind(b?.type?.startsWith("video/") ? "video" : "image"); });
+    load();
+    const off = onBgChange(load);
+    return () => { alive = false; off(); if (cur) URL.revokeObjectURL(cur); };
+  }, []);
+  const take = (f) => {
     if (!f) return;
-    if (!f.type.startsWith("image/")) return setErr("Pick an image or GIF.");
-    if (f.size > 40 * 1024 * 1024) return setErr("That file is over 40 MB.");
+    if (!/^(image|video)\//.test(f.type)) return setErr("Use a picture, GIF, WebP or MP4/WebM video.");
+    if (f.size > 60 * 1024 * 1024) return setErr("That file is over 60 MB.");
     setErr("");
-    saveBg(f).then(() => { setHas(true); emitBgChange(); });
+    saveBg(f).then(emitBgChange);
   };
   return (
-    <>
-      <Row title="Custom background" desc={err || "Use your own picture or GIF behind Moony (any wallpaper you like). It stays on this PC and replaces the theme's scene."}>
-        <div style={{ display: "flex", gap: 8 }}>
-          <label className="btn sm primary" style={{ cursor: "pointer" }}>{has ? "Change" : "Choose image"}<input type="file" accept="image/*" hidden onChange={pick} /></label>
-          {has && <button className="btn sm" onClick={() => clearBg().then(() => { setHas(false); emitBgChange(); })}>Remove</button>}
-        </div>
-      </Row>
-      {has && <>
-        <Row title="Background dimming" desc="Darken the picture so text stays easy to read."><Slider min={0} max={90} value={s.bgDim ?? 55} onChange={(v) => u({ bgDim: v })} /></Row>
-        <Row title="Background blur"><Slider min={0} max={24} value={s.bgBlur ?? 0} onChange={(v) => u({ bgBlur: v })} /></Row>
-      </>}
-    </>
+    <div className="ap-bg">
+      <label className={"ap-drop" + (drag ? " drag" : "") + (url ? " has" : "")}
+        onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)}
+        onDrop={(e) => { e.preventDefault(); setDrag(false); take(e.dataTransfer.files?.[0]); }}>
+        {url ? (kind === "video" ? <video src={url} autoPlay loop muted playsInline style={{ objectFit: s.bgFit === "contain" ? "contain" : s.bgFit === "center" ? "none" : "cover" }} /> : <img src={url} alt="" style={{ objectFit: s.bgFit === "contain" ? "contain" : s.bgFit === "center" ? "none" : "cover" }} />) : null}
+        {url && <span className="ap-dim" style={{ background: `rgba(0,0,0,${(s.bgDim ?? 55) / 100})`, backdropFilter: `blur(${(s.bgBlur ?? 0) / 3}px)` }} />}
+        <span className="ap-drop-txt"><ImagePlus size={20} />{url ? "Drop or click to change" : "Drop a picture, GIF or video here, or click to choose"}</span>
+        <input type="file" accept="image/*,video/mp4,video/webm" hidden onChange={(e) => { take(e.target.files?.[0]); e.target.value = ""; }} />
+      </label>
+      <div className="ap-bg-side">
+        {err && <small className="ap-err">{err}</small>}
+        {!url && <small className="muted-text">Your own wallpaper replaces the theme's scene. GIFs and videos play on a loop. It stays on this PC.</small>}
+        {url && <>
+          <div className="ap-ctl"><span>Dim</span><Slider min={0} max={90} value={s.bgDim ?? 55} onChange={(v) => u({ bgDim: v })} format={(v) => v + "%"} /></div>
+          <div className="ap-ctl"><span>Blur</span><Slider min={0} max={24} value={s.bgBlur ?? 0} onChange={(v) => u({ bgBlur: v })} format={(v) => v + "px"} /></div>
+          <div className="ap-ctl"><span>Fit</span><Segmented value={s.bgFit || "cover"} onChange={(v) => u({ bgFit: v })} options={[{ value: "cover", label: "Fill" }, { value: "contain", label: "Fit" }, { value: "center", label: "Center" }]} /></div>
+          <button className="btn sm ghost" onClick={() => clearBg().then(emitBgChange)}><Trash2 size={13} /> Remove background</button>
+        </>}
+      </div>
+    </div>
   );
 }
 import { isDesktop, notifyApi, robloxInstall, setFpsCap } from "../lib/bridge";
@@ -110,60 +125,70 @@ function General() {
 
 const EFFECT_NAMES = { snow: "Snowfall", sakura: "Cherry blossoms", hearts: "Floating hearts", stars: "Twinkling stars", embers: "Rising embers", bubbles: "Bubbles", leaves: "Falling leaves" };
 
+const Section = ({ title, desc, children }) => (
+  <section className="ap-sec"><header><h3>{title}</h3>{desc && <small>{desc}</small>}</header>{children}</section>
+);
+
 function Appearance() {
   const { settings: s, updateSettings: u } = useApp();
   const current = themeById(s.theme);
   return (
-    <>
-      <div className="theme-grid">
-        {THEMES.map((t) => (
-          <button key={t.id} className={"theme-card" + (current.id === t.id ? " on" : "")} onClick={() => u({ theme: t.id })}
-            style={{ "--t-bg": t.vars["--bg-1"], "--t-surface": t.vars["--surface-2"], "--t-a": t.accent[0], "--t-b": t.accent[1], "--t-amb1": t.ambient[0], "--t-amb2": t.ambient[1], "--t-wm1": t.wordmark[1], "--t-wm2": t.wordmark[2], "--t-font": `"${THEME_FONTS[t.id]}"` }}>
-            <div className="theme-prev">
-              <span className="tp-glow" /><span className="tp-glow two" />
-              <SceneArt id={t.id} className="tp-art" />
-              <span className="tp-side" /><span className="tp-card" /><span className="tp-card b" />
-              <span className="tp-btn" />
-              <span className="tp-name">Moony</span>
-            </div>
-            <div className="theme-info">
-              <b>{t.name}{current.id === t.id && <Check size={13} />}</b>
-              <small>{t.desc}</small>
-              {t.particles && <span className="tag">{EFFECT_NAMES[t.particles]}</span>}
-            </div>
-          </button>
-        ))}
-      </div>
-      <div className="settings-group" style={{ marginTop: 16 }}>
-      <Row title="Theme artwork" desc="The illustrated scene and frame decorations for each theme.">
-        <Toggle checked={s.themeArt !== false} onChange={(v) => u({ themeArt: v })} />
-      </Row>
-      <Row title="Pets" desc="Little animals that wander along the bottom of the window. Each theme has its own.">
-        <Toggle checked={s.pets !== false} onChange={(v) => u({ pets: v })} />
-      </Row>
-      <CustomBgRow s={s} u={u} />
-      <Row title="Background effect" desc={current.particles ? `${EFFECT_NAMES[current.particles]} for the ${current.name} theme. Off when Reduce motion is on.` : "This theme has no background effect."}>
-        <Toggle checked={!!s.snow && !!current.particles} onChange={(v) => u({ snow: v })} />
-      </Row>
-      <Row title="Accent color" desc="Buttons and highlights. “Match theme” uses the theme's own colour.">
-        <div className="swatches">
-          <button aria-label="Match theme" title="Match theme" className={"swatch theme-sw" + (s.accent === "theme" ? " on" : "")} style={{ background: `conic-gradient(${current.accent[0]}, ${current.accent[1]}, ${current.accent[0]})` }} onClick={() => u({ accent: "theme" })} />
-          {Object.entries(ACCENTS).map(([k, [a, b]]) => (
-            <button key={k} aria-label={k} className={"swatch" + (s.accent === k ? " on" : "")} style={{ background: `linear-gradient(135deg, ${a}, ${b})` }} onClick={() => u({ accent: k })} />
+    <div className="ap">
+      <Section title="Theme" desc={`${current.name} · ${current.desc}`}>
+        <div className="ap-themes">
+          {THEMES.map((t) => (
+            <button key={t.id} data-t={t.id} title={t.desc} className={"ap-tile" + (current.id === t.id ? " on" : "")} onClick={() => u({ theme: t.id })}
+              style={{ "--t-bg": t.vars["--bg-1"], "--t-surface": t.vars["--surface-2"], "--t-a": t.accent[0], "--t-b": t.accent[1], "--t-amb1": t.ambient[0], "--t-amb2": t.ambient[1], "--t-wm1": t.wordmark[1], "--t-wm2": t.wordmark[2], "--t-font": `"${THEME_FONTS[t.id]}"` }}>
+              <span className="ap-tile-art"><span className="tp-glow" /><span className="tp-glow two" /><SceneArt id={t.id} className="tp-art" /></span>
+              <span className="ap-tile-ui"><i /><i /><i className="dot" /></span>
+              <span className="ap-tile-name">{t.name}</span>
+              {current.id === t.id && <span className="ap-check"><Check size={12} strokeWidth={3} /></span>}
+            </button>
           ))}
         </div>
-      </Row>
-      <Row title="Interface scale" desc="Makes everything larger or smaller.">
-        <Slider value={s.scale} min={85} max={120} step={5} onChange={(v) => u({ scale: v })} format={(v) => v + "%"} />
-      </Row>
-      <Row title="Background ambience" desc="Soft animated glow behind the interface.">
-        <Toggle checked={s.ambience} onChange={(v) => u({ ambience: v })} />
-      </Row>
-      <Row title="Reduce motion" desc="Turns off most animations and transitions.">
-        <Toggle checked={s.reduceMotion} onChange={(v) => u({ reduceMotion: v })} />
-      </Row>
+      </Section>
+
+      <Section title="Background" desc="A picture, GIF or video behind the whole app.">
+        <BackgroundCard s={s} u={u} />
+      </Section>
+
+      <Section title="Color">
+        <div className="settings-group">
+          <Row title="Accent color" desc="Buttons and highlights. The first swatch follows the theme.">
+            <div className="swatches">
+              <button aria-label="Match theme" title="Match theme" className={"swatch theme-sw" + (s.accent === "theme" ? " on" : "")} style={{ background: `conic-gradient(${current.accent[0]}, ${current.accent[1]}, ${current.accent[0]})` }} onClick={() => u({ accent: "theme" })} />
+              {Object.entries(ACCENTS).map(([k, [a, b]]) => (
+                <button key={k} aria-label={k} className={"swatch" + (s.accent === k ? " on" : "")} style={{ background: `linear-gradient(135deg, ${a}, ${b})` }} onClick={() => u({ accent: k })} />
+              ))}
+            </div>
+          </Row>
+        </div>
+      </Section>
+
+      <Section title="Effects">
+        <div className="settings-group">
+          <Row title="Theme artwork" desc="The illustrated scene and frame decorations."><Toggle checked={s.themeArt !== false} onChange={(v) => u({ themeArt: v })} /></Row>
+          <Row title="Pets" desc="Little animals that wander along the bottom of the window."><Toggle checked={s.pets !== false} onChange={(v) => u({ pets: v })} /></Row>
+          <Row title="Background effect" desc={current.particles ? `${EFFECT_NAMES[current.particles]} for ${current.name}.` : "This theme has no background effect."}><Toggle checked={!!s.snow && !!current.particles} onChange={(v) => u({ snow: v })} /></Row>
+          <Row title="Background glow" desc="Soft animated light behind the interface."><Toggle checked={s.ambience} onChange={(v) => u({ ambience: v })} /></Row>
+          <Row title="Reduce motion" desc="Turns off most animations. Also saves CPU."><Toggle checked={s.reduceMotion} onChange={(v) => u({ reduceMotion: v })} /></Row>
+        </div>
+      </Section>
+
+      <Section title="Layout">
+        <div className="settings-group">
+          <Row title="Interface scale" desc="Makes everything larger or smaller.">
+            <div className="ap-scale">
+              {[90, 100, 110, 125].map((v) => <button key={v} className={"chip" + (s.scale === v ? " on" : "")} onClick={() => u({ scale: v })}>{v}%</button>)}
+              <Slider value={s.scale} min={75} max={150} step={5} onChange={(v) => u({ scale: v })} format={(v) => v + "%"} />
+            </div>
+          </Row>
+          <Row title="Window corners" desc="How round the window's corners are.">
+            <Slider value={s.winRadius ?? 16} min={0} max={28} step={2} onChange={(v) => u({ winRadius: v })} format={(v) => (v ? v + "px" : "Square")} />
+          </Row>
+        </div>
+      </Section>
     </div>
-    </>
   );
 }
 

@@ -26,8 +26,10 @@ const APP_SETTINGS = `<?xml version="1.0" encoding="UTF-8"?>\r\n<Settings>\r\n\t
 
 const root = () => path.join(process.env.LOCALAPPDATA || "", "Moony", "Roblox");
 
-async function latest() {
-  const r = await fetch("https://clientsettings.roblox.com/v2/client-version/WindowsPlayer", { signal: AbortSignal.timeout(10000) });
+const GUID = /^version-[0-9a-f]{16}$/i;
+async function latest(channel) {
+  const ch = channel && channel.toLowerCase() !== "production" && /^[a-z0-9_-]{1,40}$/i.test(channel) ? `/channel/${channel}` : "";
+  const r = await fetch(`https://clientsettings.roblox.com/v2/client-version/WindowsPlayer${ch}`, { signal: AbortSignal.timeout(10000) });
   if (!r.ok) throw new Error(`Couldn't check Roblox's version (${r.status})`);
   const j = await r.json();
   return { guid: j.clientVersionUpload, version: j.version };
@@ -91,50 +93,89 @@ function extract(buf, dest, sub) {
   }
 }
 
-let busy = null;
-// Make sure the latest Roblox is installed; returns its folder.
-// onProgress({ phase, done, total, speed }) for the bootstrapper window.
-function ensure(onProgress = () => {}) {
-  if (busy) return busy;
-  busy = (async () => {
-    let want;
-    try { want = await latest(); } catch (e) {
-      const fallback = anyInstalled();
-      if (fallback) return { dir: fallback, updated: false, offline: true };
-      throw e;
-    }
-    const ready = installedDir(want.guid);
-    if (ready) return { dir: ready, updated: false, version: want.version };
-
+// Download and unpack one version into root()/<guid>. Shared by updates and
+// the Versions tab (custom versions).
+const jobs = new Map();
+function install(guid, label, onProgress = () => {}, keep = false) {
+  if (!GUID.test(guid)) return Promise.reject(new Error("That isn't a Roblox version hash (version-xxxxxxxxxxxxxxxx)"));
+  guid = guid.toLowerCase();
+  if (installedDir(guid)) return Promise.resolve(path.join(root(), guid));
+  if (jobs.has(guid)) return jobs.get(guid);
+  const job = (async () => {
     onProgress({ phase: "Checking Roblox's files…" });
-    const pkgs = await manifest(want.guid);
+    const pkgs = await manifest(guid);
     const total = pkgs.reduce((n, p) => n + p.packed, 0);
-    const dest = path.join(root(), want.guid);
+    const dest = path.join(root(), guid);
     fs.rmSync(dest, { recursive: true, force: true });
     fs.mkdirSync(dest, { recursive: true });
     let done = 0, last = Date.now(), lastDone = 0, speed = 0;
     const tick = (n) => {
       done += n;
       const now = Date.now();
-      if (now - last > 400) { speed = ((done - lastDone) / (now - last)) * 1000; last = now; lastDone = done; onProgress({ phase: "Downloading Roblox…", done, total, speed }); }
+      if (now - last > 300) { speed = ((done - lastDone) / (now - last)) * 1000; last = now; lastDone = done; onProgress({ phase: "Downloading Roblox…", done, total, speed }); }
     };
-    // Four packages at a time; unpack each as it arrives.
+    // Six packages at a time; each is unpacked as soon as it arrives.
     const queue = [...pkgs].sort((a, b) => b.packed - a.packed);
-    await Promise.all(Array.from({ length: 4 }, async () => {
+    await Promise.all(Array.from({ length: 6 }, async () => {
       while (queue.length) {
         const p = queue.shift();
-        const buf = await download(want.guid, p, tick);
+        const buf = await download(guid, p, tick);
         extract(buf, dest, DIRS[p.name]);
       }
     }));
     onProgress({ phase: "Finishing install…", done: total, total });
     fs.writeFileSync(path.join(dest, "AppSettings.xml"), APP_SETTINGS);
-    fs.writeFileSync(path.join(dest, ".moony-complete"), want.version || want.guid);
-    // Remove older Moony-managed versions.
-    for (const d of fs.readdirSync(root())) if (d !== want.guid) fs.rmSync(path.join(root(), d), { recursive: true, force: true });
-    return { dir: dest, updated: true, version: want.version };
+    if (keep) fs.writeFileSync(path.join(dest, ".moony-keep"), "1");
+    fs.writeFileSync(path.join(dest, ".moony-complete"), label || guid);
+    return dest;
+  })().finally(() => jobs.delete(guid));
+  jobs.set(guid, job);
+  return job;
+}
+
+// Every Moony-managed version on disk.
+function list() {
+  if (!fs.existsSync(root())) return [];
+  return fs.readdirSync(root()).filter((d) => GUID.test(d)).map((guid) => {
+    const d = path.join(root(), guid), done = path.join(d, ".moony-complete");
+    let version = null, at = 0;
+    try { version = fs.readFileSync(done, "utf8").trim(); at = fs.statSync(done).mtimeMs; } catch { /* incomplete */ }
+    return { guid, version, complete: !!version, keep: fs.existsSync(path.join(d, ".moony-keep")), at, dir: d };
+  }).sort((a, b) => b.at - a.at);
+}
+function remove(guid) {
+  if (!GUID.test(guid)) return false;
+  fs.rmSync(path.join(root(), guid.toLowerCase()), { recursive: true, force: true });
+  return true;
+}
+
+let busy = null;
+// Make sure the latest Roblox is installed; returns its folder.
+// onProgress({ phase, done, total, speed }) for the bootstrapper window.
+// Make sure the Roblox version Moony should launch is installed; returns its
+// folder. opts.pinned = a version hash to always use; opts.channel = Roblox
+// release channel (default production). onProgress feeds the bootstrapper.
+function ensure(onProgress = () => {}, opts = {}) {
+  if (busy) return busy;
+  busy = (async () => {
+    if (opts.pinned && GUID.test(opts.pinned)) {
+      const dir = await install(opts.pinned, opts.pinned, onProgress, true);
+      return { dir, updated: false, version: opts.pinned, guid: opts.pinned.toLowerCase(), pinned: true, channel: opts.channel || "production" };
+    }
+    let want;
+    try { want = await latest(opts.channel); } catch (e) {
+      const fallback = anyInstalled();
+      if (fallback) return { dir: fallback, updated: false, offline: true, version: path.basename(fallback) };
+      throw e;
+    }
+    const ready = installedDir(want.guid);
+    if (ready) return { dir: ready, updated: false, version: want.version, guid: want.guid, channel: opts.channel || "production" };
+    const dir = await install(want.guid, want.version, onProgress, false);
+    // Old automatic versions go; ones you downloaded yourself (Versions tab) stay.
+    for (const v of list()) if (v.guid !== want.guid.toLowerCase() && !v.keep) remove(v.guid);
+    return { dir, updated: true, version: want.version, guid: want.guid, channel: opts.channel || "production" };
   })().finally(() => { busy = null; });
   return busy;
 }
 
-module.exports = { ensure, latest, installedDir, anyInstalled, root };
+module.exports = { ensure, latest, install, list, remove, installedDir, anyInstalled, root, GUID };

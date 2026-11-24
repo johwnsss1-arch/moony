@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { themeById } from "./themes";
 import { api, auth, discordApi, launchGame, notifyApi, playtimeApi, win } from "./bridge";
 
 const read = (key, fallback) => {
@@ -38,6 +39,12 @@ export const DEFAULT_SETTINGS = {
       system: { on: false, x: 94, y: 18 },
       visualizer: { on: true, x: 50, y: 93 },
       watermark: { on: true, x: 93, y: 96 },
+      date: { on: false, x: 94, y: 25 },
+      ping: { on: false, x: 3, y: 25 },
+      battery: { on: false, x: 94, y: 32 },
+      breaks: { on: false, x: 50, y: 6 },
+      crosshair: { on: false, x: 50, y: 50 },
+      text: { on: false, x: 50, y: 97, label: "" },
     },
   },
   christmas: true,
@@ -306,8 +313,9 @@ export function AppProvider({ children }) {
   // Settings the main process uses (auto-close Roblox, the in-game HUD).
   const friendsOnline = friends.data.filter((f) => f.presence?.type > 0).length;
   useEffect(() => {
-    window.orbit?.setPrefs?.({ autoCloseRoblox: s.autoCloseRoblox, hud: { ...s.hud, friendsOnline }, activeAccountId: launchAs?.id ?? null });
-  }, [s.autoCloseRoblox, s.hud, friendsOnline, launchAs?.id]);
+    const accent = s.accent === "theme" || !ACCENTS[s.accent] ? themeById(s.theme).accent[0] : ACCENTS[s.accent][0];
+    window.orbit?.setPrefs?.({ autoCloseRoblox: s.autoCloseRoblox, hud: { ...s.hud, friendsOnline }, activeAccountId: launchAs?.id ?? null, accent });
+  }, [s.autoCloseRoblox, s.hud, friendsOnline, launchAs?.id, s.accent, s.theme]);
 
   // Game update alerts follow the favorites list.
   useEffect(() => {

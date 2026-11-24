@@ -1,7 +1,8 @@
 import { DiscordIcon } from "./DiscordIcon";
+import { api } from "../lib/bridge";
 import { DISCORD_URL } from "../lib/links";
 import { useEffect, useRef, useState } from "react";
-import { MessageSquareHeart, LayoutDashboard, MessageSquare, Newspaper, Shirt, Wand2, ArrowLeft, LibraryBig, ShoppingBag, ChartNoAxesColumn, Server, CheckCircle2, ChevronDown, Compass, Heart, Home, Info, Minus, PanelRight, Play, Search, Settings, Square, Copy, UserPlus, Users, UsersRound, X, AlertCircle } from "lucide-react";
+import { MessageSquareHeart, LayoutDashboard, MessageSquare, Newspaper, Shirt, Wand2, ArrowLeft, LibraryBig, ShoppingBag, ChartNoAxesColumn, Server, CheckCircle2, ChevronDown, Compass, Heart, Home, Info, Minus, PanelRight, Play, Search, Settings, Square, Copy, UserPlus, Users, UsersRound, X, AlertCircle , Layers} from "lucide-react";
 import { useApp } from "../lib/store";
 import { win } from "../lib/bridge";
 import { cleanName } from "../lib/format";
@@ -27,6 +28,7 @@ export const NAV = [
   { id: "avatar", label: "Avatar", icon: Shirt, group: 1, desc: "Change your avatar in 3D" },
   { id: "hud", label: "HUD", icon: LayoutDashboard, group: 2, desc: "The overlay you see on top of Roblox" },
   { id: "tweaks", label: "Tweaks", icon: Wand2, group: 2, desc: "Mods and engine settings (FFlags)" },
+  { id: "versions", label: "Versions", icon: Layers, group: 2, desc: "Pick or download a Roblox version" },
   { id: "accounts", label: "Accounts", icon: UsersRound, group: 2, desc: "Sign in and switch accounts" },
   { id: "settings", label: "Settings", icon: Settings, group: 3, desc: "Theme, launching, notifications, Discord" },
 ];
@@ -125,12 +127,33 @@ export function TitleBar({ onSearch }) {
   );
 }
 
+// Red dot on News when there's a post newer than the last time you looked.
+function useNewsDot(page) {
+  const { settings, updateSettings } = useApp();
+  const [newest, setNewest] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    const check = () => api("news").then((list) => { if (!alive || !Array.isArray(list)) return; setNewest(Math.max(0, ...list.map((n) => Date.parse(n.date) || 0))); }).catch(() => {});
+    check();
+    const t = setInterval(check, 15 * 60e3);
+    return () => { alive = false; clearInterval(t); };
+  }, []);
+  const seen = settings.newsSeenAt;
+  useEffect(() => {
+    if (!newest) return;
+    if (seen == null || page === "news") { if (seen !== newest) updateSettings({ newsSeenAt: newest }); }
+  }, [newest, page, seen, updateSettings]);
+  return newest > 0 && seen != null && newest > seen && page !== "news";
+}
+
 export function Sidebar() {
   const { page, setPage, activeAccount, openProfile, route } = useApp();
+  const newsDot = useNewsDot(page);
   const navBtn = (n) => (
     <button key={n.id} data-page={n.id} className={"nav-btn" + (page === n.id ? " on" : "")} onClick={() => setPage(n.id)} aria-label={n.label}>
       <n.icon size={19} strokeWidth={page === n.id ? 2.2 : 1.8} />
       <span className="nav-label">{n.label}</span>
+      {n.id === "news" && newsDot && <span className="nav-dot" aria-label="New posts" />}
       <span className="tip">{n.label}</span>
     </button>
   );
