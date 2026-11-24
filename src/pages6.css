@@ -394,3 +394,40 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 
 .flag-import { display: flex; gap: 8px; width: 100%; margin-top: 4px; }
 .flag-import .input { flex: 1; }
+
+/* ===================== Midnight = the website look (v2.0.4) =====================
+   Black and grey, white primary buttons, quiet outlines, no glows or gradients. */
+.frame.theme-midnight { background: radial-gradient(70% 50% at 50% -10%, rgba(255,255,255,.05), transparent 70%), #050505; }
+.frame.theme-midnight::after { box-shadow: inset 0 0 0 1px #1f1f1f; }
+.frame.theme-midnight .titlebar { background: rgba(5,5,5,.85); border-bottom: 1px solid #1a1a1a; }
+.frame.theme-midnight .content { background: #080808; }
+.frame.theme-midnight .rpanel { background: #070707; border-color: #1a1a1a; }
+.frame.theme-midnight .theme-scene { filter: grayscale(1) brightness(.55) contrast(1.1); opacity: .55; }
+.frame.theme-midnight .snow { opacity: .45; filter: grayscale(1); }
+.frame.theme-midnight .ambient { display: none; }
+.frame.theme-midnight .page-head h1 { background: none; -webkit-text-fill-color: currentColor; color: #fff; letter-spacing: -.035em; }
+.frame.theme-midnight .settings-group, .frame.theme-midnight .card, .frame.theme-midnight .wide, .frame.theme-midnight .item-card,
+.frame.theme-midnight .preset-lib, .frame.theme-midnight .ver-row, .frame.theme-midnight .ver-mode, .frame.theme-midnight .fflag-card {
+  background: #0e0e0e; border: 1px solid #1f1f1f; box-shadow: none; }
+.frame.theme-midnight .btn { border-radius: 10px; box-shadow: none !important; filter: none !important; font-weight: 600; }
+.frame.theme-midnight .btn.primary { background: #fff !important; color: #000 !important; border: 1px solid #fff; }
+.frame.theme-midnight .btn.primary:hover:not(:disabled) { background: #e5e5e5 !important; }
+.frame.theme-midnight .btn.primary svg { color: #000; }
+.frame.theme-midnight .btn.secondary, .frame.theme-midnight .btn.ghost { background: transparent; border: 1px solid #2a2a2a; color: #e5e5e5; }
+.frame.theme-midnight .btn.secondary:hover, .frame.theme-midnight .btn.ghost:hover { background: #151515; border-color: #3a3a3a; }
+.frame.theme-midnight .chip { background: transparent; border: 1px solid #262626; color: #a3a3a3; }
+.frame.theme-midnight .chip.on, .frame.theme-midnight .segmented button.on { background: #fff; color: #000; box-shadow: none; border-color: #fff; }
+.frame.theme-midnight .segmented { background: #0e0e0e; border: 1px solid #1f1f1f; }
+.frame.theme-midnight .toggle { background: #262626; border: 0; }
+.frame.theme-midnight .toggle.on { background: #fff; }
+.frame.theme-midnight .toggle.on .knob { background: #000; }
+.frame.theme-midnight .input, .frame.theme-midnight .search-field, .frame.theme-midnight .tb-search { background: #0e0e0e; border-color: #222; }
+.frame.theme-midnight .input:focus, .frame.theme-midnight .search-field:focus-within { border-color: #555; box-shadow: 0 0 0 3px rgba(255,255,255,.06); }
+.frame.theme-midnight .sidebar .nav-btn { color: #8a8a8a; }
+.frame.theme-midnight .sidebar .nav-btn:hover:not(.on) { background: #141414; color: #e5e5e5; }
+.frame.theme-midnight .sidebar .nav-btn.on { background: #1a1a1a !important; color: #fff; box-shadow: inset 0 0 0 1px #2e2e2e !important; }
+.frame.theme-midnight .sidebar .nav-btn.on::after { background: #fff; }
+.frame.theme-midnight .tag, .frame.theme-midnight .label { background: #161616; color: #bdbdbd; border-color: #262626; }
+.frame.theme-midnight .tile-art, .frame.theme-midnight .item-img { box-shadow: none; }
+.frame.theme-midnight .item-tag.why.fy { background: #fff; color: #000; }
+.frame.theme-midnight ::-webkit-scrollbar-thumb:hover, .frame.theme-midnight ::-webkit-scrollbar-thumb:active { background: #8a8a8a; background-clip: padding-box; }

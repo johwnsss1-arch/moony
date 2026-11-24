@@ -13,9 +13,11 @@ const dark = (o = {}) => ({
 
 export const THEMES = [
   {
-    id: "midnight", name: "Midnight", desc: "Moony's classic deep-night look",
-    accent: ["#8b7dff", "#6d5ef5"], vars: dark(), ambient: ["#8b7dff", "#6d5ef5", "#3fd0ff"], particles: "stars", logo: null,
-    wordmark: ["#fff6d8", "#ffffff", "#c9c3ff"],
+    id: "midnight", name: "Midnight", desc: "Moony's clean black look, like the website",
+    accent: ["#f5f5f5", "#d4d4d4"],
+    vars: dark({ "--bg-0": "#050505", "--bg-1": "#0a0a0a", "--surface": "#111111", "--surface-2": "#171717", "--surface-3": "#202020", "--text": "#f5f5f5", "--text-2": "#a3a3a3", "--text-3": "#6b6b6b", "--line": "#1f1f1f", "--line-2": "#2a2a2a" }),
+    ambient: ["#ffffff", "#9a9a9a", "#555555"], particles: "stars", logo: null,
+    wordmark: ["#ffffff", "#ffffff", "#d4d4d4"],
   },
   {
     id: "christmas", name: "Christmas", desc: "Snow, string lights and a Santa hat",
