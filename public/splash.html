@@ -17,13 +17,34 @@ html,body{margin:0;height:100%;background:transparent;overflow:hidden;font-famil
 .foot{margin-top:7px;font-size:11px;color:rgba(255,255,255,.45);height:14px}
 .cancel{margin:auto 0 16px;padding:8px 34px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:#fff;font:500 13.5px inherit;font-family:inherit;cursor:pointer;-webkit-app-region:no-drag}
 .cancel:hover{background:rgba(255,255,255,.16)}
+/* Custom looks (Settings → Appearance → Loading screen) */
+.art{position:absolute;inset:-20px;background-size:cover;background-position:center;filter:blur(18px) saturate(1.3);opacity:0;transition:opacity .6s;z-index:0}
+.art.on{opacity:.45}
+.card>*:not(.art):not(canvas){position:relative;z-index:2}
+#fx{position:absolute;inset:0;z-index:1;pointer-events:none}
+.tag{margin-top:6px;font-size:12px;color:rgba(255,255,255,.55);height:14px;max-width:86%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-minimal .card{background:#0b0b0d;border-color:#222;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+.s-minimal .icon{transform:none;animation:none;background:#151518;box-shadow:none;width:64px;height:64px}
+.s-minimal .bar{height:3px}.s-minimal .fill{background:var(--accent)}
+.s-neon .card{background:#05040a;border:1px solid var(--accent);box-shadow:0 0 24px color-mix(in srgb,var(--accent) 60%,transparent),inset 0 0 30px color-mix(in srgb,var(--accent) 25%,transparent);animation:neon 2.4s ease-in-out infinite}
+.s-neon .step{text-shadow:0 0 12px var(--accent)}
+.s-neon .fill{box-shadow:0 0 12px var(--accent);background:var(--accent)}
+.s-glass .card{background:rgba(20,20,28,.35);backdrop-filter:blur(6px)}
+.s-glass .art.on{opacity:.8;filter:blur(8px) saturate(1.2)}
+.s-retro .card{font-family:Consolas,"Courier New",monospace;background:#0a0a12;border-radius:6px;border:2px solid var(--accent)}
+.s-retro .card::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0 2px,transparent 2px 4px)}
+.s-retro .icon{border-radius:4px;animation:none;transform:none}
+.s-retro .bar,.s-retro .fill{border-radius:0}
+.s-retro .step{text-transform:uppercase;letter-spacing:.06em;font-size:17px}
+@keyframes neon{50%{box-shadow:0 0 36px color-mix(in srgb,var(--accent) 80%,transparent),inset 0 0 40px color-mix(in srgb,var(--accent) 35%,transparent)}}
 @keyframes bob{50%{transform:rotate(-8deg) translateY(-5px)}}
 @keyframes indet{0%{transform:translateX(-110%)}100%{transform:translateX(380%)}}
-</style></head><body><div class="card">
+</style></head><body><div class="card"><div class="art" id="art"></div><canvas id="fx"></canvas>
 <div class="top"><span id="chan">Moony</span><span id="ver"></span></div>
 <div class="icon" id="icon"><img id="logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAzMiAzMic+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSdnJyB4MT0nNScgeTE9JzQnIHgyPScyNCcgeTI9JzI4JyBncmFkaWVudFVuaXRzPSd1c2VyU3BhY2VPblVzZSc+PHN0b3Agc3RvcC1jb2xvcj0nI2ZmZjZkOCcvPjxzdG9wIG9mZnNldD0nLjU1JyBzdG9wLWNvbG9yPScjYzljM2ZmJy8+PHN0b3Agb2Zmc2V0PScxJyBzdG9wLWNvbG9yPScjOGI3ZGZmJy8+PC9saW5lYXJHcmFkaWVudD48bWFzayBpZD0nbSc+PHJlY3Qgd2lkdGg9JzMyJyBoZWlnaHQ9JzMyJyBmaWxsPScjZmZmJy8+PGNpcmNsZSBjeD0nMjEnIGN5PScxMS41JyByPScxMCcgZmlsbD0nIzAwMCcvPjwvbWFzaz48L2RlZnM+PGNpcmNsZSBjeD0nMTUnIGN5PScxNycgcj0nMTInIGZpbGw9J3VybCgjZyknIG1hc2s9J3VybCgjbSknLz48cGF0aCBkPSdNMjUuNSAzLjVsLjkgMi4xIDIuMS45LTIuMS45LS45IDIuMS0uOS0yLjEtMi4xLS45IDIuMS0uOXonIGZpbGw9JyNmZmY2ZDgnLz48L3N2Zz4="></div>
 <div class="title" id="title"></div>
 <div class="step" id="step">Starting…</div>
+<div class="tag" id="tag"></div>
 <div class="bar"><div class="fill" id="fill"></div></div>
 <div class="foot" id="foot"></div>
 <button class="cancel" id="cancel">Cancel</button>
@@ -37,10 +58,20 @@ window.setState = (s) => {
   if (s.version != null) $("ver").textContent = s.version ? "Version: " + s.version : "";
   const f = $("fill");
   if (s.progress == null) f.className = "fill indet"; else { f.className = "fill"; f.style.width = Math.max(4, Math.min(100, s.progress)) + "%"; }
-  if (s.image) { $("logo").src = s.image; $("icon").classList.add("game"); }
+  if (s.image) { $("logo").src = s.image; $("icon").classList.add("game"); if (q.get("art") !== "0") { $("art").style.backgroundImage = "url('" + String(s.image).replace(/'/g, "%27") + "')"; $("art").classList.add("on"); } }
 };
 
 const q = new URLSearchParams(location.search);
+document.documentElement.className = "s-" + (/^(classic|minimal|neon|glass|retro)$/.test(q.get("style") || "") ? q.get("style") : "classic");
+document.getElementById("tag").textContent = (q.get("tag") || "").slice(0, 60);
+// Twinkling stars behind the card content.
+if (q.get("fx") === "stars") {
+  const cv = document.getElementById("fx"), g = cv.getContext("2d");
+  const fit = () => { cv.width = cv.offsetWidth; cv.height = cv.offsetHeight; };
+  fit();
+  const st = Array.from({ length: 70 }, () => [Math.random(), Math.random(), Math.random() * 6.28, 0.4 + Math.random()]);
+  (function f(t) { g.clearRect(0, 0, cv.width, cv.height); for (const [x, y, p, r] of st) { g.fillStyle = "rgba(255,255,255," + (0.25 + 0.6 * Math.abs(Math.sin(t / 900 + p))) + ")"; g.fillRect(x * cv.width, y * cv.height, r, r); } requestAnimationFrame(f); })(0);
+}
 if (/^#[0-9a-f]{6}$/i.test(q.get("accent") || "")) document.documentElement.style.setProperty("--accent", q.get("accent"));
 document.getElementById("cancel").onclick = () => window.__TAURI_INTERNALS__?.invoke("ipc", { channel: "splash:cancel", args: [] });
 document.querySelector(".card").setAttribute("data-tauri-drag-region", "");

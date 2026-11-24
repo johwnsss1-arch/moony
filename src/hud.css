@@ -67,3 +67,6 @@ html:has(#hud), html:has(#hud) body, #hud { margin: 0; height: 100%; background:
 .t-sunset .hw { background: linear-gradient(135deg, rgba(60,16,40,.8), rgba(80,30,16,.8)); border: 1px solid rgba(255,143,90,.5); border-radius: 14px; }
 .t-sunset .hw small { color: #ffb38a; }
 .t-mono .hw { background: rgba(255,255,255,.9); border-color: #000; color: #000; border-radius: 6px; } .t-mono .hw b { color: #000; } .t-mono .hw small { color: #555; }
+
+/* Crosshair at the centre of the Roblox window */
+.hud-crosshair { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; line-height: 0; }

@@ -20,6 +20,34 @@ const SORT_OPTIONS = [
 const GENRES = ["Action", "Adventure", "Entertainment", "Obby & Platformer", "Party & Casual", "Puzzle", "RPG", "Roleplay & Avatar Sim", "Shooter", "Shopping", "Simulation", "Social", "Sports & Racing", "Strategy", "Survival", "Education"];
 const PAGE = 60;
 
+// Smart discovery: picks based on what you actually play.
+// "Because you played": well-rated games in your most-played game's genre.
+// "Hidden gems": highly rated games that aren't crowded yet.
+function ForYou({ allGames }) {
+  const { playtime } = useApp();
+  const played = useMemo(() => new Set(Object.keys(playtime.games || {}).map(Number)), [playtime.games]);
+  const topU = useMemo(() => Object.entries(playtime.games || {}).sort((a, b) => b[1].seconds - a[1].seconds)[0]?.[0], [playtime.games]);
+  const top = useAsync(() => (topU ? api("gameDetails", Number(topU)) : null), [topU]);
+  const genre = top.data?.genre && GENRES.includes(top.data.genre) ? top.data.genre : null;
+  const similar = useAsync(() => (genre ? api("genreGames", genre) : null), [genre]);
+  const score = (g) => (g.rating ?? 70) * Math.log10((g.playing || 0) + 10);
+  const because = useMemo(() => (similar.data || []).filter((g) => !played.has(Number(g.universeId)) && (g.rating ?? 0) >= 75).sort((a, b) => score(b) - score(a)).slice(0, 12), [similar.data, played]);
+  const gems = useMemo(() => allGames.filter((g) => !played.has(Number(g.universeId)) && (g.rating ?? 0) >= 88 && g.playing >= 150 && g.playing <= 8000).sort((a, b) => b.rating - a.rating).slice(0, 12), [allGames, played]);
+  if (!because.length && !gems.length) return null;
+  return (
+    <div className="for-you">
+      {because.length > 0 && <>
+        <div className="results-head"><span>Because you played <b>{top.data?.name}</b></span><small>{genre}</small></div>
+        <Scroller className="for-you-row">{because.map((g) => <div className="for-you-item" key={g.universeId}><GameWide game={g} /></div>)}</Scroller>
+      </>}
+      {gems.length > 0 && <>
+        <div className="results-head"><span>Hidden gems</span><small>Loved by players, not crowded yet</small></div>
+        <Scroller className="for-you-row">{gems.map((g) => <div className="for-you-item" key={g.universeId}><GameWide game={g} /></div>)}</Scroller>
+      </>}
+    </div>
+  );
+}
+
 export default function Discover({ focusKey }) {
   const { sorts, loadSorts } = useApp();
   const [query, setQuery] = useState("");
@@ -77,6 +105,8 @@ export default function Discover({ focusKey }) {
           <button key={g} className={"chip" + (genre === g ? " on" : "")} onClick={() => setGenre(g)}>{g}</button>
         ))}
       </Scroller>
+
+      {!searching && genre === "All" && sortId === "all" && <ForYou allGames={allGames} />}
 
       <div className="results-head">
         {title}

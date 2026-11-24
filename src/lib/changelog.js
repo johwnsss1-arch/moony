@@ -2,6 +2,20 @@
 // Add an entry here for every release.
 export const CHANGELOG = [
   {
+    version: "3.0.0",
+    title: "Moony 3.0: play together, play faster",
+    items: [
+      "Party: follow a friend and Moony puts you in every server they join.",
+      "Performance: Boost mode (high priority and power plan while you play), plus ping, CPU and RAM graphs for each session.",
+      "Wrapped: your month or year in Roblox as a card you can save and post.",
+      "Discover: Because you played… and Hidden gems, picked from what you actually play.",
+      "Servers: Fast join (lowest ping), Server hop and auto-rejoin when you disconnect.",
+      "HUD: an in-game crosshair with 7 styles, colours, size and gap.",
+      "Appearance: live animated backgrounds, 8 app fonts, and a customizable loading screen.",
+      "Discord: a Join my server button on your status while you play.",
+    ],
+  },
+  {
     version: "2.0.0",
     title: "The new, lighter Moony",
     items: [

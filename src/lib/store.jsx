@@ -27,6 +27,12 @@ export const DEFAULT_SETTINGS = {
   defaultAccount: null,
   confirmLaunch: false,
   autoCloseRoblox: true,
+  autoRejoin: false,
+  boost: false,
+  liveBg: "off",
+  loading: { style: "classic", tagline: "", gameArt: true, fx: "stars" },
+  uiFont: "inter",
+  discordJoinButton: true,
   // In-game overlay: each widget has on/off and a position (percent of the Roblox window).
   hud: {
     enabled: true, opacity: 0.92, scale: 1,
@@ -169,9 +175,9 @@ export function AppProvider({ children }) {
   const [discordState, setDiscordState] = useState("off");
   useEffect(() => {
     if (!discordApi) return;
-    discordApi.configure({ enabled: s.discordEnabled, clientId: s.discordClientId, showGame: s.discordShowGame })
+    discordApi.configure({ enabled: s.discordEnabled, clientId: s.discordClientId, showGame: s.discordShowGame, joinButton: s.discordJoinButton !== false })
       .then(setDiscordState).catch(() => setDiscordState("unavailable"));
-  }, [s.discordEnabled, s.discordClientId, s.discordShowGame]);
+  }, [s.discordEnabled, s.discordClientId, s.discordShowGame, s.discordJoinButton]);
   useEffect(() => {
     if (!discordApi || !s.discordEnabled) return;
     const t = setInterval(() => discordApi.status().then(setDiscordState).catch(() => {}), 5000);
@@ -297,13 +303,47 @@ export function AppProvider({ children }) {
     return l.onRequest(go);
   }, [signIn]);
 
+  // Party mode: follow a leader into every server they join.
+  const [party, setParty] = useState(null); // { leader, since, state, lastJob }
+  const partyRef = useRef(null); partyRef.current = party;
+  const nowRef = useRef(null); nowRef.current = nowPlaying;
+  useEffect(() => {
+    if (!party?.leader || !launchAs || !auth?.presence) return;
+    let stop = false;
+    const tick = async () => {
+      try {
+        const p = (await auth.presence(launchAs.id, [party.leader.id]))[party.leader.id];
+        if (stop || !p) return;
+        const cur = partyRef.current;
+        const st = p.type === 2 ? (p.gameId ? "playing" : "hidden") : p.type === 1 ? "online" : "offline";
+        if (p.type === 2 && p.gameId && p.placeId && p.gameId !== cur.lastJob && nowRef.current?.jobId !== p.gameId) {
+          setParty({ ...cur, state: "joining", where: p.lastLocation, lastJob: p.gameId });
+          toast(`Following ${cur.leader.displayName} into ${p.lastLocation || "their game"}`, "success");
+          play({ placeId: p.placeId, universeId: p.universeId, name: p.lastLocation || "Party game" }, { jobId: p.gameId });
+        } else if (cur.state !== st || cur.where !== p.lastLocation) setParty({ ...cur, state: st, where: p.lastLocation });
+      } catch { /* try again next tick */ }
+    };
+    tick();
+    const t = setInterval(tick, 8000);
+    return () => { stop = true; clearInterval(t); };
+  }, [party?.leader?.id, launchAs, play, toast]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Disconnected from a game: offer to rejoin the same server.
   const [rejoinOffer, setRejoinOffer] = useState(null);
+  const rejoinTries = useRef({ job: null, n: 0, at: 0 });
+  const autoRejoinRef = useRef(false);
+  autoRejoinRef.current = !!s.autoRejoin;
   useEffect(() => {
     const g = window.orbit?.game;
     if (!g) return;
     const offs = [
-      g.onDisconnected((info) => setRejoinOffer(info)),
+      g.onDisconnected((info) => {
+        // Auto-rejoin: at most 3 tries for the same server in 5 minutes.
+        const now = Date.now(), r = rejoinTries.current;
+        if (r.job !== info.jobId || now - r.at > 300000) { r.job = info.jobId; r.n = 0; r.at = now; }
+        if (autoRejoinRef.current && r.n < 3) { r.n++; setTimeout(() => play({ placeId: info.placeId, universeId: info.universeId, name: info.name, icon: info.icon }, { jobId: info.jobId }), 3000); }
+        else setRejoinOffer(info);
+      }),
       g.onRejoin((info) => { setRejoinOffer(null); play({ placeId: info.placeId, universeId: info.universeId, name: info.name, icon: info.icon }, { jobId: info.jobId }); }),
       g.onOpen((game) => openGame(game)),
     ];
@@ -314,8 +354,8 @@ export function AppProvider({ children }) {
   const friendsOnline = friends.data.filter((f) => f.presence?.type > 0).length;
   useEffect(() => {
     const accent = s.accent === "theme" || !ACCENTS[s.accent] ? themeById(s.theme).accent[0] : ACCENTS[s.accent][0];
-    window.orbit?.setPrefs?.({ autoCloseRoblox: s.autoCloseRoblox, hud: { ...s.hud, friendsOnline, theme: s.theme, accent }, activeAccountId: launchAs?.id ?? null, accent });
-  }, [s.autoCloseRoblox, s.hud, friendsOnline, launchAs?.id, s.accent, s.theme]);
+    window.orbit?.setPrefs?.({ loading: s.loading, boost: !!s.boost, autoCloseRoblox: s.autoCloseRoblox, hud: { ...s.hud, friendsOnline, theme: s.theme, accent }, activeAccountId: launchAs?.id ?? null, accent });
+  }, [s.loading, s.boost, s.autoCloseRoblox, s.hud, friendsOnline, launchAs?.id, s.accent, s.theme]);
 
   // Game update alerts follow the favorites list.
   useEffect(() => {
@@ -323,7 +363,7 @@ export function AppProvider({ children }) {
   }, [favorites, s.alertsUpdates]);
 
   const value = useMemo(() => ({
-    rejoinOffer, setRejoinOffer,
+    rejoinOffer, setRejoinOffer, party, setParty,
     settings: s, updateSettings, page, setPage, route, back, canGoBack, gameOpen, openGame, openProfile, closeGame: () => {},
     robux, refreshRobux, privateServers, setPrivateServers,
     accounts, setAccounts, activeAccount, setActiveId,
@@ -331,7 +371,7 @@ export function AppProvider({ children }) {
     recent, setRecent, tracked, setTracked,
     sorts, loadSorts, play, joinFriend, toast, toasts,
     isSignedIn, signIn, signOut, launchAs, friends, loadFriends, playtime, nowPlaying, discordState,
-  }), [rejoinOffer, route, back, canGoBack, openGame, openProfile, robux, refreshRobux, privateServers, setPrivateServers, playtime, nowPlaying, discordState, friends, loadFriends, s, updateSettings, page, gameOpen, accounts, setAccounts, activeAccount, setActiveId, favorites, setFavorites, isFavorite, toggleFavorite, recent, setRecent, tracked, setTracked, sorts, loadSorts, play, joinFriend, toast, toasts, isSignedIn, signIn, signOut, launchAs]);
+  }), [party, rejoinOffer, route, back, canGoBack, openGame, openProfile, robux, refreshRobux, privateServers, setPrivateServers, playtime, nowPlaying, discordState, friends, loadFriends, s, updateSettings, page, gameOpen, accounts, setAccounts, activeAccount, setActiveId, favorites, setFavorites, isFavorite, toggleFavorite, recent, setRecent, tracked, setTracked, sorts, loadSorts, play, joinFriend, toast, toasts, isSignedIn, signIn, signOut, launchAs]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -32,7 +32,12 @@ const AvatarPage = lazy(() => import("./pages/AvatarPage"));
 const Tweaks = lazy(() => import("./pages/Tweaks"));
 const Versions = lazy(() => import("./pages/Versions"));
 const Chat = lazy(() => import("./pages/Chat"));
+import { LiveBg } from "./components/LiveBg";
+import { applyUiFont } from "./lib/fonts";
 const Hud = lazy(() => import("./pages/Hud"));
+const Performance = lazy(() => import("./pages/Performance"));
+const Party = lazy(() => import("./pages/Party"));
+const Wrapped = lazy(() => import("./pages/Wrapped"));
 const PageLoading = () => <div className="page"><Skeleton w={180} h={26} /><Skeleton w="45%" h={12} style={{ marginTop: 12 }} /></div>;
 
 export default function App() {
@@ -133,14 +138,17 @@ function Frame() {
   }, [settings.reduceMotion]);
   const style = { "--win-r": `${settings.winRadius ?? 16}px`, ...theme.vars, "--accent": a, "--accent-2": b, "--amb-1": theme.ambient[0], "--amb-2": theme.ambient[1], "--amb-3": theme.ambient[2], "--wm-1": theme.wordmark[0], "--wm-2": theme.wordmark[1], "--wm-3": theme.wordmark[2] };
   const festive = !!theme.festive;
-  const cls = ["frame", isDesktop && "desktop", max && "maximized", settings.reduceMotion && "reduce-motion", settings.ambience && "ambience", showPanel && "with-panel", festive && "festive", (settings.themeArt !== false || bgUrl) && "has-art", bgUrl && "has-bg", settings.reduceMotion && "no-anim", idle && "idle", `theme-${theme.id}`].filter(Boolean).join(" ");
+  const live = !!settings.liveBg && settings.liveBg !== "off";
+  useEffect(() => { applyUiFont(settings.uiFont); }, [settings.uiFont]);
+  const cls = ["frame", live && !bgUrl && "has-bg", isDesktop && "desktop", max && "maximized", settings.reduceMotion && "reduce-motion", settings.ambience && "ambience", showPanel && "with-panel", festive && "festive", (settings.themeArt !== false || bgUrl) && "has-art", bgUrl && "has-bg", settings.reduceMotion && "no-anim", idle && "idle", `theme-${theme.id}`].filter(Boolean).join(" ");
   const key = page + JSON.stringify(route.param?.id ?? route.param?.universeId ?? "");
 
   return (
     <div className={cls} style={style}>
       <div className="ambient" aria-hidden><span /><span /><span /></div>
       {bgUrl && <div className={"custom-bg fit-" + (settings.bgFit || "cover")} aria-hidden style={{ "--bg-dim": (settings.bgDim ?? 55) / 100, "--bg-blur": `${settings.bgBlur ?? 0}px` }}>{bgKind === "video" ? <video src={bgUrl} autoPlay loop muted playsInline /> : <img src={bgUrl} alt="" />}</div>}
-      {settings.themeArt !== false && !bgUrl && <SceneArt id={theme.id} />}
+      {!bgUrl && live && <LiveBg kind={settings.liveBg} accent={a} paused={idle || settings.reduceMotion} />}
+      {settings.themeArt !== false && !bgUrl && !live && <SceneArt id={theme.id} />}
       {settings.themeArt !== false && <FrameDeco id={theme.id} />}
       {festive && <Lights />}
       <TitleBar onSearch={openSearch} />
@@ -159,6 +167,9 @@ function Frame() {
         {page === "versions" && <Versions />}
         {page === "chat" && <Chat />}
         {page === "hud" && <Hud />}
+        {page === "performance" && <Performance />}
+        {page === "party" && <Party />}
+        {page === "wrapped" && <Wrapped />}
         {page === "library" && <Library />}
         {page === "favorites" && <Favorites />}
         {page === "friends" && <Friends />}

@@ -7,6 +7,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod auth;
+mod boost;
 mod discord;
 mod flags;
 mod fsx;
@@ -53,6 +54,8 @@ async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result
         "hud:status" => Ok(hud::status()),
         "hud:push" => { hud::push(&app, a(0)); Ok(json!(true)) }
         "sys:usage" => Ok(hud::usage()),
+        "boost:on" => Ok(tokio::task::spawn_blocking(boost::on).await.unwrap_or(Value::Null)),
+        "boost:off" => Ok(tokio::task::spawn_blocking(boost::off).await.unwrap_or(Value::Null)),
         "net:ping" => Ok(json!(hud::ping().await)),
         "update:get" => Ok(updater::get(&app)),
         "update:check" => Ok(updater::check(&app).await),
@@ -154,7 +157,7 @@ async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result
         }
         "discord:status" => Ok(json!(discord::status())),
         "discord:set" => { let v = a(0); let _ = tokio::task::spawn_blocking(move || discord::set(&v)).await; Ok(json!(true)) }
-        "splash:open" => splash::open(&app, a(0).as_str().unwrap_or("#8b7dff")).map(|_| json!(true)),
+        "splash:open" => splash::open(&app, a(0).as_str().unwrap_or("#8b7dff"), a(1).as_str().unwrap_or("")).map(|_| json!(true)),
         "splash:set" => { splash::set(&app, &a(0)); Ok(json!(true)) }
         "splash:close" => { splash::close(&app, a(0).as_u64().unwrap_or(0)); Ok(json!(true)) }
         "splash:cancel" => { splash::cancel(&app); Ok(json!(true)) }
@@ -267,6 +270,7 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![ipc])
-        .run(tauri::generate_context!())
-        .expect("Moony failed to start");
+        .build(tauri::generate_context!())
+        .expect("Moony failed to start")
+        .run(|_, e| if let tauri::RunEvent::Exit = e { boost::off(); });
 }

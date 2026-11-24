@@ -7,11 +7,13 @@ use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 
 pub static CANCELLED: AtomicBool = AtomicBool::new(false);
 
-pub fn open(app: &tauri::AppHandle, accent: &str) -> Result<(), String> {
+pub fn open(app: &tauri::AppHandle, accent: &str, opts: &str) -> Result<(), String> {
+    // Extra look options from the page, already URL-encoded; anything else is dropped.
+    let opts: String = opts.chars().filter(|c| c.is_ascii_alphanumeric() || "-_.~%=&".contains(*c)).take(600).collect();
     CANCELLED.store(false, Ordering::SeqCst);
     if let Some(w) = app.get_webview_window("splash") { let _ = w.close(); }
     let accent = if accent.len() == 7 && accent.starts_with('#') && accent[1..].chars().all(|c| c.is_ascii_hexdigit()) { accent.to_string() } else { "#8b7dff".into() };
-    WebviewWindowBuilder::new(app, "splash", WebviewUrl::App(format!("splash.html?accent={}", accent.replace('#', "%23")).into()))
+    WebviewWindowBuilder::new(app, "splash", WebviewUrl::App(format!("splash.html?accent={}&{}", accent.replace('#', "%23"), opts).into()))
         .title("Moony")
         .inner_size(440.0, 330.0)
         .resizable(false)

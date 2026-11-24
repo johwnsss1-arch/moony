@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { LayoutDashboard, Magnet, RotateCcw } from "lucide-react";
 import { DEFAULT_SETTINGS, useApp } from "../lib/store";
 import { HudWidget, WIDGETS } from "../components/HudWidgets";
+import { CROSSHAIRS, CROSSHAIR_DEFAULT, Crosshair } from "../components/Crosshair";
 import { Empty, Slider, Toggle } from "../components/ui";
 import "../hud.css";
 
@@ -105,6 +106,8 @@ export default function Hud() {
     system: { cpu: 23, ram: 61 },
   };
   const selW = hud.widgets[sel];
+  const xh = { ...CROSSHAIR_DEFAULT, ...hud.crosshair };
+  const setXh = (p) => save({ crosshair: { ...xh, ...p } });
 
   return (
     <div className="page hud-page">
@@ -131,6 +134,7 @@ export default function Hud() {
                     <HudWidget id={id} state={state} demo />
                   </div>
                 ); })}
+                {xh.on && <div className="hud-crosshair"><Crosshair c={xh} /></div>}
               </div>
             </div>
             </div>
@@ -169,6 +173,18 @@ export default function Hud() {
           <div className="settings-group">
             <div className="setting"><div><b>Size</b></div><Slider value={Math.round(hud.scale * 100)} min={70} max={150} step={5} onChange={(v) => save({ scale: v / 100 })} format={(v) => v + "%"} /></div>
             <div className="setting"><div><b>Opacity</b></div><Slider value={Math.round(hud.opacity * 100)} min={30} max={100} step={5} onChange={(v) => save({ opacity: v / 100 })} format={(v) => v + "%"} /></div>
+          </div>
+          <div className="settings-group xh-editor">
+            <div className="setting"><div><b>Crosshair</b><small>Drawn at the centre of Roblox. Works even with the HUD off.</small></div><Toggle checked={xh.on} onChange={(v) => setXh({ on: v })} label="Crosshair" /></div>
+            {xh.on && <>
+              <div className="xh-styles">{CROSSHAIRS.map((c) => <button key={c.id} className={"xh-style" + (xh.style === c.id ? " sel" : "")} title={c.label} onClick={() => setXh({ style: c.id })}><Crosshair c={{ ...xh, style: c.id, size: 20, opacity: 1 }} /></button>)}</div>
+              <div className="setting"><div><b>Colour</b></div><div className="row-gap">{["#00ff88", "#ffffff", "#ff3b4e", "#3ff0ff", "#ffe14d", "#ff5ad8"].map((col) => <button key={col} className={"xh-col" + (xh.color === col ? " sel" : "")} style={{ background: col }} onClick={() => setXh({ color: col })} aria-label={col} />)}<input type="color" value={xh.color} onChange={(e) => setXh({ color: e.target.value })} /></div></div>
+              <div className="setting"><div><b>Size</b></div><Slider value={xh.size} min={6} max={60} step={1} onChange={(v) => setXh({ size: v })} format={(v) => v + "px"} /></div>
+              <div className="setting"><div><b>Thickness</b></div><Slider value={xh.thickness} min={1} max={6} step={0.5} onChange={(v) => setXh({ thickness: v })} format={(v) => v + "px"} /></div>
+              <div className="setting"><div><b>Gap</b></div><Slider value={xh.gap} min={0} max={20} step={1} onChange={(v) => setXh({ gap: v })} format={(v) => v + "px"} /></div>
+              <div className="setting"><div><b>Outline</b></div><Toggle checked={xh.outline} onChange={(v) => setXh({ outline: v })} label="Outline" /></div>
+              <div className="setting"><div><b>Centre dot</b></div><Toggle checked={xh.dot} onChange={(v) => setXh({ dot: v })} label="Centre dot" /></div>
+            </>}
           </div>
           <button className="btn ghost sm" style={{ alignSelf: "flex-start" }} onClick={() => updateSettings({ hud: DEFAULT_SETTINGS.hud })}><RotateCcw size={13} /> Reset layout</button>
         </div>

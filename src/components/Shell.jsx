@@ -2,7 +2,7 @@ import { DiscordIcon } from "./DiscordIcon";
 import { api } from "../lib/bridge";
 import { DISCORD_URL } from "../lib/links";
 import { useEffect, useRef, useState } from "react";
-import { MessageSquareHeart, LayoutDashboard, MessageSquare, Newspaper, Shirt, Wand2, ArrowLeft, LibraryBig, ShoppingBag, ChartNoAxesColumn, Server, CheckCircle2, ChevronDown, Compass, Heart, Home, Info, Minus, PanelRight, Play, Search, Settings, Square, Copy, UserPlus, Users, UsersRound, X, AlertCircle , Layers} from "lucide-react";
+import { MessageSquareHeart, LayoutDashboard, MessageSquare, Newspaper, Shirt, Wand2, ArrowLeft, LibraryBig, ShoppingBag, ChartNoAxesColumn, Server, CheckCircle2, ChevronDown, Compass, Heart, Home, Info, Minus, PanelRight, Play, Search, Settings, Square, Copy, UserPlus, Users, UsersRound, X, AlertCircle , Layers, Gauge, PartyPopper, Sparkles} from "lucide-react";
 import { useApp } from "../lib/store";
 import { win } from "../lib/bridge";
 import { cleanName } from "../lib/format";
@@ -26,7 +26,10 @@ export const NAV = [
   { id: "friends", label: "Friends", icon: Users, group: 1, desc: "Who's online and what they're playing" },
   { id: "chat", label: "Chat", icon: MessageSquare, group: 1, desc: "Message your Roblox friends" },
   { id: "avatar", label: "Avatar", icon: Shirt, group: 1, desc: "Change your avatar in 3D" },
+  { id: "party", label: "Party", icon: PartyPopper, group: 1, desc: "Follow a friend into every server they join" },
+  { id: "wrapped", label: "Wrapped", icon: Sparkles, group: 1, desc: "Your Roblox month and year, as a card to share" },
   { id: "hud", label: "HUD", icon: LayoutDashboard, group: 2, desc: "The overlay you see on top of Roblox" },
+  { id: "performance", label: "Performance", icon: Gauge, group: 2, desc: "Boost mode, ping, CPU and RAM per session" },
   { id: "tweaks", label: "Tweaks", icon: Wand2, group: 2, desc: "Mods and engine settings (FFlags)" },
   { id: "versions", label: "Versions", icon: Layers, group: 2, desc: "Pick or download a Roblox version" },
   { id: "accounts", label: "Accounts", icon: UsersRound, group: 2, desc: "Sign in and switch accounts" },

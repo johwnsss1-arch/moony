@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "@fontsource-variable/inter";
 import "./hud.css";
 import { HudWidget } from "./components/HudWidgets";
+import { Crosshair } from "./components/Crosshair";
 import { listen } from "@tauri-apps/api/event";
 
 // Rust build: state arrives as a Tauri event instead of Electron IPC.
@@ -12,8 +13,10 @@ if (window.__TAURI_INTERNALS__ && !window.moonyOverlay) window.moonyOverlay = { 
 function Hud() {
   const [state, setState] = useState(null);
   useEffect(() => { window.moonyOverlay?.onState(setState); }, []);
-  if (!state?.prefs?.enabled) return null;
-  const { widgets = {}, opacity = 0.92, scale = 1 } = state.prefs;
+  if (!state?.prefs) return null;
+  const { widgets = {}, opacity = 0.92, scale = 1, crosshair } = state.prefs;
+  const xhair = crosshair?.on && <div className="hud-crosshair"><Crosshair c={crosshair} /></div>;
+  if (!state.prefs.enabled) return xhair || null;
   return (
     <div className={"hud-root t-" + (state.prefs.theme || "midnight")} style={{ opacity, "--hud-scale": scale, "--hud-acc": state.prefs.accent || "#8b7dff", "--viz": state.prefs.accent || "#8b7dff" }}>
       {Object.entries(widgets).filter(([, w]) => w.on).map(([id, w]) => (
@@ -21,6 +24,7 @@ function Hud() {
           <HudWidget id={id} state={state} />
         </div>
       ))}
+      {xhair}
     </div>
   );
 }

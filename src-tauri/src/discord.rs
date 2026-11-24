@@ -31,9 +31,9 @@ pub fn set(a: &Value) {
     if let Some(t) = a["startTimestamp"].as_i64() { act = act.timestamps(activity::Timestamps::new().start(t / 1000)); }
     let mut assets = activity::Assets::new().small_image("https://moonylauncher.xyz/img/icon.png").small_text("Moony · moonylauncher.xyz");
     if !large.is_empty() { assets = assets.large_image(&large).large_text(&large_t); }
-    act = act.assets(assets).buttons(vec![
-        activity::Button::new("Get Moony", "https://moonylauncher.xyz"),
-        activity::Button::new("Join the Discord", "https://discord.gg/moonylauncher"),
-    ]);
+    // Discord allows two buttons: in a game, "Join my server" replaces the Discord invite.
+    let join = s("joinUrl");
+    let second = if join.starts_with("https://www.roblox.com/games/start?") { activity::Button::new("Join my server", &join) } else { activity::Button::new("Join the Discord", "https://discord.gg/moonylauncher") };
+    act = act.assets(assets).buttons(vec![activity::Button::new("Get Moony", "https://moonylauncher.xyz"), second]);
     if c.set_activity(act).is_err() { let _ = c.reconnect(); }
 }

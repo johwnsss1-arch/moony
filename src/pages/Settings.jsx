@@ -3,6 +3,8 @@ import { ImagePlus, Trash2, Bell, Brush, Check, Cpu, ExternalLink, Gamepad2, Key
 import { ACCENTS, DEFAULT_SETTINGS, useApp } from "../lib/store";
 import { THEMES, THEME_FONTS, themeById } from "../lib/themes";
 import { SceneArt } from "../components/ThemeArt";
+import { LIVE_BGS } from "../components/LiveBg";
+import { UI_FONTS } from "../lib/fonts";
 import { clearBg, emitBgChange, loadBg, onBgChange, saveBg } from "../lib/custombg";
 
 // Custom background: picture, GIF or short video, with a live preview.
@@ -129,6 +131,21 @@ const Section = ({ title, desc, children }) => (
   <section className="ap-sec"><header><h3>{title}</h3>{desc && <small>{desc}</small>}</header>{children}</section>
 );
 
+const LOAD_STYLES = [["classic", "Classic"], ["minimal", "Minimal"], ["neon", "Neon"], ["glass", "Glass"], ["retro", "Retro"]];
+function LoadingCard({ s, u }) {
+  const l = { style: "classic", tagline: "", gameArt: true, fx: "stars", ...s.loading };
+  const set = (p) => u({ loading: { ...l, ...p } });
+  return (
+    <div className="settings-group">
+      <Row title="Style"><div className="ap-chips">{LOAD_STYLES.map(([id, name]) => <button key={id} className={"chip" + (l.style === id ? " on" : "")} onClick={() => set({ style: id })}>{name}</button>)}</div></Row>
+      <Row title="Your text" desc="A line shown under the progress, like your name or a motto."><input className="input" style={{ width: 220 }} maxLength={60} placeholder="e.g. let's get this W" value={l.tagline} onChange={(e) => set({ tagline: e.target.value })} /></Row>
+      <Row title="Game art background" desc="Blurs the game's icon behind the window."><Toggle checked={l.gameArt !== false} onChange={(v) => set({ gameArt: v })} /></Row>
+      <Row title="Twinkling stars"><Toggle checked={l.fx === "stars"} onChange={(v) => set({ fx: v ? "stars" : "none" })} /></Row>
+      {window.orbit?.splashPreview && <Row title="Preview" desc="Opens it for 5 seconds."><button className="btn secondary sm" onClick={() => window.orbit.splashPreview(l)}>Show preview</button></Row>}
+    </div>
+  );
+}
+
 function Appearance() {
   const { settings: s, updateSettings: u } = useApp();
   const current = themeById(s.theme);
@@ -150,6 +167,20 @@ function Appearance() {
 
       <Section title="Background" desc="A picture, GIF or video behind the whole app.">
         <BackgroundCard s={s} u={u} />
+      </Section>
+
+      <Section title="Live background" desc="An animated scene behind the app. It pauses while you're in a game, so it doesn't cost FPS.">
+        <div className="ap-chips">{LIVE_BGS.map((b) => <button key={b.id} className={"chip" + ((s.liveBg || "off") === b.id ? " on" : "")} onClick={() => u({ liveBg: b.id })}>{b.label}</button>)}</div>
+        {s.liveBg && s.liveBg !== "off" && <small className="muted">Replaces the theme's artwork. A custom picture or video background still wins if you've set one.</small>}
+      </Section>
+
+      <Section title="Font" desc="The font used across Moony.">
+        <div className="ap-chips">{UI_FONTS.map((f) => <button key={f.id} className={"chip" + ((s.uiFont || "inter") === f.id ? " on" : "")} onClick={() => u({ uiFont: f.id })}>{f.label}</button>)}</div>
+        <small className="muted">For Roblox's in-game font, use Tweaks → Mods → Font.</small>
+      </Section>
+
+      <Section title="Loading screen" desc="The window you see while a game launches.">
+        <LoadingCard s={s} u={u} />
       </Section>
 
       <Section title="Color">
@@ -224,6 +255,9 @@ function Launch() {
       <ProtocolRow />
       <Row title="Close Roblox when I leave a game" desc="Instead of Roblox's home screen, you come straight back to Moony. Teleports between places don't count.">
         <Toggle checked={s.autoCloseRoblox} onChange={(v) => u({ autoCloseRoblox: v })} />
+      </Row>
+      <Row title="Rejoin automatically when disconnected" desc="Puts you back in the same server a few seconds after Roblox drops you (up to 3 tries).">
+        <Toggle checked={!!s.autoRejoin} onChange={(v) => u({ autoRejoin: v })} />
       </Row>
       <Row title="Ask before launching" desc="Show a confirmation before opening Roblox.">
         <Toggle checked={s.confirmLaunch} onChange={(v) => u({ confirmLaunch: v })} />
@@ -318,6 +352,9 @@ function Discord() {
         </Row>
         <Row title="Show the game's name" desc="Off shows just “Playing Roblox”.">
           <Toggle checked={s.discordShowGame} onChange={(v) => u({ discordShowGame: v })} />
+        </Row>
+        <Row title="“Join my server” button" desc="Friends can click it on your Discord profile to join the server you're in.">
+          <Toggle checked={s.discordJoinButton !== false} onChange={(v) => u({ discordJoinButton: v })} />
         </Row>
         <Row title="Discord application ID" desc="The ID of the Discord app named “Moony” (see the steps below).">
           <div className="row-gap">

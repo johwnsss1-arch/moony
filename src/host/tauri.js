@@ -88,7 +88,7 @@ let splashTimer = null, splashOff = null;
 const splash = (s) => rust("splash:set", s).catch(() => {});
 async function launch({ placeId, accountId, followUserId, jobId, linkCode, name, icon }) {
   const title = (followUserId ? `Joining ${name || "your friend"}` : name || "Roblox").slice(0, 80);
-  await rust("splash:open", prefs.accent || "#8b7dff").catch(() => {});
+  await rust("splash:open", prefs.accent || "#8b7dff", splashOpts()).catch(() => {});
   splash({ title, step: "Getting ready…", progress: 10, image: /^https:\/\/[a-z0-9.-]*rbxcdn\.com\//i.test(icon || "") ? icon : null, foot: "Moony" });
   clearTimeout(splashTimer); splashTimer = setTimeout(() => rust("splash:close", 0), 45000);
   splashOff?.(); splashOff = on("launch:progress")((p) => splash(p.total ? { step: `${p.phase} ${mb(p.done)} / ${mb(p.total)} MB`, progress: 8 + (p.done / p.total) * 45, foot: "Updating Roblox" } : { step: p.phase, progress: null }));
@@ -134,8 +134,11 @@ let discordPrefs = {};
 function updateDiscord() {
   if (!discordPrefs.enabled || !nowPlaying) return rust("discord:set", null).catch(() => {});
   const named = discordPrefs.showGame !== false && nowPlaying.name;
-  rust("discord:set", { details: named ? `Playing ${nowPlaying.name}`.slice(0, 128) : "Playing Roblox", state: "via Moony", startTimestamp: nowPlaying.startedAt, largeImageKey: named ? nowPlaying.icon : "", largeImageText: named ? nowPlaying.name.slice(0, 128) : "" }).catch(() => {});
+  rust("discord:set", { details: named ? `Playing ${nowPlaying.name}`.slice(0, 128) : "Playing Roblox", state: "via Moony", startTimestamp: nowPlaying.startedAt, largeImageKey: named ? nowPlaying.icon : "", largeImageText: named ? nowPlaying.name.slice(0, 128) : "", joinUrl: named && discordPrefs.joinButton !== false && nowPlaying.placeId && nowPlaying.jobId ? `https://www.roblox.com/games/start?placeId=${nowPlaying.placeId}&gameInstanceId=${nowPlaying.jobId}` : "" }).catch(() => {});
 }
+// Loading screen look (Settings → Appearance → Loading screen).
+const splashOpts = () => { const l = prefs.loading || {}; return new URLSearchParams({ style: l.style || "classic", tag: (l.tagline || "").slice(0, 60), art: l.gameArt === false ? "0" : "1", fx: l.fx || "none" }).toString().split("+").join("%20"); };
+
 // Game sessions: playtime, "now playing", auto-close and rejoin offers.
 let prefs = {};
 let nowPlaying = null;
@@ -149,6 +152,34 @@ tracker.on("start", async (s) => {
   }
   emit("game:now", nowPlaying);
   updateDiscord();
+});
+// Performance: ping, CPU and RAM every 5 s while in a game (last 20 sessions),
+// plus Boost mode on start / off at the end.
+let perf = null, perfLog = null, perfTimer = null;
+async function perfLoad() { if (!perfLog) perfLog = (await rust("store:get", "perf").catch(() => null)) || { sessions: [] }; return perfLog; }
+tracker.on("start", (s) => {
+  if (perf && perf.jobId === s.jobId) { perf.u = s.universeId || perf.u; return; }
+  perf = { jobId: s.jobId, u: s.universeId, start: Date.now(), boost: !!prefs.boost, samples: [] };
+  if (prefs.boost) setTimeout(() => rust("boost:on").catch(() => {}), 4000);
+  clearInterval(perfTimer);
+  perfTimer = setInterval(async () => {
+    if (!perf) return;
+    const [ping, use] = await Promise.all([rust("net:ping").catch(() => -1), rust("sys:usage").catch(() => null)]);
+    perf.samples.push([Math.round((Date.now() - perf.start) / 1000), ping, use?.cpu ?? null, use?.ram ?? null]);
+    if (perf.samples.length > 1440) perf.samples.shift();
+    emit("perf:live", perf);
+  }, 5000);
+});
+tracker.on("end", async () => {
+  clearInterval(perfTimer);
+  rust("boost:off").catch(() => {});
+  const p = perf; perf = null;
+  if (!p || p.samples.length < 3) return;
+  const log = await perfLoad();
+  log.sessions.unshift({ ...p, end: Date.now(), name: tracker.summary().games[p.u]?.name || null });
+  log.sessions.length = Math.min(log.sessions.length, 20);
+  rust("store:set", "perf", log).catch(() => {});
+  emit("perf:update", log);
 });
 tracker.on("server", async (s) => {
   const region = await roblox.ipRegion(s.ip).catch(() => null);
@@ -171,7 +202,7 @@ async function handleLink(uri) {
   if (!/^roblox(-player)?:/i.test(String(uri))) return;
   if (/^roblox-player:/i.test(uri)) {
     const parts = Object.fromEntries(uri.replace(/^roblox-player:/i, "").split("+").map((kv) => { const i = kv.indexOf(":"); return [kv.slice(0, i), kv.slice(i + 1)]; }));
-    await rust("splash:open", prefs.accent || "#8b7dff").catch(() => {});
+    await rust("splash:open", prefs.accent || "#8b7dff", splashOpts()).catch(() => {});
     splash({ title: parts.launchmode === "app" ? "Roblox" : "Joining game", step: "Checking for Roblox updates…", progress: 8, foot: "Moony bootstrapper" });
     splashOff?.(); splashOff = on("launch:progress")((p) => splash(p.total ? { step: `${p.phase} ${mb(p.done)} / ${mb(p.total)} MB`, progress: 8 + (p.done / p.total) * 50 } : { step: p.phase, progress: null }));
     try {
@@ -244,6 +275,9 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
     launch: (opts) => launch(typeof opts === "object" ? opts : { placeId: opts }),
     install: () => Promise.resolve(null),
     setFps: (fps) => setFps(fps),
+    splashPreview: async (loading) => { const keep = prefs.loading; prefs.loading = loading; await rust("splash:open", prefs.accent || "#8b7dff", splashOpts()).catch(() => {}); prefs.loading = keep; rust("splash:set", { title: "Preview", step: "Joining server…", progress: 62, foot: "This is how your loading screen looks", channel: "LIVE", version: "" }).catch(() => {}); rust("splash:close", 5000).catch(() => {}); },
+    savePicture: (name, b64) => rust("fs:savePicture", name, b64),
+    perf: { get: () => perfLoad(), live: () => Promise.resolve(perf), onLive: on("perf:live"), onUpdate: on("perf:update"), boostNow: () => rust("boost:on"), clear: () => { perfLog = { sessions: [] }; return rust("store:set", "perf", perfLog); } },
     playtime: { get: () => Promise.resolve(tracker.summary()), onUpdate: on("playtime:update"), onNow: on("game:now") },
     avatar: {
       model3d: (acc, uid) => withSession(acc, (c) => roblox.avatar3d(c, uid)),
@@ -255,7 +289,7 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
       wearOutfit: async (acc, id) => { await withSession(acc, (c) => roblox.wearOutfit(c, id)); await withSession(acc, (c) => roblox.redraw(c)); return true; },
     },
     openRobloxPage: (_acc, url) => rust("open:url", url),
-    setPrefs: (p) => { prefs = p || {}; rust("hud:enabled", !!prefs.hud?.enabled).catch(() => {}); return rust("store:set", "prefs", p).catch(() => {}); },
+    setPrefs: (p) => { prefs = p || {}; rust("hud:enabled", !!(prefs.hud?.enabled || prefs.hud?.crosshair?.on)).catch(() => {}); return rust("store:set", "prefs", p).catch(() => {}); },
     setZoom: () => Promise.resolve(true),
     setRadius: (r) => rust("ui:radius", Number(r) || 0),
     protocol: { get: () => rust("protocol:get"), set: (v) => rust("protocol:set", !!v) },
@@ -331,6 +365,7 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
       },
       onExpired: on("auth:expired"),
       friends: (id) => withSession(id, (c) => roblox.friends(c, id)),
+      presence: (id, userIds) => withSession(id, (c) => roblox.friendPresence(c, userIds)),
       robux: (id) => withSession(id, (c) => roblox.robux(c, id)),
       region: (id, placeId, jobId) => withSession(id, (c) => roblox.serverRegion(c, placeId, jobId)),
       resolveLink: (id, code) => withSession(id, (c) => roblox.resolveShareLink(c, code)),

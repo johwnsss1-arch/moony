@@ -235,6 +235,13 @@ async function presence(userIds) {
   return Object.fromEntries(r.userPresences.map((p) => [p.userId, { type: p.userPresenceType, label: label[p.userPresenceType] ?? "Offline", lastLocation: p.lastLocation, placeId: p.rootPlaceId || p.placeId || null }]));
 }
 
+// Signed-in presence for a few users (includes the server's gameId for friends).
+async function friendPresence(cookie, userIds) {
+  const r = await authed(cookie, "https://presence.roblox.com/v1/presence/users", { method: "POST", body: JSON.stringify({ userIds: userIds.map(Number) }) });
+  if (!r.ok) throw new Error(`Roblox API ${r.status} for presence`);
+  return Object.fromEntries((await r.json()).userPresences.map((p) => [p.userId, { type: p.userPresenceType, placeId: p.rootPlaceId || p.placeId || null, gameId: p.gameId || null, universeId: p.universeId || null, lastLocation: p.lastLocation }]));
+}
+
 // Public servers for a place. `ping` and `fps` are what Roblox reports for the
 // server itself (average player ping, server frame rate), not ping from this PC.
 async function servers(placeId, { order = "Desc", cursor = "", hideFull = true } = {}) {
@@ -710,4 +717,4 @@ async function logout(cookie) {
   await authed(cookie, "https://auth.roblox.com/v2/logout", { method: "POST", body: "{}" }).catch(() => {});
 }
 
-module.exports = { avatarImage, onCookieRotated, itemDetails, buyItem, chatConversations, chatMessages, chatSend, chatRead, chatStart, searchMany, genreGames, news, avatar3d, avatarState, inventory, outfits, setWearing, setAvatarType, wearOutfit, redraw, placeUniverse, sorts, search, gameDetails, lookupUser, searchUsers, presence, servers, userProfile, gameMedia, badges, catalog, ipRegion, me, friends, authTicket, logout, robux, serverRegion, resolveShareLink };
+module.exports = { friendPresence, avatarImage, onCookieRotated, itemDetails, buyItem, chatConversations, chatMessages, chatSend, chatRead, chatStart, searchMany, genreGames, news, avatar3d, avatarState, inventory, outfits, setWearing, setAvatarType, wearOutfit, redraw, placeUniverse, sorts, search, gameDetails, lookupUser, searchUsers, presence, servers, userProfile, gameMedia, badges, catalog, ipRegion, me, friends, authTicket, logout, robux, serverRegion, resolveShareLink };

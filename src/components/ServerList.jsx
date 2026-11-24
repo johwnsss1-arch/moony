@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Gauge, Globe, LogIn, RefreshCw, Server, Signal, Users } from "lucide-react";
+import { Gauge, Globe, LogIn, RefreshCw, Server, Shuffle, Signal, Users, Zap } from "lucide-react";
+import { pickServer } from "../lib/servers";
 import { useApp } from "../lib/store";
 import { api, auth } from "../lib/bridge";
 import { Empty, ErrorState, Segmented, Skeleton, Toggle } from "./ui";
@@ -39,7 +40,17 @@ const pingClass = (p) => (p == null ? "" : p < 90 ? "good" : p < 180 ? "ok" : "b
 
 // Public servers for one game, with sorting, paging and per-server Join.
 export function ServerList({ game, compact = false }) {
-  const { play } = useApp();
+  const { play, toast, nowPlaying } = useApp();
+  const [busy, setBusy] = useState(null);
+  const quick = async (mode) => {
+    setBusy(mode);
+    try {
+      const s = await pickServer(game.placeId, mode, nowPlaying?.jobId);
+      if (!s) toast?.("No open server found right now");
+      else play(game, { jobId: s.id });
+    } catch (e) { toast?.(e.message); }
+    setBusy(null);
+  };
   const [sort, setSort] = useState("most");
   const [hideFull, setHideFull] = useState(true);
   const [st, setSt] = useState({ status: "loading", list: [], next: null, error: null });
@@ -64,6 +75,8 @@ export function ServerList({ game, compact = false }) {
       <div className="servers-bar">
         <Segmented value={sort} onChange={setSort} options={SORTS} />
         <label className="inline-toggle"><Toggle checked={hideFull} onChange={setHideFull} label="Hide full servers" /> Hide full</label>
+        <button className="btn primary sm" disabled={!!busy} onClick={() => quick("ping")} title="Joins the lowest-ping server with room"><Zap size={13} /> {busy === "ping" ? "Finding…" : "Fast join"}</button>
+        <button className="btn secondary sm" disabled={!!busy} onClick={() => quick("hop")} title="Joins a random different server"><Shuffle size={13} /> {busy === "hop" ? "Finding…" : "Server hop"}</button>
         <span className="grow" />
         {st.status === "ready" && <small>{totals.servers}{st.next ? "+" : ""} servers · {totals.players.toLocaleString()} players</small>}
         <button className="btn ghost sm icon-only" title="Refresh" onClick={() => load()} disabled={st.status === "loading"}><RefreshCw size={13} className={st.status === "loading" ? "spin" : ""} /></button>

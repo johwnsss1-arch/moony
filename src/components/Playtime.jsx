@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, Clock, Gamepad2, Hourglass, Radio, RotateCcw } from "lucide-react";
+import { CalendarDays, Clock, Gamepad2, Hourglass, Radio, RotateCcw, Shuffle } from "lucide-react";
+import { pickServer } from "../lib/servers";
 import { useApp } from "../lib/store";
 import { isDesktop } from "../lib/bridge";
 import { ago, cleanName, duration, totalSeconds } from "../lib/format";
@@ -18,7 +19,8 @@ function useTicker(active) {
 
 // Live "now playing" strip, shown while Roblox is in a game.
 export function NowPlaying({ compact }) {
-  const { nowPlaying, openGame } = useApp();
+  const { nowPlaying, openGame, play, toast } = useApp();
+  const [hopping, setHopping] = useState(false);
   useTicker(!!nowPlaying);
   if (!nowPlaying) return null;
   const secs = Math.floor((Date.now() - nowPlaying.startedAt) / 1000);
@@ -32,6 +34,11 @@ export function NowPlaying({ compact }) {
         {nowPlaying.region && <small className="np-region">Server in {nowPlaying.region.country === "US" ? `${nowPlaying.region.region}, US` : `${nowPlaying.region.city}, ${nowPlaying.region.country}`}</small>}
       </div>
       <span className="np-clock">{clock}</span>
+      {nowPlaying.placeId && !compact && <button className="btn ghost sm" disabled={hopping} title="Move to a different server" onClick={async (e) => {
+        e.stopPropagation(); setHopping(true);
+        try { const s = await pickServer(nowPlaying.placeId, "hop", nowPlaying.jobId); if (s) play({ placeId: nowPlaying.placeId, universeId: nowPlaying.universeId, name: nowPlaying.name || "Roblox", icon: nowPlaying.icon }, { jobId: s.id }); else toast?.("No other open server found"); } catch (err) { toast?.(err.message); }
+        setHopping(false);
+      }}><Shuffle size={13} /> {hopping ? "Hopping…" : "Hop"}</button>}
     </div>
   );
 }

@@ -35,6 +35,16 @@ pub fn call(app: &tauri::AppHandle, op: &str, a: &[Value]) -> Result<Value, Stri
             mk(&dest)?; std::fs::copy(&src, &dest).map_err(|e| e.to_string())?;
             Ok(json!(src.file_name().map(|n| n.to_string_lossy().to_string())))
         }
+        // Save a PNG the page drew (Wrapped card) to PicturesMoony and show it.
+        "savePicture" => {
+            let name: String = s(0).chars().filter(|c| c.is_ascii_alphanumeric() || *c == '-').take(60).collect();
+            let dir = app.path().picture_dir().map_err(|e| e.to_string())?.join("Moony");
+            let p = dir.join(format!("{}.png", if name.is_empty() { "moony".into() } else { name }));
+            mk(&p)?;
+            std::fs::write(&p, B64.decode(s(1)).map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
+            let _ = std::process::Command::new("explorer").arg(format!("/select,{}", p.display())).spawn();
+            Ok(json!(p.to_string_lossy()))
+        }
         _ => Err("unknown file operation".into()),
     }
 }
