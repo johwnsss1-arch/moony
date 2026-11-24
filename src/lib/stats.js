@@ -1,9 +1,6 @@
-// Numbers derived from the playtime data the main process records.
 const DAY = 86400000;
 export const dayKey = (d) => new Date(d).toISOString().slice(0, 10);
 
-// Consecutive days with any play, ending today (or yesterday, so an evening
-// streak doesn't read 0 in the morning).
 export function streak(days = {}) {
   let n = 0;
   let d = Date.now();
@@ -23,7 +20,6 @@ export function bestStreak(days = {}) {
   return best;
 }
 
-// Seconds played per hour of the day (0-23), from the session log.
 export function hourly(sessions = []) {
   const h = Array(24).fill(0);
   for (const s of sessions) {
@@ -49,7 +45,6 @@ export function sessionStats(sessions = [], universeId) {
   };
 }
 
-// Seconds per day for the last N days, optionally for one game.
 export function daily(sessions = [], nDays = 14, universeId) {
   const out = Array.from({ length: nDays }, (_, i) => ({ day: dayKey(Date.now() - (nDays - 1 - i) * DAY), secs: 0 }));
   const idx = Object.fromEntries(out.map((d, i) => [d.day, i]));

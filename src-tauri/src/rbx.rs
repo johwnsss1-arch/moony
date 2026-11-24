@@ -1,7 +1,3 @@
-// Moony's own Roblox install (port of electron/rbxinstall.cjs): reads the
-// latest version from Roblox, downloads its packages from setup.rbxcdn.com,
-// checks each MD5, unpacks them into %LOCALAPPDATA%\Moony\Roblox\<version>,
-// then starts RobloxPlayerBeta.exe directly.
 use futures_util::StreamExt;
 use serde_json::{json, Value};
 use std::io::Read;
@@ -25,9 +21,6 @@ const DIRS: &[(&str, &str)] = &[
 ];
 const APP_SETTINGS: &str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<Settings>\r\n\t<ContentFolder>content</ContentFolder>\r\n\t<BaseUrl>http://www.roblox.com</BaseUrl>\r\n</Settings>\r\n";
 
-// Roblox lives in Moony's data folder, not next to the app, so reinstalling
-// or uninstalling Moony never touches it. Moony 1.x kept it in
-// %LOCALAPPDATA%MoonyRoblox; that copy is moved over once (no re-download).
 pub fn root() -> PathBuf {
     let local = dirs::data_local_dir().unwrap_or_default();
     let new = local.join("xyz.moonylauncher.moony").join("Roblox");
@@ -106,7 +99,6 @@ fn extract(buf: &[u8], dest: &Path, sub: &str) -> Result<(), String> {
     Ok(())
 }
 
-/// Download + unpack one version. `progress` gets (phase, done, total).
 pub async fn install<F: Fn(&str, u64, u64) + Send + Sync + 'static>(guid: &str, label: &str, keep: bool, progress: F) -> Result<PathBuf, String> {
     if !valid_guid(guid) { return Err("That isn't a Roblox version hash (version-xxxxxxxxxxxxxxxx)".into()); }
     if let Some(d) = installed(guid) { return Ok(d); }
@@ -119,7 +111,6 @@ pub async fn install<F: Fn(&str, u64, u64) + Send + Sync + 'static>(guid: &str, 
     let done = Arc::new(AtomicU64::new(0));
     let progress = Arc::new(progress);
     let client = reqwest::Client::new();
-    // Six downloads at a time; each package is unpacked as soon as it lands.
     let results = futures_util::stream::iter(pkgs.into_iter().map(|p| {
         let (client, done, progress, dest, guid) = (client.clone(), done.clone(), progress.clone(), dest.clone(), guid.to_string());
         async move {
@@ -154,7 +145,6 @@ pub async fn install<F: Fn(&str, u64, u64) + Send + Sync + 'static>(guid: &str, 
     Ok(dest)
 }
 
-/// The version Moony should launch (pinned, or the latest), installed.
 pub async fn ensure(app: &tauri::AppHandle, pinned: Option<String>, channel: Option<String>) -> Result<Value, String> {
     let emit = { let app = app.clone(); move |phase: &str, done: u64, total: u64| { let _ = app.emit("launch:progress", json!({ "phase": phase, "done": done, "total": total })); } };
     if let Some(p) = pinned.filter(|p| valid_guid(p)) {
@@ -164,7 +154,6 @@ pub async fn ensure(app: &tauri::AppHandle, pinned: Option<String>, channel: Opt
     let (guid, version) = match latest(channel.as_deref()).await {
         Ok(v) => v,
         Err(e) => {
-            // Offline: use whatever is installed.
             let any = list().into_iter().find(|v| v["complete"].as_bool() == Some(true));
             return any.map(|v| json!({ "dir": v["dir"], "version": v["version"], "offline": true })).ok_or(e);
         }
@@ -175,7 +164,6 @@ pub async fn ensure(app: &tauri::AppHandle, pinned: Option<String>, channel: Opt
     Ok(json!({ "dir": dir, "version": version, "guid": guid, "updated": fresh, "channel": channel.unwrap_or("production".into()) }))
 }
 
-/// Start the player with a one-time sign-in ticket (what roblox.com's Play button does).
 pub fn launch(dir: &Path, ticket: &str, launcher_url: &str, tracker: &str) -> Result<(), String> {
     let exe = dir.join("RobloxPlayerBeta.exe");
     if !exe.exists() { return Err("Roblox Player not found".into()); }

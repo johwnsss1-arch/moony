@@ -1,6 +1,3 @@
-// window.orbit for the Rust (Tauri) build: the same API the Electron preload
-// exposed, so the interface code is unchanged. Each call is either handled
-// here (Roblox web API logic, which runs in the page) or sent to Rust.
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -17,14 +14,12 @@ async function notify(title, body) {
     let ok = await isPermissionGranted();
     if (!ok) ok = (await requestPermission()) === "granted";
     if (ok) sendNotification({ title: String(title).slice(0, 120), body: String(body).slice(0, 240) });
-  } catch { /* notifications off */ }
+  } catch { }
 }
 
-// Mods work on the Roblox version Moony launches (newest complete install).
 const playerDir = async () => { const st = await rust("versions:info").catch(() => null); const v = st?.installed?.find((x) => x.complete); return v ? String(v.dir) : null; };
 const mods = createMods(rust, playerDir);
 
-// Game update alerts: every 15 minutes, check favourites for a newer update time.
 let watchList = [];
 async function checkUpdates() {
   if (!watchList.length) return;
@@ -35,13 +30,12 @@ async function checkUpdates() {
       const prev = seen[id];
       seen[id] = g.updated;
       if (prev && g.updated && new Date(g.updated) > new Date(prev)) notify(`${g.name} just updated`, "Open Moony to see what's new.");
-    } catch { /* skip */ }
+    } catch { }
   }
   rust("store:set", "game-updates", seen).catch(() => {});
 }
 setInterval(checkUpdates, 15 * 60e3);
 
-// FPS cap goes through the FFlags store so the editor stays in sync.
 async function setFps(fps) {
   const n = Number(fps);
   if (!Number.isInteger(n) || n < 0 || n > 1000) return { ok: false, error: "Invalid FPS value" };
@@ -53,8 +47,6 @@ async function setFps(fps) {
   return { ok: true, version: r.version };
 }
 
-
-// Events: from Rust (Tauri events) and from this file (local).
 const local = new Map();
 const emit = (ch, data) => (local.get(ch) || []).forEach((fn) => fn(data));
 const on = (ch) => (cb) => {
@@ -67,7 +59,6 @@ const on = (ch) => (cb) => {
 const off = () => () => {};
 const unavailable = (what) => () => Promise.reject(new Error(`${what} is coming to the new Moony soon`));
 
-// Signed-in calls: Rust swaps this placeholder for the account's cookie.
 const token = (id) => `moony:acct:${Number(id)}`;
 async function withSession(id, fn) {
   const accounts = await rust("vault:accounts");
@@ -81,8 +72,6 @@ async function withSession(id, fn) {
 
 const PUBLIC = new Set(["sorts", "search", "gameDetails", "lookupUser", "searchUsers", "presence", "servers", "userProfile", "gameMedia", "badges", "catalog", "placeUniverse", "searchMany", "genreGames", "news", "avatarImage"]);
 
-// Launch a game: make sure Roblox is installed (Rust downloads it with
-// progress), get a one-time sign-in ticket, then Rust starts the player.
 const mb = (n) => (n / 1e6).toFixed(n > 1e8 ? 0 : 1);
 let splashTimer = null, splashOff = null;
 const splash = (s) => rust("splash:set", s).catch(() => {});
@@ -136,10 +125,8 @@ function updateDiscord() {
   const named = discordPrefs.showGame !== false && nowPlaying.name;
   rust("discord:set", { details: named ? `Playing ${nowPlaying.name}`.slice(0, 128) : "Playing Roblox", state: "via Moony", startTimestamp: nowPlaying.startedAt, largeImageKey: named ? nowPlaying.icon : "", largeImageText: named ? nowPlaying.name.slice(0, 128) : "", joinUrl: named && discordPrefs.joinButton !== false && nowPlaying.placeId && nowPlaying.jobId ? `https://www.roblox.com/games/start?placeId=${nowPlaying.placeId}&gameInstanceId=${nowPlaying.jobId}` : "" }).catch(() => {});
 }
-// Loading screen look (Settings → Appearance → Loading screen).
 const splashOpts = () => { const l = prefs.loading || {}; return new URLSearchParams({ style: l.style || "classic", tag: (l.tagline || "").slice(0, 60), art: l.gameArt === false ? "0" : "1", fx: l.fx || "none" }).toString().split("+").join("%20"); };
 
-// Game sessions: playtime, "now playing", auto-close and rejoin offers.
 let prefs = {};
 let nowPlaying = null;
 const tracker = createTracker(rust, emit);
@@ -148,13 +135,11 @@ tracker.on("start", async (s) => {
   splash({ step: "You're in!", progress: 100 }); rust("splash:close", 700).catch(() => {});
   nowPlaying = { universeId: s.universeId, placeId: s.placeId, jobId: s.jobId, name: null, icon: null, startedAt: s.startedAt };
   if (s.universeId) {
-    try { const g = await roblox.gameDetails(s.universeId); nowPlaying = { ...nowPlaying, name: g.name, icon: g.icon }; tracker.setMeta(s.universeId, { name: g.name, icon: g.icon, placeId: g.placeId }); } catch { /* no name */ }
+    try { const g = await roblox.gameDetails(s.universeId); nowPlaying = { ...nowPlaying, name: g.name, icon: g.icon }; tracker.setMeta(s.universeId, { name: g.name, icon: g.icon, placeId: g.placeId }); } catch { }
   }
   emit("game:now", nowPlaying);
   updateDiscord();
 });
-// Performance: ping, CPU and RAM every 5 s while in a game (last 20 sessions),
-// plus Boost mode on start / off at the end.
 let perf = null, perfLog = null, perfTimer = null;
 async function perfLoad() { if (!perfLog) perfLog = (await rust("store:get", "perf").catch(() => null)) || { sessions: [] }; return perfLog; }
 tracker.on("start", (s) => {
@@ -197,7 +182,6 @@ tracker.on("end", ({ reason, session }) => {
   if (reason === "disconnected" && session?.jobId && session.placeId) emit("game:disconnected", { placeId: session.placeId, jobId: session.jobId, universeId: session.universeId, name: last?.name || "your game", icon: last?.icon || null });
 });
 
-// A Roblox link opened with Moony (at start-up or while running).
 async function handleLink(uri) {
   if (!/^roblox(-player)?:/i.test(String(uri))) return;
   if (/^roblox-player:/i.test(uri)) {
@@ -227,14 +211,11 @@ async function handleLink(uri) {
   }
 }
 
-// What's playing (Spotify, a browser tab, Media Player...): checked every
-// 2 s; the UI hears about changes.
 let media = null;
 setInterval(async () => {
   const m = await rust("media:info").catch(() => null);
   if (JSON.stringify(m) !== JSON.stringify(media)) { media = m; emit("media:change", m); }
 }, 2000);
-// Feed the HUD once a second while it's showing.
 let hudPing = null, hudPingAt = 0;
 async function hudTick() {
   const st = await rust("hud:status").catch(() => null);
@@ -246,7 +227,6 @@ async function hudTick() {
 }
 
 if (window.__TAURI_INTERNALS__ && !window.orbit) {
-  // Links (Discord, website, promos) open in your normal browser.
   window.open = (url) => { if (/^https:\/\//.test(String(url))) rust("open:url", String(url)).catch(() => {}); return null; };
   document.addEventListener("click", (e) => { const a = e.target.closest?.("a[href^='https://']"); if (a) { e.preventDefault(); rust("open:url", a.href).catch(() => {}); } }, true);
   tracker.start();
@@ -320,7 +300,6 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
     },
     fflags: {
       get: () => rust("fflags:get"), set: (f) => rust("fflags:set", f), presets: () => rust("fflags:presets"),
-      // Read a flag list from a link (raw GitHub/Gist, Pastebin...). Returns the text.
       fromUrl: async (url) => {
         let u = String(url).trim();
         if (!/^https:\/\//.test(u)) throw new Error("Use an https:// link");
@@ -345,7 +324,6 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
     notify: { friend: (n) => notify(n?.title || "Moony", n?.body || "").then(() => true), onClick: on("notify:click") },
     discord: { configure: (p) => { discordPrefs = p || {}; updateDiscord(); return rust("discord:configure", p); }, status: () => rust("discord:status") },
     auth: {
-      // Roblox's own login page opens in a separate window; Rust keeps the cookie.
       login: async () => {
         const r = await rust("auth:login");
         if (!r?.ok) return r;
@@ -354,7 +332,6 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
       logout: async (id) => { await withSession(id, (c) => roblox.logout(c)).catch(() => {}); await rust("vault:remove", Number(id)); return { ok: true }; },
       sessions: () => rust("vault:accounts").then((a) => a.map((x) => x.id)),
       restore: async () => {
-        // First run of the Rust build: bring over accounts from the old Moony.
         if (!localStorage.getItem("moony-imported")) { await rust("vault:import").catch(() => 0); localStorage.setItem("moony-imported", "1"); }
         const out = [];
         for (const a of await rust("vault:accounts")) {

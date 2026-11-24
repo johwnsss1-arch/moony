@@ -1,7 +1,3 @@
-// What's new popup, "How did you find Moony?" question and feedback.
-// Feedback and the answer go to the Moony team through the main process
-// (see feedback:send in electron/main.cjs). Nothing identifying is sent:
-// no account names, IDs or cookies, only what the person types or picks.
 import { useEffect, useState } from "react";
 import { MessageSquareHeart, Sparkles, X, Send, Bug, Lightbulb, Heart } from "lucide-react";
 import { useApp } from "../lib/store";
@@ -26,10 +22,8 @@ function Modal({ onClose, children, className = "" }) {
 
 export function WhatsNew() {
   const { settings, updateSettings } = useApp();
-  // People updating from before this popup existed count as having seen 1.0.6.
   const seen = settings.lastSeenVersion ?? (settings.tourDone ? "1.0.6" : null);
-  // First install: don't show it, just remember the version.
-  useEffect(() => { if (!seen && settings.tourDone === undefined) updateSettings({ lastSeenVersion: VERSION }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!seen && settings.tourDone === undefined) updateSettings({ lastSeenVersion: VERSION }); }, []);
   if (!settings.tourDone || !seen || seen === VERSION) return null;
   const entries = CHANGELOG.filter((c) => cmp(c.version, seen) > 0);
   const close = () => updateSettings({ lastSeenVersion: VERSION });
@@ -54,7 +48,6 @@ export function FoundUs() {
   const { settings, updateSettings } = useApp();
   const [other, setOther] = useState("");
   const [pick, setPick] = useState(null);
-  // Ask once, a little after the welcome tour, and never on the very first screen.
   if (!settings.tourDone || settings.foundUsAsked || (settings.launches ?? 0) < 2) return null;
   const done = (answer) => {
     updateSettings({ foundUsAsked: true });
@@ -104,7 +97,6 @@ export function FeedbackModal({ onClose }) {
   );
 }
 
-// A gentle nudge after a few sessions, shown once.
 export function FeedbackNudge({ onOpen }) {
   const { settings, updateSettings } = useApp();
   if (!settings.tourDone || !settings.foundUsAsked || settings.feedbackNudged || (settings.launches ?? 0) < 4) return null;
@@ -119,10 +111,9 @@ export function FeedbackNudge({ onOpen }) {
   );
 }
 
-// Counts app opens (used to time the question and the nudge).
 export function useLaunchCounter() {
   const { settings, updateSettings } = useApp();
-  useEffect(() => { updateSettings({ launches: (settings.launches ?? 0) + 1 }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { updateSettings({ launches: (settings.launches ?? 0) + 1 }); }, []);
 }
 
 function cmp(a, b) {

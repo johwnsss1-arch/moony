@@ -1,7 +1,5 @@
 import { useEffect, useRef } from "react";
 
-// Background particles for themes, all on one canvas (clicks pass through).
-// Each kind: how many per area, how it spawns, moves and is drawn.
 const KINDS = {
   snow: {
     per: 9000,
@@ -75,8 +73,6 @@ export function Particles({ kind = "snow", density = 1 }) {
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
     resize();
-    // 30 fps is plenty for drifting particles, and only 10 fps while Moony
-    // isn't the window you're using (e.g. while you play).
     const tick = (now) => {
       const minGap = document.hasFocus() ? 32 : 100;
       if (now - last < minGap) { raf = requestAnimationFrame(tick); return; }
@@ -92,7 +88,6 @@ export function Particles({ kind = "snow", density = 1 }) {
       ctx.globalAlpha = 1;
       raf = requestAnimationFrame(tick);
     };
-    // Pause while the window is hidden to save CPU.
     const vis = () => { cancelAnimationFrame(raf); if (!document.hidden) { last = performance.now(); raf = requestAnimationFrame(tick); } };
     document.addEventListener("visibilitychange", vis);
     raf = requestAnimationFrame(tick);
@@ -102,10 +97,7 @@ export function Particles({ kind = "snow", density = 1 }) {
 }
 export const Snow = (props) => <Particles kind="snow" {...props} />;
 
-// A string of twinkling bulbs hanging under the title bar.
 const COLORS = ["#ff4d5e", "#ffd166", "#3ddc97", "#4fb3ff"];
-// Each segment draws its own sagging piece of wire with the bulb hanging from
-// its lowest point, so wire and bulbs always line up at any window width.
 export function Lights({ count = 60 }) {
   return (
     <div className="lights" aria-hidden>

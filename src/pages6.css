@@ -1,19 +1,14 @@
-/* ===================== Theme frames & controls v4 ===================== */
-/* Every theme gets its own window border, title bar, sidebar, buttons,
-   toggles, chips and inputs. */
 .frame { --frame-r: 12px; }
 .frame::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 60; border-radius: inherit; }
 .frame .btn, .frame .chip, .frame .input, .frame .toggle, .frame .nav-btn { transition: transform .15s, box-shadow .2s, background .2s, border-color .2s, filter .2s; }
 .frame .btn:hover:not(:disabled) { transform: translateY(-1px); }
 
-/* ---- Midnight: moonlit glass, silver rim ---- */
 .theme-midnight::after { box-shadow: inset 0 0 0 1px rgba(170,160,255,.22), inset 0 1px 0 rgba(255,255,255,.08); }
 .theme-midnight .titlebar { background: linear-gradient(180deg, rgba(139,125,255,.08), transparent); }
 .theme-midnight .btn.primary { border-radius: 999px; background: linear-gradient(135deg, #a89bff, #6a5cff) !important; }
 .theme-midnight .toggle.on { background: linear-gradient(90deg, #6a5cff, #a89bff); box-shadow: 0 0 12px rgba(139,125,255,.5); }
 .theme-midnight .toggle.on .knob { background: radial-gradient(circle at 35% 35%, #fff, #e6e1ff); box-shadow: 0 0 8px #fff; }
 
-/* ---- Kawaii: candy buttons, puffy pills, stitched frame ---- */
 .theme-kawaii::after { border: 3px dotted rgba(255,156,200,.45); border-radius: 12px; inset: 3px; }
 .theme-kawaii .titlebar { background: repeating-linear-gradient(90deg, rgba(255,156,200,.12) 0 14px, rgba(255,255,255,.05) 14px 28px); border-bottom: 2px dashed rgba(255,156,200,.35); }
 .theme-kawaii .btn { border-radius: 999px !important; font-weight: 700; }
@@ -29,7 +24,6 @@
 .theme-kawaii .nav-btn { border-radius: 999px; }
 .theme-kawaii .nav-btn.on { background: linear-gradient(180deg, rgba(255,163,204,.28), rgba(255,111,174,.18)); box-shadow: inset 0 0 0 2px rgba(255,140,191,.55), 0 4px 12px -4px rgba(255,111,174,.5) !important; color: #fff; }
 
-/* ---- Anime Night: neon tube outlines ---- */
 .theme-anime::after { box-shadow: inset 0 0 0 1px rgba(255,111,168,.55), inset 0 0 22px rgba(255,111,168,.15), inset 0 0 0 4px rgba(120,130,255,.12); }
 .theme-anime .titlebar { border-bottom: 1px solid rgba(255,111,168,.35); box-shadow: 0 1px 12px rgba(255,111,168,.2); }
 .theme-anime .btn.primary { background: transparent !important; border: 1.5px solid #ff7eb6; color: #ffe0ee; box-shadow: 0 0 10px rgba(255,111,168,.55), inset 0 0 10px rgba(255,111,168,.35) !important; text-shadow: 0 0 6px #ff6fa8; }
@@ -40,7 +34,6 @@
 .theme-anime .toggle.on .knob { background: #ff7eb6; box-shadow: 0 0 8px #ff6fa8; }
 .theme-anime .input:focus { box-shadow: 0 0 0 1px #ff7eb6, 0 0 14px rgba(255,111,168,.4); }
 
-/* ---- Halloween: wooden-crate frame, carved buttons ---- */
 .theme-halloween::after { border: 4px solid transparent; border-radius: inherit; background: repeating-linear-gradient(90deg, #3a2010 0 22px, #2a160a 22px 26px) border-box; -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
 .theme-halloween .main { box-shadow: inset 0 0 40px rgba(255,138,31,.10); }
 .theme-halloween .titlebar { background: linear-gradient(180deg, rgba(120,60,20,.35), transparent); }
@@ -51,7 +44,6 @@
 .theme-halloween .toggle.on .knob { background: #ffb347; box-shadow: 0 0 10px #ff8a1f; }
 .theme-halloween .chip.on { background: rgba(255,138,31,.25); border-color: #ff8a1f; }
 
-/* ---- Christmas: candy-cane window, gift-wrap buttons ---- */
 .theme-christmas::after { border: 4px solid transparent; border-radius: inherit; background: repeating-linear-gradient(45deg, #d4263a 0 10px, #f4f4f4 10px 20px) border-box; -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
 .theme-christmas .titlebar { background: linear-gradient(180deg, rgba(212,38,58,.22), transparent); }
 .theme-christmas .titlebar::after { content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 6px; background: radial-gradient(circle at 6px 0, #fff 4px, transparent 4.5px) 0 0 / 14px 6px repeat-x; opacity: .8; pointer-events: none; }
@@ -61,7 +53,6 @@
 .theme-christmas .toggle.on .knob { background: #1e7a42; }
 .theme-christmas .chip.on { background: #1e7a42; border-color: #ffd166; }
 
-/* ---- Ocean: porthole rim, bubble buttons ---- */
 .theme-ocean::after { box-shadow: inset 0 0 0 2px rgba(120,210,255,.25), inset 0 0 60px rgba(0,80,140,.35); }
 .theme-ocean .btn { border-radius: 999px !important; }
 .theme-ocean .btn.primary { background: radial-gradient(120% 120% at 30% 20%, #8fe6ff, #1e9cd8 60%, #0a5a90) !important; box-shadow: inset 0 2px 4px rgba(255,255,255,.5), 0 6px 18px rgba(30,156,216,.45) !important; }
@@ -71,7 +62,6 @@
 .theme-ocean .chip { border-radius: 999px; }
 .theme-ocean .nav-btn.on { border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(120,210,255,.35); background: rgba(63,208,255,.15); }
 
-/* ---- Forest: carved wood buttons, leafy frame ---- */
 .theme-forest::after { box-shadow: inset 0 0 0 3px #2a2414, inset 0 0 0 4px rgba(232,196,122,.35); }
 .theme-forest .titlebar { background: linear-gradient(180deg, rgba(60,50,20,.5), transparent); }
 .theme-forest .btn { border-radius: 8px !important; }
@@ -81,7 +71,6 @@
 .theme-forest .toggle.on .knob { background: #e8c47a; }
 .theme-forest .chip.on { background: rgba(90,138,58,.4); border-color: #9cc46a; }
 
-/* ---- Cyberpunk: HUD brackets, hard-edged neon ---- */
 .theme-cyberpunk::after {
   background:
     linear-gradient(#f5e400, #f5e400) 0 0 / 26px 2px, linear-gradient(#f5e400, #f5e400) 0 0 / 2px 26px,
@@ -103,7 +92,6 @@
 .theme-cyberpunk .nav-btn { border-radius: 0; }
 .theme-cyberpunk .nav-btn.on { box-shadow: inset 3px 0 0 #f5e400, 0 0 14px rgba(245,228,0,.3) !important; }
 
-/* ---- Galaxy: orbit ring rim, nebula buttons ---- */
 .theme-galaxy::after { box-shadow: inset 0 0 0 1px rgba(200,170,255,.3), inset 0 0 80px rgba(120,60,200,.18); }
 .theme-galaxy .btn.primary { border-radius: 999px; background: linear-gradient(120deg, #5a7cff, #b06aff 50%, #ff7ad9) !important; background-size: 200% 100% !important; animation: nebula 6s linear infinite; }
 @keyframes nebula { to { background-position: 200% 0; } }
@@ -112,7 +100,6 @@
 .theme-galaxy .toggle.on .knob { box-shadow: 0 0 0 3px rgba(255,255,255,.2), 0 0 10px #fff; }
 .theme-galaxy .nav-btn.on { border-radius: 999px; box-shadow: 0 0 0 1px rgba(200,170,255,.5), 0 0 18px rgba(176,106,255,.4) !important; }
 
-/* ---- Sunset: retro chrome, striped sun buttons ---- */
 .theme-sunset::after { box-shadow: inset 0 0 0 2px rgba(255,143,90,.35), inset 0 -40px 60px -30px rgba(255,94,154,.25); }
 .theme-sunset .titlebar { background: linear-gradient(180deg, rgba(255,143,90,.14), transparent); }
 .theme-sunset .btn.primary { background: linear-gradient(180deg, #ffd166 0 30%, #ff8f5a 30% 38%, #ff8f5a 38% 60%, #ff5e9a 60% 66%, #ff5e9a 66%) !important; color: #2a0a1a; font-weight: 800; border-radius: 6px; }
@@ -120,7 +107,6 @@
 .theme-sunset .toggle.on { background: linear-gradient(90deg, #ff5e9a, #ffd166); }
 .theme-sunset .chip.on { background: linear-gradient(90deg, #ff8f5a55, #ff5e9a55); border-color: #ff8f5a; }
 
-/* ---- Mono: editorial, sharp ink lines ---- */
 .theme-mono::after { box-shadow: inset 0 0 0 1px #fff3; }
 .theme-mono .btn { border-radius: 0 !important; }
 .theme-mono .btn.primary { background: #fff !important; color: #000; box-shadow: none !important; }
@@ -131,7 +117,6 @@
 .theme-mono .toggle.on .knob { background: #000; }
 .theme-mono .chip.on { background: #fff; color: #000; }
 
-/* ===================== What's new, feedback, "found us" ===================== */
 .eng-modal { width: 460px; padding: 26px 26px 22px; background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 10%, #131419), #131419 40%); }
 .eng-hero { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .eng-hero > svg { flex: none; width: 44px; height: 44px; padding: 11px; border-radius: 14px; color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 40%, transparent); }
@@ -167,22 +152,17 @@
 .eng-new { width: 560px; }
 .eng-vid { display: block; width: 100%; aspect-ratio: 16/9; margin: 0 0 12px; border-radius: 12px; background: #000; border: 1px solid var(--line-2); object-fit: cover; }
 
-/* ---- Window shape + interface scale (v1.0.9) ---- */
 :root { --win-r: 16px; }
 .frame.desktop { border-radius: var(--win-r); }
 .frame.desktop:not(.maximized) .winctl .close { border-top-right-radius: calc(var(--win-r) - 1px); }
 .frame.desktop.maximized { --win-r: 0px; }
 .frame.desktop.maximized::after { border-radius: 0; }
-/* Scale with CSS zoom on <body> so every window keeps its own size (Electron's
-   page zoom is shared by every page from the same origin, HUD included). */
 body { zoom: var(--ui-scale, 1); width: calc(100vw / var(--ui-scale, 1)); height: calc(100vh / var(--ui-scale, 1)); }
 
-/* ---- Custom background: video + fit ---- */
 .custom-bg video { position: absolute; inset: -30px; width: calc(100% + 60px); height: calc(100% + 60px); object-fit: cover; filter: blur(var(--bg-blur)); transform: translate3d(calc(var(--mx, 0) * -12px), calc(var(--my, 0) * -8px), 0); transition: transform .7s cubic-bezier(.2,.8,.2,1); }
 .custom-bg.fit-contain img, .custom-bg.fit-contain video { object-fit: contain; }
 .custom-bg.fit-center img, .custom-bg.fit-center video { object-fit: none; }
 
-/* ---- Appearance settings (v1.0.9) ---- */
 .ap { display: flex; flex-direction: column; gap: 26px; }
 .ap-sec > header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
 .ap-sec h3 { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-2); }
@@ -201,7 +181,6 @@ body { zoom: var(--ui-scale, 1); width: calc(100vw / var(--ui-scale, 1)); height
 .ap-tile-ui i.dot { width: 18px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--t-a), var(--t-b)); margin-top: 2px; }
 .ap-tile-name { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 18px 8px 7px; font: 600 12.5px var(--t-font, var(--display)); color: #fff; text-align: center; background: linear-gradient(180deg, transparent, rgba(0,0,0,.65)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
 .ap-check { position: absolute; top: 7px; right: 7px; z-index: 3; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--t-a); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
-/* Each tile wears its theme's frame */
 .ap-tile[data-t="kawaii"] { border: 2px dotted rgba(255,156,200,.7); }
 .ap-tile[data-t="christmas"]::after, .ap-tile[data-t="halloween"]::after { content: ""; position: absolute; inset: 0; z-index: 2; border: 3px solid transparent; border-radius: inherit; pointer-events: none; -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
 .ap-tile[data-t="christmas"]::after { background: repeating-linear-gradient(45deg, #d4263a 0 6px, #f4f4f4 6px 12px) border-box; }
@@ -230,7 +209,6 @@ body { zoom: var(--ui-scale, 1); width: calc(100vw / var(--ui-scale, 1)); height
 .ap-scale .chip.on { background: var(--accent); color: #fff; border-color: transparent; }
 @media (max-width: 1100px) { .ap-bg { grid-template-columns: 1fr; } }
 
-/* ---- FFlags (v1.0.9) ---- */
 .preset-lib { margin-bottom: 18px; padding: 14px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
 .preset-lib.loading { display: flex; align-items: center; gap: 8px; color: var(--text-3); font-size: 13px; }
 .preset-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -263,7 +241,6 @@ body { zoom: var(--ui-scale, 1); width: calc(100vw / var(--ui-scale, 1)); height
 .flag-val small { color: var(--text-3); font-size: 12px; }
 .json-edit.bad { border-color: #ff6b7d !important; }
 
-/* ---- Versions (v1.0.9) ---- */
 .versions .mono, .mono { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12.5px; }
 .ver-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 22px; }
 .ver-mode { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); cursor: pointer; }
@@ -285,7 +262,6 @@ body { zoom: var(--ui-scale, 1); width: calc(100vw / var(--ui-scale, 1)); height
 .ver-main small { color: var(--text-3); font-size: 12px; }
 .tag.on { background: var(--accent); color: #fff; }
 
-/* ---- News dot ---- */
 .nav-btn { position: relative; }
 .nav-dot { position: absolute; top: 7px; left: 31px; width: 9px; height: 9px; border-radius: 50%; background: #ff3b5c; box-shadow: 0 0 0 2px var(--bg-0), 0 0 10px rgba(255,59,92,.7); animation: navdot 2s ease-in-out infinite; pointer-events: none; }
 @keyframes navdot { 50% { transform: scale(1.25); } }
@@ -293,10 +269,6 @@ body { zoom: var(--ui-scale, 1); width: calc(100vw / var(--ui-scale, 1)); height
 .ap-scale { flex-wrap: nowrap; } .ap-scale .slider { width: 150px; min-width: 0; } .ap-sec .setting > div:first-child { min-width: 180px; }
 .settings-panel { min-width: 0; } .settings-panel .setting { min-width: 0; } .settings-panel .setting > div:first-child { min-width: 0; }
 
-/* ---- Rendering performance (v1.0.10) ----
-   Blurring what's behind a large panel or every game card is redrawn on each
-   animation frame and while scrolling; solid tints look the same and cost
-   nothing. Long grids skip drawing cards that are off screen. */
 .content, .sidebar, .rpanel { backdrop-filter: none !important; }
 .content { background: color-mix(in srgb, var(--bg-1) 78%, transparent); }
 .rpanel { background: color-mix(in srgb, var(--bg-1) 86%, transparent); }
@@ -307,7 +279,6 @@ body { zoom: var(--ui-scale, 1); width: calc(100vw / var(--ui-scale, 1)); height
 .content { contain: layout paint; }
 
 kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border: 1px solid var(--line-2, rgba(255,255,255,.18)); border-bottom-width: 2px; font: 600 12px ui-monospace, Consolas, monospace; color: var(--text); }
-/* ---- Marketplace feed ---- */
 .mk-modes button { display: inline-flex; align-items: center; gap: 6px; }
 .mk-free { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); }
 .item-tag.why { left: 8px; right: auto; background: rgba(0,0,0,.6); color: #fff; }
@@ -316,21 +287,14 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .item-fav { display: inline-flex; align-items: center; gap: 3px; color: var(--text-3); font-size: 11px; }
 .feed-sentinel { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 26px 0 40px; color: var(--text-3); font-size: 13px; min-height: 40px; }
 
-/* ---- Idle: Moony is in the background, so nothing decorative moves ---- */
 .frame.idle *, .frame.idle *::before, .frame.idle *::after { animation-play-state: paused !important; }
 .frame.idle .snow { visibility: hidden; }
 
-/* ===================== v2.0.1 ===================== */
-
-/* Sidebar: the highlight stays inside the button (no glow that the sidebar
-   cuts off at its edges). */
 .nav-scroll { padding: 4px 0; }
 .frame .sidebar .nav-btn.on { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent) !important; background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 26%, transparent), color-mix(in srgb, var(--accent-2) 14%, transparent)) !important; color: #fff; }
 .frame .sidebar .nav-btn.on::after { content: ""; position: absolute; left: 50%; bottom: 3px; width: 14px; height: 3px; margin-left: -7px; border-radius: 3px; background: var(--accent); }
 .frame .sidebar .nav-btn:hover:not(.on) { background: color-mix(in srgb, var(--accent) 10%, transparent); }
 
-/* Scrollbar: thin and quiet, grows and lights up in the accent colour when
-   you reach for it. */
 .frame ::-webkit-scrollbar { width: 12px; height: 12px; }
 .frame ::-webkit-scrollbar-track { background: transparent; }
 .frame ::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--text) 14%, transparent); border: 4px solid transparent; border-radius: 99px; background-clip: padding-box; min-height: 40px; }
@@ -339,12 +303,6 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .frame ::-webkit-scrollbar-corner { background: transparent; }
 .frame ::-webkit-scrollbar-button { display: none; height: 0; }
 
-/* Themes, reworked: every theme now builds its whole look from its own
-   colours, so each one feels like a different app rather than a tint.
-   - a soft colour mesh behind everything from the theme's three ambient colours
-   - surfaces tinted towards the accent, with a light top edge
-   - headings in the theme's wordmark gradient
-   - accent buttons with a matching glow */
 .frame { background:
   radial-gradient(70% 55% at 0% 0%, color-mix(in srgb, var(--amb-1) 16%, transparent), transparent 70%),
   radial-gradient(60% 50% at 100% 100%, color-mix(in srgb, var(--amb-2) 13%, transparent), transparent 70%),
@@ -367,7 +325,6 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .frame .tile-art, .frame .item-img { box-shadow: 0 10px 26px -14px color-mix(in srgb, var(--accent) 60%, #000); }
 .frame .tag { background: color-mix(in srgb, var(--accent) 16%, transparent); color: color-mix(in srgb, var(--accent) 40%, #fff); }
 
-/* v2.0.2: square window, no outline; easy-to-grab resize edges */
 :root, .frame.desktop { --win-r: 0px !important; }
 .frame.desktop { border-radius: 0 !important; border: 0 !important; }
 .frame::after { border-radius: 0 !important; }
@@ -381,7 +338,6 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .rp-promo-dots i { width: 6px; height: 6px; border-radius: 99px; background: var(--line-2, rgba(255,255,255,.2)); cursor: pointer; transition: width .2s; }
 .rp-promo-dots i.on { width: 16px; background: var(--accent); }
 
-/* Cursor presets (Mods) */
 .cur-presets { margin: 14px 0 6px; }
 .cur-presets .list-title small { font-weight: 500; color: var(--text-3); text-transform: none; letter-spacing: 0; }
 .cur-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
@@ -395,8 +351,6 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .flag-import { display: flex; gap: 8px; width: 100%; margin-top: 4px; }
 .flag-import .input { flex: 1; }
 
-/* ===================== Midnight = the website look (v2.0.4) =====================
-   Black and grey, white primary buttons, quiet outlines, no glows or gradients. */
 .frame.theme-midnight { background: radial-gradient(70% 50% at 50% -10%, rgba(255,255,255,.05), transparent 70%), #050505; }
 .frame.theme-midnight::after { box-shadow: inset 0 0 0 1px #1f1f1f; }
 .frame.theme-midnight .titlebar { background: rgba(5,5,5,.85); border-bottom: 1px solid #1a1a1a; }
@@ -432,7 +386,6 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .frame.theme-midnight .item-tag.why.fy { background: #fff; color: #000; }
 .frame.theme-midnight ::-webkit-scrollbar-thumb:hover, .frame.theme-midnight ::-webkit-scrollbar-thumb:active { background: #8a8a8a; background-clip: padding-box; }
 
-/* Your own background (picture/GIF/video) shows through every panel, in every theme. */
 .frame.has-bg { background: #000 !important; }
 .frame.has-bg .content, .frame.has-bg.theme-midnight .content { background: color-mix(in srgb, var(--bg-1) 42%, transparent) !important; }
 .frame.has-bg .rpanel, .frame.has-bg.theme-midnight .rpanel { background: color-mix(in srgb, var(--bg-1) 55%, transparent) !important; }
@@ -441,7 +394,6 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .frame.has-bg .theme-scene { display: none; }
 .frame.has-bg .settings-group, .frame.has-bg .card, .frame.has-bg .wide, .frame.has-bg .item-card { background: color-mix(in srgb, var(--surface) 70%, transparent) !important; backdrop-filter: blur(10px); }
 
-/* Crosshair editor */
 .xh-styles { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0 8px; }
 .xh-style { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 10px; border: 1px solid var(--line, rgba(255,255,255,.1)); background: rgba(0,0,0,.35); cursor: pointer; }
 .xh-style.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
@@ -449,7 +401,6 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .xh-col.sel { border-color: var(--text, #fff); }
 .xh-editor input[type=color] { width: 26px; height: 22px; border: 0; background: none; padding: 0; cursor: pointer; }
 
-/* Performance center */
 .perf-boost { display: flex; align-items: center; gap: 14px; padding: 16px; }
 .perf-boost small { display: block; color: var(--text-2); margin-top: 2px; max-width: 620px; }
 .perf-boost-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent); flex: none; }
@@ -477,7 +428,6 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .perf-tip { margin: 6px 0 0; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, #facc15 10%, transparent); font-size: 13px; }
 @media (max-width: 900px) { .perf-tiles { grid-template-columns: 1fr 1fr; } .perf-layout { grid-template-columns: 1fr; } }
 
-/* Party */
 .party-card { display: flex; align-items: center; gap: 14px; padding: 16px; border-color: var(--accent); }
 .party-card b { display: block; font-size: 18px; }
 .party-card small { color: var(--text-2); }
@@ -491,7 +441,6 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .search-input.sm { display: flex; align-items: center; gap: 6px; }
 .search-input.sm .input { height: 30px; width: 180px; }
 
-/* Wrapped */
 .wrapped-layout { display: grid; grid-template-columns: minmax(260px, 440px) 1fr; gap: 24px; align-items: start; }
 .wrapped-card { width: 100%; height: auto; border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,.45); }
 .wrapped-side { display: grid; gap: 10px; align-content: start; }
@@ -501,16 +450,13 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .wrapped-facts small { display: block; color: var(--text-2); }
 @media (max-width: 860px) { .wrapped-layout { grid-template-columns: 1fr; } }
 
-/* Smart discovery rows */
 .for-you { display: grid; gap: 6px; margin-bottom: 14px; }
 .for-you-row { display: flex; gap: 12px; padding-bottom: 6px; }
 .for-you-item { flex: 0 0 300px; }
 
-/* Live backgrounds */
 .live-bg canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .live-bg::after { background: rgba(0,0,0,.58); }
 
-/* App font picker */
 html[style*="--ui-font"] body, html[style*="--ui-font"] button, html[style*="--ui-font"] input, html[style*="--ui-font"] select, html[style*="--ui-font"] textarea { font-family: var(--ui-font) !important; }
 html.font-small body { font-size: 85%; }
 .ap-chips { display: flex; flex-wrap: wrap; gap: 6px; }

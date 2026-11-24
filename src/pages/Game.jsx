@@ -108,7 +108,7 @@ function Overview({ g, st, media }) {
   );
 }
 
-const Stat = ({ icon: Icon, label, value }) => ( // eslint-disable-line no-unused-vars
+const Stat = ({ icon: Icon, label, value }) => (
   <div className="stat"><span className="stat-label"><Icon size={12} /> {label}</span>{value == null ? <Skeleton w={54} h={16} style={{ marginTop: 6 }} /> : <b>{value}</b>}</div>
 );
 

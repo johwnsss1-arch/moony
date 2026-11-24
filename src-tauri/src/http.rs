@@ -1,7 +1,3 @@
-// HTTP for the interface. The page can't call Roblox directly (CORS) and must
-// never see a Roblox cookie, so it asks Rust to make the request. A request
-// for a signed-in account carries a placeholder ("moony:acct:<id>") in place
-// of the cookie; it's swapped for the real one here and never sent back.
 use base64::{engine::general_purpose::STANDARD as B64, Engine};
 use once_cell::sync::Lazy;
 use serde_json::{json, Value};
@@ -36,7 +32,6 @@ pub async fn request(app: &tauri::AppHandle, req: Value) -> Result<Value, String
         for (k, v) in h {
             let mut val = v.as_str().unwrap_or_default().to_string();
             if k.eq_ignore_ascii_case("cookie") && val.contains("moony:acct:") {
-                // Only Roblox ever gets a Roblox cookie.
                 if !(host == "roblox.com" || host.ends_with(".roblox.com")) { continue; }
                 let id: u64 = val.split("moony:acct:").nth(1).and_then(|s| s.split(|c: char| !c.is_ascii_digit()).next()).and_then(|s| s.parse().ok()).unwrap_or(0);
                 let Some(cookie) = crate::vault::cookie(app, id) else { return Err("That account is signed out".into()) };
@@ -56,14 +51,13 @@ pub async fn request(app: &tauri::AppHandle, req: Value) -> Result<Value, String
     let mut headers = serde_json::Map::new();
     for (k, v) in res.headers() {
         if k == "set-cookie" {
-            // Roblox rotates the cookie now and then; keep the new one.
             if let (Some(id), Ok(s)) = (account, v.to_str()) {
                 if let Some(rest) = s.strip_prefix(".ROBLOSECURITY=") {
                     let c = rest.split(';').next().unwrap_or_default();
                     if c.len() > 100 { crate::vault::rotate(app, id, c); }
                 }
             }
-            continue; // never hand cookies to the page
+            continue;
         }
         if let Ok(s) = v.to_str() { headers.insert(k.to_string(), json!(s)); }
     }

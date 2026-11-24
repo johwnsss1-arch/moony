@@ -60,8 +60,6 @@ export function Segmented({ value, options, onChange }) {
 
 export const Skeleton = ({ w = "100%", h = 14, r = 6, style }) => <div className="skeleton" style={{ width: w, height: h, borderRadius: r, ...style }} />;
 
-// Image that fades in (shimmering placeholder until then) and retries a
-// couple of times if the CDN hiccups, instead of staying blank.
 export function Img({ src, alt = "", className = "", ...rest }) {
   const [loaded, setLoaded] = useState(false);
   const [attempt, setAttempt] = useState(0);

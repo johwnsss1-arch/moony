@@ -1,5 +1,3 @@
-// Signed-in Roblox accounts. Each cookie is encrypted with Windows DPAPI
-// (only your Windows user on this PC can decrypt it) and never leaves Rust.
 use base64::{engine::general_purpose::STANDARD as B64, Engine};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -56,15 +54,10 @@ pub fn remove(app: &tauri::AppHandle, id: u64) {
     all.retain(|e| e.id != id);
     save(app, &all);
 }
-/// Accounts without their cookies, for the interface.
 pub fn accounts(app: &tauri::AppHandle) -> Vec<Value> {
     load(app).into_iter().map(|e| json!({ "id": e.id, "name": e.name, "displayName": e.display_name, "avatar": e.avatar })).collect()
 }
 
-/// One-time move from the Electron build: its sessions.json holds cookies
-/// encrypted by Chromium (AES-256-GCM with a key protected by DPAPI in
-/// "Local State"). Decrypt them on this PC and store them in our own vault.
-/// Returns how many accounts were imported.
 pub fn import_electron(app: &tauri::AppHandle) -> usize {
     use aes_gcm::{aead::Aead, Aes256Gcm, KeyInit, Nonce};
     let Some(roaming) = dirs::config_dir() else { return 0 };

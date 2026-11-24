@@ -1,5 +1,3 @@
-// Moony mark: a crescent moon with a small star. Themes can decorate it:
-// "hat" (Santa hat), "bow" (pink bow), "witch" (witch hat).
 export function Logo({ size = 26, variant = null, festive = false }) {
   const v = variant || (festive ? "hat" : null);
   return (

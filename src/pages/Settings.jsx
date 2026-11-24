@@ -7,7 +7,6 @@ import { LIVE_BGS } from "../components/LiveBg";
 import { UI_FONTS } from "../lib/fonts";
 import { clearBg, emitBgChange, loadBg, onBgChange, saveBg } from "../lib/custombg";
 
-// Custom background: picture, GIF or short video, with a live preview.
 function BackgroundCard({ s, u }) {
   const [url, setUrl] = useState(null);
   const [kind, setKind] = useState("image");
@@ -269,7 +268,6 @@ function Launch() {
   );
 }
 
-// Make Moony the app Windows uses for Roblox's Play links (roblox-player:).
 function ProtocolRow() {
   const { toast } = useApp();
   const [on, setOn] = useState(null);

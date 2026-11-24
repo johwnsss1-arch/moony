@@ -12,8 +12,6 @@ import { themeById } from "../lib/themes";
 import { NowPlaying, RecentServers } from "./Playtime";
 import { Robux } from "./RobuxIcon";
 
-// Sidebar tabs, in groups separated by a divider. Settings sits at the bottom.
-// `desc` is used by the first-run tour.
 export const NAV = [
   { id: "home", label: "Home", icon: Home, group: 0, desc: "Featured games, your playtime and where you left off" },
   { id: "discover", label: "Discover", icon: Compass, group: 0, desc: "Search Roblox and browse by genre" },
@@ -36,7 +34,6 @@ export const NAV = [
   { id: "settings", label: "Settings", icon: Settings, group: 3, desc: "Theme, launching, notifications, Discord" },
 ];
 
-// One-time "here's what each icon does" card on first launch.
 export function Tour() {
   const { settings, updateSettings, setPage } = useApp();
   if (settings.tourDone) return null;
@@ -129,7 +126,6 @@ export function TitleBar({ onSearch }) {
   );
 }
 
-// Red dot on News when there's a post newer than the last time you looked.
 function useNewsDot(page) {
   const { settings, updateSettings } = useApp();
   const [newest, setNewest] = useState(0);
@@ -181,7 +177,6 @@ export function Sidebar() {
 export function RightPanel() {
   const { accounts, activeAccount, setActiveId, recent, play, openGame, tracked, setPage, launchAs, friends, joinFriend, isSignedIn, openProfile } = useApp();
   const source = launchAs ? friends.data : tracked;
-  // Stable order (by name) so presence changes don't reshuffle the list.
   const online = source.filter((t) => t.presence && t.presence.type > 0).sort((a, b) => (a.displayName || a.name || "").localeCompare(b.displayName || b.name || "", undefined, { sensitivity: "base" }) || a.id - b.id);
   return (
     <aside className="rpanel">
@@ -269,9 +264,6 @@ export function Toasts() {
   );
 }
 
-// A rotating, looping video card under "Recently played" (Discord invite,
-// giveaways, "update coming"...). The list lives on moonylauncher.xyz/promos.json
-// so it can change any time without an app update.
 const PROMO_FEED = "https://moonylauncher.xyz/promos.json";
 function PromoFrame() {
   const [items, setItems] = useState([]);

@@ -1,4 +1,3 @@
-// App font picker. Each font is bundled (works offline) and only loaded when picked.
 export const UI_FONTS = [
   { id: "inter", label: "Inter", family: '"Inter Variable", Inter, "Segoe UI", sans-serif', load: null },
   { id: "space-grotesk", label: "Space Grotesk", family: '"Space Grotesk Variable", sans-serif', load: () => import("@fontsource-variable/space-grotesk") },
@@ -12,7 +11,7 @@ export const UI_FONTS = [
 
 export async function applyUiFont(id) {
   const f = UI_FONTS.find((x) => x.id === id) || UI_FONTS[0];
-  try { await f.load?.(); } catch { /* keep the old font */ }
+  try { await f.load?.(); } catch { }
   const r = document.documentElement;
   if (f.id === "inter") { r.style.removeProperty("--ui-font"); r.classList.remove("font-small"); }
   else { r.style.setProperty("--ui-font", f.family); r.classList.toggle("font-small", !!f.small); }

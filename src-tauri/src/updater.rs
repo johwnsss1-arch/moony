@@ -1,5 +1,3 @@
-// Updates: reads latest.json from the newest GitHub release, downloads the
-// installer, checks its SHA-256, and runs it silently when you restart.
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::sync::Mutex;
@@ -50,7 +48,6 @@ pub async fn check(app: &tauri::AppHandle) -> Value {
     match r { Ok(v) => set(app, v), Err(e) => set(app, json!({ "status": "error", "error": e })) }
 }
 
-/// Run the downloaded installer silently and quit; it starts Moony again.
 pub fn apply(app: &tauri::AppHandle) -> bool {
     let Some(f) = FILE.lock().unwrap().clone() else { return false };
     if std::process::Command::new(f).arg("/S").spawn().is_ok() { app.exit(0); true } else { false }

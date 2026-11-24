@@ -1,9 +1,5 @@
-// Original illustrations for each theme: a scene that sits in the
-// bottom-right of the window behind the content, and small decorations on
-// the window's corners. All characters here are Moony's own.
 import { useId } from "react";
 
-/* ---------------------------------------------------------------- helpers */
 const Stars = ({ n = 18, w = 640, h = 260, seed = 1, fill = "#fff" }) => (
   <g fill={fill} className="ta-far">
     {Array.from({ length: n }, (_, i) => {
@@ -24,7 +20,6 @@ const Shooting = ({ n = 2, color = "#fff" }) => (
   </g>
 );
 
-/* ----------------------------------------------------------------- scenes */
 function Midnight({ u }) {
   return (
     <g>
@@ -37,7 +32,7 @@ function Midnight({ u }) {
       <Shooting n={3} color="#e3ddff" />
       <circle cx="420" cy="170" r="190" fill={`url(#${u}mg)`} />
       <circle cx="420" cy="175" r="110" fill={`url(#${u}mm)`} mask={`url(#${u}mk)`} />
-      
+
       <g fill="#1a1838" opacity=".9">
         <path d="M0 420V360c60-20 120-24 180-10s110 10 170-6 130-30 200-14 90 30 90 30v60z" />
       </g>
@@ -53,7 +48,6 @@ function Kawaii({ u }) {
         <linearGradient id={u + "kb"} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fff" /><stop offset="1" stopColor="#ffe3ef" /></linearGradient>
         <linearGradient id={u + "kh"} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ff9cc8" /><stop offset="1" stopColor="#ff5fa2" /></linearGradient>
       </defs>
-      {/* rainbow */}
       <g fill="none" strokeWidth="14" opacity=".55" strokeLinecap="round">
         <path d="M150 330a220 220 0 0 1 440 0" stroke="#ffb3d1" />
         <path d="M164 330a206 206 0 0 1 412 0" stroke="#ffe0a3" />
@@ -61,15 +55,12 @@ function Kawaii({ u }) {
         <path d="M192 330a178 178 0 0 1 356 0" stroke="#c9d6ff" />
         <path d="M206 330a164 164 0 0 1 328 0" stroke="#e3c9ff" />
       </g>
-      {/* clouds */}
       <g fill="#fff" opacity=".9">
         <path className="ta-drift" style={{ animationDuration: "48s" }} d="M120 330c-20 0-30-24-10-32 0-22 30-28 40-12 14-16 40-6 36 14 22 2 22 30 0 30z" />
         <path className="ta-drift" style={{ animationDuration: "64s", animationDelay: "-30s" }} d="M520 320c-18 0-26-20-8-28 2-18 26-22 34-10 12-12 34-4 30 12 20 2 18 26 0 26z" />
       </g>
-      {/* hills */}
       <path d="M0 420V368c80-30 160-30 240-6s170 20 250-4 150-10 150-10v72z" fill="#ffc2dc" />
       <path d="M0 420v-30c100-18 220-16 320 0s220 10 320-8v38z" fill="#ff9cc8" opacity=".75" />
-      {/* strawberries */}
       {[[120, 380], [560, 372]].map(([x, y], i) => (
         <g key={i} transform={`translate(${x} ${y})`}>
           <path d="M0 -14c14 0 20 8 18 18-3 14-12 22-18 22S-15 18-18 4c-2-10 4-18 18-18z" fill="#ff4f7d" />
@@ -77,9 +68,7 @@ function Kawaii({ u }) {
           <g fill="#ffe08a"><circle cx="-6" cy="2" r="1.4" /><circle cx="5" cy="0" r="1.4" /><circle cx="0" cy="10" r="1.4" /><circle cx="-9" cy="12" r="1.2" /><circle cx="8" cy="12" r="1.2" /></g>
         </g>
       ))}
-      
-      
-      {/* sparkles */}
+
       <g fill="#fff">
         {[[210, 130], [470, 110], [520, 200], [170, 220]].map(([x, y], i) => (
           <path key={i} className="ta-sparkle" style={{ animationDelay: `${i * 0.6}s`, transformOrigin: `${x}px ${y}px` }} transform={`translate(${x} ${y})`} d="M0-10l2.4 7.6L10 0l-7.6 2.4L0 10l-2.4-7.6L-10 0l7.6-2.4z" />
@@ -102,16 +91,12 @@ function Anime({ u }) {
       <Shooting n={2} color="#ffc4dd" />
       <circle cx="440" cy="150" r="170" fill={`url(#${u}ag)`} />
       <circle cx="440" cy="150" r="96" fill={`url(#${u}am)`} />
-      {/* skyline */}
       <path d="M0 420V260h40v-40h30v30h26v-70h44v80h20v-40h40v60h30v-90h50v100h24v-50h40v40h30v-80h46v90h24v-30h40v50h36v-60h40v60h40v160z" fill="#16123a" />
       {windows}
-      {/* neon signs */}
       <rect x="150" y="196" width="30" height="8" rx="3" fill="#ff6fa8" className="ta-flicker" />
       <rect x="436" y="210" width="8" height="34" rx="3" fill="#46e2ff" className="ta-flicker" style={{ animationDelay: "1.3s" }} />
-      {/* rooftop */}
       <path d="M200 420v-74h440v74z" fill="#0d0b22" />
       <g stroke="#2a2458" strokeWidth="3"><path d="M200 346h440" />{Array.from({ length: 12 }, (_, i) => <path key={i} d={`M${210 + i * 38} 346v-30`} />)}<path d="M200 316h440" /></g>
-      {/* Hana, sitting on the rooftop edge with headphones */}
       <g transform="translate(420 236)" fill="#0d0b22">
         <g className="ta-hair">
           <path d="M-8 -12c-20 6-30 36-24 62 4 18 0 40-14 56 22-4 40-20 46-44 6 20 30 30 52 30-14-14-18-34-16-56 4-30-18-52-44-48z" />
@@ -124,7 +109,6 @@ function Anime({ u }) {
         <path d="M-10 86h66l12 26-16 52h-14l10-46h-26l-8 54h-14l2-56z" />
         <path d="M52 40c18 10 30 24 34 42l-10 4c-6-14-16-24-28-30z" />
       </g>
-      {/* sakura branch */}
       <g transform="translate(640 0)">
         <path d="M0 30c-60 10-110 40-150 80M-90 60c-10 20-6 40 4 54M-130 92c-20 0-36 8-46 20" stroke="#3a2340" strokeWidth="6" fill="none" strokeLinecap="round" />
         {[[-150, 110], [-86, 114], [-176, 112], [-60, 50], [-110, 74], [-30, 40]].map(([x, y], i) => (
@@ -151,12 +135,11 @@ function Halloween({ u }) {
       <Stars n={16} seed={7} h={180} />
       <circle cx="440" cy="140" r="130" fill={`url(#${u}hm)`} />
       <circle cx="440" cy="140" r="76" fill="#ffd08a" />
-      
-      {/* hill and tree */}
+
       <path d="M0 420V350c120-50 260-60 380-40s200 30 260 20v90z" fill="#1a1020" />
       <path d="M160 340c4-50-6-90-30-120M132 250c-24-10-40-30-44-50M140 230c20-20 50-24 70-16M146 280c-20 0-34-10-44-22" stroke="#1a1020" strokeWidth="9" fill="none" strokeLinecap="round" />
       <Pumpkin x={300} y={354} /><Pumpkin x={372} y={368} s={0.7} /><Pumpkin x={560} y={368} s={0.85} />
-      
+
     </g>
   );
 }
@@ -176,8 +159,7 @@ function Christmas() {
       <path d="M0 420V350c140-40 280-44 420-20s180 16 220 10v80z" fill="#eef4ff" />
       <path d="M0 420v-40c160-20 320-20 640 0v40z" fill="#d6e2f7" />
       <Tree x={150} y={340} /><Tree x={560} y={330} s={0.8} /><Tree x={230} y={350} s={0.6} />
-      
-      {/* gifts */}
+
       {[[290, 366, "#d4263a", "#ffd166"], [324, 374, "#1f9d55", "#fff"]].map(([x, y, c, r], i) => (
         <g key={i} transform={`translate(${x} ${y})`}><rect x="-18" y="-18" width="36" height="30" rx="3" fill={c} /><rect x="-3" y="-18" width="6" height="30" fill={r} /><rect x="-18" y="-8" width="36" height="6" fill={r} /><path d="M0-18c-10-12-18-4-10 0zM0-18c10-12 18-4 10 0z" fill={r} /></g>
       ))}
@@ -190,9 +172,7 @@ function Ocean({ u }) {
     <g>
       <defs><linearGradient id={u + "or"} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#bdeaff" stopOpacity=".35" /><stop offset="1" stopColor="#bdeaff" stopOpacity="0" /></linearGradient></defs>
       {[[300, 40], [400, 60], [520, 50]].map(([x, w], i) => <path key={i} d={`M${x} 0h${w}l${w * 1.5} 360h-${w * 2}z`} fill={`url(#${u}or)`} />)}
-      
-      
-      {/* sea floor */}
+
       <path d="M0 420v-50c120-20 250-26 380-10s200 10 260 4v56z" fill="#0b2a3a" />
       <g stroke="#14e0c4" strokeWidth="7" fill="none" strokeLinecap="round" opacity=".8" className="ta-sway">
         <path d="M90 380c-10-30 10-50 0-80s10-40 4-60" /><path d="M120 384c10-30-8-46 2-72" /><path d="M590 376c-10-24 8-40-2-66s8-30 2-50" />
@@ -210,19 +190,16 @@ function Forest() {
     <g>
       <Stars n={10} seed={4} h={150} fill="#fffbe6" />
       <circle cx="470" cy="110" r="48" fill="#ffe7b0" opacity=".8" />
-      {/* layered pines */}
       {[[0, "#1e2d1a", 0.9], [30, "#16210f", 1]].map(([dy, c, o], l) => (
         <g key={l} fill={c} opacity={o}>
           {Array.from({ length: 9 }, (_, i) => { const x = i * 80 + (l ? 40 : 0), h = 120 + ((i * 37 + l * 20) % 70); return <path key={i} d={`M${x} ${340 + dy}l30-${h}l30 ${h}z`} />; })}
         </g>
       ))}
       <path d="M0 420v-70c160-16 320-18 640 0v70z" fill="#121a0e" />
-      
-      {/* mushrooms */}
+
       {[[250, 380], [280, 386]].map(([x, y], i) => (
         <g key={i} transform={`translate(${x} ${y}) scale(${i ? 0.7 : 1})`}><rect x="-5" y="-6" width="10" height="16" rx="3" fill="#fff3e0" /><path d="M-18-4c0-14 8-20 18-20s18 6 18 20z" fill="#d4572e" /><circle cx="-6" cy="-14" r="2.6" fill="#fff" /><circle cx="6" cy="-10" r="2" fill="#fff" /></g>
       ))}
-      {/* fireflies */}
       {[[200, 250], [320, 220], [540, 260], [500, 200], [150, 300]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="3" fill="#e7f57a" className="ta-wander" style={{ animationDelay: `${i * -1.7}s` }} />)}
     </g>
   );
@@ -232,12 +209,10 @@ function Cyberpunk() {
   return (
     <g>
       <g stroke="#00f0ff" strokeWidth="1.2" opacity=".35">{Array.from({ length: 26 }, (_, i) => <path key={i} className="ta-rain" style={{ animationDelay: `${(i * 0.37) % 1.6}s` }} d={`M${(i * 53) % 640} 0l-6 26`} />)}</g>
-      {/* grid floor */}
       <g stroke="#ff2bd6" strokeWidth="1.2" opacity=".5" className="ta-grid">
         {Array.from({ length: 9 }, (_, i) => <path key={i} d={`M0 ${330 + i * i * 2.4}h640`} />)}
         {Array.from({ length: 17 }, (_, i) => <path key={"v" + i} d={`M320 330L${-320 + i * 80} 420`} />)}
       </g>
-      {/* skyline */}
       <g fill="#100d1c">
         <path d="M60 330V160h50v-30h20v30h30v170zM180 330V200h60v130zM260 330V100h40l10-30 10 30h40v230zM380 330V180h70v150zM470 330V130h50v200zM540 330V210h70v120z" />
       </g>
@@ -248,7 +223,6 @@ function Cyberpunk() {
         <rect x="480" y="150" width="6" height="120" fill="#f5e400" />
       </g>
       <g fill="#f5e400" opacity=".7">{Array.from({ length: 30 }, (_, i) => <rect key={i} x={190 + (i % 6) * 8 + Math.floor(i / 6) * 60 * (i % 2)} y={210 + Math.floor(i / 6) * 18} width="4" height="6" />)}</g>
-      {/* Volt, hooded runner with a glowing visor */}
       <g transform="translate(430 236)">
         <path d="M-34 100c0-40 4-70 14-84 6-8 14-12 20-12s14 4 20 12c10 14 14 44 14 84z" fill="#0a0812" />
         <path d="M-22 10c-4-28 4-46 22-50s28 22 22 50c-10 8-34 8-44 0z" fill="#0a0812" />
@@ -271,14 +245,12 @@ function Galaxy({ u }) {
       <ellipse cx="380" cy="200" rx="300" ry="160" fill={`url(#${u}gn)`} />
       <Stars n={40} seed={9} h={420} />
       <Shooting n={3} color="#e3d1ff" />
-      {/* ringed planet */}
       <g transform="translate(470 290)">
         <ellipse rx="130" ry="26" fill="none" stroke="#e3d1ff" strokeWidth="8" opacity=".55" transform="rotate(-14)" />
         <circle r="80" fill={`url(#${u}gp)`} />
         <path d="M-126 30a130 26-14 0 0 252-62" fill="none" stroke="#e3d1ff" strokeWidth="8" opacity=".8" transform="rotate(0)" />
         <circle cx="-26" cy="-20" r="14" fill="#fff" opacity=".12" /><circle cx="20" cy="22" r="10" fill="#3f2a8a" opacity=".3" />
       </g>
-      {/* Cosmo the astronaut */}
       <g transform="translate(250 180)"><g className="ta-tumble">
         <path d="M40 30c20 0 30 10 30 20" stroke="#e8e6f5" strokeWidth="3" fill="none" strokeDasharray="4 4" />
         <rect x="-30" y="10" width="60" height="62" rx="22" fill="#f4f2ff" />
@@ -307,7 +279,6 @@ function Sunset({ u }) {
       <path d="M0 330l130-50 90 30 100-60 100 70 90-40 130 50z" fill="#2a1420" />
       <rect y="330" width="640" height="90" fill="#1d0e17" />
       <g stroke="#ff8f5a" strokeWidth="2.4" opacity=".45">{[0, 1, 2, 3, 4].map((i) => <path key={i} d={`M${300 - i * 20} ${344 + i * 14}h${160 + i * 40}`} />)}</g>
-      {/* palms */}
       {[[120, 340, 1], [560, 336, 0.85]].map(([x, y, s], i) => (
         <g key={i} transform={`translate(${x} ${y}) scale(${s})`} fill="#1a0b13" className="ta-sway">
           <path d="M-4 0c4-60 10-110 24-160l6 2c-12 50-16 100-18 158z" />
@@ -343,7 +314,6 @@ export function SceneArt({ id, className = "theme-scene" }) {
   );
 }
 
-/* ------------------------------------------------------ frame decorations */
 const Bow = ({ c = "#ff7eb6" }) => (
   <g><path d="M0 0c-26-22-46-8-42 8 4 18 24 14 42-8zM0 0c26-22 46-8 42 8-4 18-24 14-42-8z" fill={c} /><path d="M-4 4l-14 30 10-2 6 10 4-36zM4 4l14 30-10-2-6 10-4-36z" fill={c} opacity=".85" /><circle r="8" fill="#ffd1e6" /></g>
 );

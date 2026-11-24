@@ -6,17 +6,14 @@ export function compact(n) {
   return String(n);
 }
 
-// 0 → "0m", 4500 → "1h 15m", 200000 → "55h 33m"
 export function duration(seconds = 0) {
   const m = Math.floor(seconds / 60);
-  if (seconds > 0 && m === 0) return "<1m"; // played, just under a minute
+  if (seconds > 0 && m === 0) return "<1m";
   if (m < 60) return `${m}m`;
   const h = Math.floor(m / 60);
   return `${h}h${m % 60 ? ` ${m % 60}m` : ""}`;
 }
 
-// Total of several durations that matches the per-item numbers shown
-// (each item is shown in whole minutes, so add whole minutes).
 export const totalSeconds = (list) => list.reduce((n, s) => n + Math.floor((s || 0) / 60) * 60, 0);
 
 export function ago(date) {
@@ -27,5 +24,4 @@ export function ago(date) {
   return "just now";
 }
 
-// Roblox names often carry update tags like "[🌸 UPDATE]"; strip them for compact UI.
 export const cleanName = (name = "") => name.replace(/\[[^\]]*\]|【[^】]*】|\([^)]*update[^)]*\)/gi, "").replace(/\s{2,}/g, " ").trim() || name;

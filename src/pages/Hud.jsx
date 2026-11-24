@@ -7,19 +7,16 @@ import { Empty, Slider, Toggle } from "../components/ui";
 import "../hud.css";
 
 const ZOOM = 2.2;
-const SNAP = 1.6; // % distance at which a widget snaps to a guide
+const SNAP = 1.6;
 const GUIDES = [3, 50, 97];
 
-// HUD editor. The preview is your actual Roblox window, scaled down: same
-// shape, widgets drawn at their real size, and a live picture of the game
-// behind them, so what you place here is exactly where it shows in game.
 export default function Hud() {
   const { settings, updateSettings, nowPlaying, friends, recent, favorites } = useApp();
   const hud = { ...DEFAULT_SETTINGS.hud, ...settings.hud, widgets: { ...DEFAULT_SETTINGS.hud.widgets, ...(settings.hud?.widgets || {}) } };
   const [sel, setSel] = useState("game");
   const [status, setStatus] = useState(null);
   const [media, setMedia] = useState(null);
-  const [drag, setDrag] = useState(null); // { id, x, y, snapX, snapY }
+  const [drag, setDrag] = useState(null);
   const [snap, setSnap] = useState(true);
   const [boxW, setBoxW] = useState(800);
   const box = useRef(null);
@@ -34,8 +31,7 @@ export default function Hud() {
     const offs = [o.hud?.onStatus(setStatus), o.media?.onChange(setMedia)];
     return () => offs.forEach((f) => f?.());
   }, []);
-  // No live game picture here: capturing Roblox while dragging made it lag.
-  const [focus, setFocus] = useState(null); // zoom target { x, y } while editing
+  const [focus, setFocus] = useState(null);
   const focusTimer = useRef(0);
   useEffect(() => {
     const ro = new ResizeObserver(([e]) => setBoxW(e.contentRect.width));
@@ -45,7 +41,6 @@ export default function Hud() {
 
   if (!window.orbit) return <div className="page"><Empty icon={LayoutDashboard} title="Desktop app only" text="The in-game HUD works in the desktop app." /></div>;
 
-  // The real Roblox window size (or your screen, before Roblox has been seen).
   const screenSize = window.screen.width > 0 && window.screen.height > 0 ? { width: window.screen.width, height: window.screen.height } : { width: 1920, height: 1080 };
   const size = status?.size?.width > 0 ? status.size : screenSize;
   const k = boxW / size.width;
@@ -64,7 +59,6 @@ export default function Hud() {
     setFocus({ x: w0.x, y: w0.y });
     let last = null, raf = 0;
     const move = (ev) => {
-      // The stage is zoomed in ZOOM× around where the drag started.
       let x = start.x + ((ev.clientX - start.px) / (rect.width * ZOOM)) * 100;
       let y = start.y + ((ev.clientY - start.py) / (rect.height * ZOOM)) * 100;
       x = Math.min(99, Math.max(1, x)); y = Math.min(99, Math.max(1, y));
@@ -74,7 +68,6 @@ export default function Hud() {
       }
       x = Math.round(x * 10) / 10; y = Math.round(y * 10) / 10;
       last = { id, x, y, snapX, snapY };
-      // Only redraw the preview while dragging; save once on release.
       if (!raf) raf = requestAnimationFrame(() => { raf = 0; setDrag(last); });
     };
     const up = () => {
@@ -122,11 +115,9 @@ export default function Hud() {
             <div className={"hud-zoom" + (focus ? " on" : "")} style={focus ? { transform: `scale(${ZOOM})`, transformOrigin: `${focus.x}% ${focus.y}%` } : undefined}>
             {fallbackArt ? <img className="hud-bg dim" src={fallbackArt} alt="" draggable={false} /> : <div className="hud-bg scene" />}
 
-            {/* Guides */}
             {drag?.snapX != null && <i className="hud-guide v" style={{ left: `${drag.snapX}%` }} />}
             {drag?.snapY != null && <i className="hud-guide h" style={{ top: `${drag.snapY}%` }} />}
 
-            {/* The HUD at real size, scaled to the preview */}
             <div className="hud-real" style={{ width: size.width, height: size.height, transform: `scale(${k})`, opacity: hud.enabled ? hud.opacity : hud.opacity * 0.5 }}>
               <div className={"hud-root t-" + (settings.theme || "midnight")} style={{ position: "absolute", "--hud-scale": hud.scale, "--viz": "var(--accent)", "--hud-acc": "var(--accent)" }}>
                 {Object.entries(hud.widgets).filter(([, w]) => w.on).map(([id, w0]) => { const w = drag?.id === id ? { ...w0, x: drag.x, y: drag.y } : w0; return (

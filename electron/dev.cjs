@@ -1,4 +1,3 @@
-// Starts Electron pointed at the Vite dev server (used by `npm run desktop`).
 const { spawn } = require("child_process");
 const electron = require("electron");
 

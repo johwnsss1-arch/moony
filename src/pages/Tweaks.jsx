@@ -19,7 +19,6 @@ export default function Tweaks() {
   );
 }
 
-/* ===================== Mods ===================== */
 function Mods() {
   const { toast } = useApp();
   const [st, setSt] = useState(null);
@@ -72,7 +71,6 @@ function Mods() {
   );
 }
 
-// Cursor presets hosted on moonylauncher.xyz (new ones appear without an update).
 let cursorCache = null;
 function OnlineCursors({ kind, current, onPick }) {
   const [items, setItems] = useState(cursorCache);
@@ -146,9 +144,6 @@ function FontPreview({ src }) {
   );
 }
 
-/* ===================== FFlags ===================== */
-// Two views of the same flags (a table and raw JSON), plus a preset library
-// that's loaded from moonylauncher.xyz so new presets arrive without an update.
 const kindOf = (k) => (/^(D|F|S)?FFlag/.test(k) ? "Flag" : /^(D|F|S)?FInt/.test(k) ? "Int" : /^(D|F|S)?FString/.test(k) ? "String" : /^(D|F|S)?FLog/.test(k) ? "Log" : "Other");
 const parseVal = (s) => (s === "true" ? true : s === "false" ? false : /^-?\d+$/.test(s) ? Number(s) : s);
 const same = (a, b) => String(a) === String(b);
@@ -199,8 +194,6 @@ function FFlags() {
   );
 }
 
-// Pull flags out of whatever a link returns: a JSON object of flags, a
-// {"flags": {...}} wrapper, or JSON with comments/trailing commas around it.
 function parseFlagText(text) {
   const start = text.indexOf("{"), end = text.lastIndexOf("}");
   if (start < 0 || end < start) throw new Error("No flags found in that link");
@@ -251,7 +244,6 @@ function PresetLibrary({ draft, setDraft }) {
     const n = { ...d };
     if (applied(p)) for (const k of Object.keys(p.flags)) delete n[k];
     else {
-      // Only one renderer at a time.
       if (Object.keys(p.flags).some((k) => /^FFlagDebugGraphicsPrefer/.test(k))) for (const k of Object.keys(n)) if (/^FFlagDebugGraphicsPrefer/.test(k)) delete n[k];
       Object.assign(n, p.flags);
     }

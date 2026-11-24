@@ -6,7 +6,6 @@ import { Carousel } from "../components/Carousel";
 import { NowPlaying, PlaytimeSection } from "../components/Playtime";
 import { ErrorState, Img, Skeleton } from "../components/ui";
 
-// Home rows show the top 30 of each chart (Discover has the full lists).
 const pick = (sorts, id) => (sorts.find((s) => s.id === id)?.games ?? []).slice(0, 30);
 
 export default function Home() {

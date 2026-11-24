@@ -1,20 +1,12 @@
-// Roblox public web API client. Runs in Node (Electron main process, or the
-// Vite dev server for browser previews) so there are no CORS limits.
-// Only unauthenticated endpoints are used here. Anything that needs a signed-in
-// session (friends list, presence details, launching as a specific account)
-// is an integration point for later.
-
 const crypto = require("crypto");
 const cache = new Map();
 const TTL = 5 * 60 * 1000;
 
-// Same request already on its way? Share it instead of asking Roblox twice.
 const inflight = new Map();
 const MAX_CACHE = 600;
 function remember(key, v) {
   cache.delete(key);
   cache.set(key, { t: Date.now(), v });
-  // Keep memory flat: drop the oldest answers past the cap.
   while (cache.size > MAX_CACHE) cache.delete(cache.keys().next().value);
 }
 setInterval(() => { const now = Date.now(); for (const [k, h] of cache) if (now - h.t > TTL) cache.delete(k); }, 60e3).unref?.();
@@ -30,7 +22,6 @@ function get(url, opts) {
 }
 async function fetchJson(url, opts, key) {
   let res;
-  // Roblox rate-limits bursts (429): wait and retry a few times.
   for (let attempt = 0; attempt < 4; attempt++) {
     res = await fetch(url, { signal: AbortSignal.timeout(15000), ...opts, headers: { "content-type": "application/json", ...(opts?.headers || {}) } });
     if (res.status !== 429) break;
@@ -42,8 +33,6 @@ async function fetchJson(url, opts, key) {
   return v;
 }
 
-// Thumbnails: Roblox answers "Pending" (no image yet) while it renders one.
-// Ask again for just those a few times, and never cache an incomplete answer.
 async function thumbs(kind, ids, size) {
   const out = {};
   let todo = [...new Set(ids)].filter(Boolean);
@@ -64,8 +53,6 @@ async function thumbs(kind, ids, size) {
 
 const chunk = (arr, n) => Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n));
 
-// Card-sized images (576x324 banners, 256px icons) load faster and use far
-// less memory than full size; every chunk is fetched in parallel.
 async function thumbnails(universeIds, big = false) {
   const out = {};
   await Promise.all(chunk(universeIds, 50).map(async (ids) => {
@@ -79,7 +66,6 @@ async function thumbnails(universeIds, big = false) {
   return out;
 }
 
-// Descriptions + creators aren't in list endpoints; batch-fetch them.
 async function info(universeIds) {
   const out = {};
   const pages = await Promise.all(chunk(universeIds, 50).map((ids) => get(`https://games.roblox.com/v1/games?universeIds=${ids.join(",")}`)));
@@ -134,7 +120,6 @@ async function search(query) {
   return games.map((g) => shapeGame(g, thumbs));
 }
 
-// Search with paging (40 per page, up to `pages` pages).
 async function searchMany(query, pages = 3) {
   const q = String(query || "").trim();
   if (!q) return [];
@@ -151,8 +136,6 @@ async function searchMany(query, pages = 3) {
   return all.map((g) => shapeGame(g, thumbs));
 }
 
-// Roblox has no genre filter, so a genre page combines the genre's games
-// from every chart with a keyword search for that genre.
 const GENRE_WORDS = {
   "Action": ["action", "fighting", "battlegrounds", "combat"], "Adventure": ["adventure", "explore", "story", "quest"],
   "Entertainment": ["entertainment", "music", "showcase", "concert"], "Obby & Platformer": ["obby", "parkour", "tower", "difficulty chart"],
@@ -183,7 +166,7 @@ async function gameDetails(universeId) {
     const v = await get(`https://games.roblox.com/v1/games/votes?universeIds=${id}`);
     const x = v.data[0];
     votes = x.upVotes + x.downVotes ? Math.round((x.upVotes / (x.upVotes + x.downVotes)) * 100) : null;
-  } catch { /* votes are optional */ }
+  } catch { }
   return {
     universeId: g.id,
     placeId: g.rootPlaceId,
@@ -235,22 +218,17 @@ async function presence(userIds) {
   return Object.fromEntries(r.userPresences.map((p) => [p.userId, { type: p.userPresenceType, label: label[p.userPresenceType] ?? "Offline", lastLocation: p.lastLocation, placeId: p.rootPlaceId || p.placeId || null }]));
 }
 
-// Signed-in presence for a few users (includes the server's gameId for friends).
 async function friendPresence(cookie, userIds) {
   const r = await authed(cookie, "https://presence.roblox.com/v1/presence/users", { method: "POST", body: JSON.stringify({ userIds: userIds.map(Number) }) });
   if (!r.ok) throw new Error(`Roblox API ${r.status} for presence`);
   return Object.fromEntries((await r.json()).userPresences.map((p) => [p.userId, { type: p.userPresenceType, placeId: p.rootPlaceId || p.placeId || null, gameId: p.gameId || null, universeId: p.universeId || null, lastLocation: p.lastLocation }]));
 }
 
-// Public servers for a place. `ping` and `fps` are what Roblox reports for the
-// server itself (average player ping, server frame rate), not ping from this PC.
 async function servers(placeId, { order = "Desc", cursor = "", hideFull = true } = {}) {
   const id = Number(placeId);
   const q = new URLSearchParams({ limit: "100", sortOrder: order === "Asc" ? "Asc" : "Desc", excludeFullGames: String(!!hideFull) });
   if (cursor) q.set("cursor", cursor);
   const url = `https://games.roblox.com/v1/games/${id}/servers/Public?${q}`;
-  // Server lists change quickly, so cache briefly; Roblox rate-limits this
-  // endpoint hard, so back off and retry before giving up.
   const hit = serverCache.get(url);
   if (hit && Date.now() - hit.t < 20000) return hit.v;
   let res;
@@ -276,13 +254,11 @@ async function placeUniverse(placeId) {
   return r.universeId ?? null;
 }
 
-// Full-body 2D avatar picture (public).
 async function avatarImage(userId) {
   const r = await get(`https://thumbnails.roblox.com/v1/users/avatar?userIds=${Number(userId)}&size=420x420&format=Webp`);
   return r.data?.[0]?.state === "Completed" ? r.data[0].imageUrl : null;
 }
 
-/* ---------- Profiles ---------- */
 async function userProfile(userId) {
   const id = Number(userId);
   const [u, avatar, head, friendsN, followersN, followingN, favs] = await Promise.all([
@@ -305,7 +281,6 @@ async function userProfile(userId) {
   };
 }
 
-/* ---------- Game page extras ---------- */
 async function gameMedia(universeId) {
   const r = await get(`https://thumbnails.roblox.com/v1/games/multiget/thumbnails?universeIds=${Number(universeId)}&countPerUniverse=10&size=768x432&format=Webp`);
   return (r.data[0]?.thumbnails || []).filter((t) => t.state === "Completed").map((t) => t.imageUrl);
@@ -334,16 +309,13 @@ async function badges(universeId, userId) {
   }));
 }
 
-/* ---------- Marketplace ---------- */
 const CATALOG_CATS = { all: 1, accessories: 11, clothing: 3, bodyparts: 4, animations: 12, heads: 4 };
 async function catalog({ keyword = "", category = "all", sort = "relevance", cursor = "", minPrice, maxPrice, period, paidOnly } = {}) {
   const q = new URLSearchParams({ Category: String(CATALOG_CATS[category] ?? 1), Limit: "30" });
   const sorts = { relevance: 0, favorited: 1, sales: 2, updated: 3, priceLow: 4, priceHigh: 5 };
   q.set("SortType", String(sorts[sort] ?? 0));
   if (sort === "priceLow") q.set("SortAggregation", "5");
-  // Sales/favorites over a time window: 1 = past day, 3 = past week, 5 = all time.
   if (["day", "week", "all"].includes(period) && (sort === "sales" || sort === "favorited")) q.set("SortAggregation", { day: "1", week: "3", all: "5" }[period]);
-  // Paid, on-sale items only (no freebies, nothing off sale).
   if (paidOnly) { q.set("IncludeNotForSale", "false"); if (minPrice == null || minPrice === "") minPrice = 1; }
   if (keyword) q.set("Keyword", String(keyword).slice(0, 100));
   if (cursor) q.set("Cursor", cursor);
@@ -366,7 +338,6 @@ async function catalog({ keyword = "", category = "all", sort = "relevance", cur
   };
 }
 
-/* ---------- Server region ---------- */
 const regionCache = new Map();
 async function ipRegion(ip) {
   if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)) return null;
@@ -376,10 +347,6 @@ async function ipRegion(ip) {
   regionCache.set(ip, v);
   return v;
 }
-
-/* ---------- Signed-in calls ----------
-   `cookie` is the account's .ROBLOSECURITY value. It only ever lives in the
-   Electron main process and is sent only to roblox.com hosts. */
 
 async function authed(cookie, url, opts = {}) {
   const send = (csrf) => fetch(url, {
@@ -395,16 +362,12 @@ async function authed(cookie, url, opts = {}) {
     },
   });
   let res = await send();
-  // Roblox asks for a CSRF token on POSTs: retry once with the one it gives back.
   if (res.status === 403 && res.headers.get("x-csrf-token")) res = await send(res.headers.get("x-csrf-token"));
   noticeRotation(cookie, res);
   if (res.status === 401) throw Object.assign(new Error("Session expired, sign in again"), { code: "EXPIRED" });
   return res;
 }
 
-// Roblox periodically replaces the session token and sends the new one in a
-// Set-Cookie header; the old one stops working later. Hand any new token to
-// the main process so it's saved, otherwise you get signed out.
 let rotationHandler = null;
 function onCookieRotated(fn) { rotationHandler = fn; }
 function noticeRotation(oldCookie, res) {
@@ -447,8 +410,6 @@ async function friends(cookie, userId) {
   }));
 }
 
-// One-time ticket the Roblox player exchanges for a session, the same flow
-// roblox.com's own Play button uses.
 async function authTicket(cookie) {
   const res = await authed(cookie, "https://auth.roblox.com/v1/authentication-ticket/", { method: "POST", body: "{}" });
   const ticket = res.headers.get("rbx-authentication-ticket");
@@ -462,11 +423,7 @@ async function robux(cookie, userId) {
   return (await res.json()).robux ?? 0;
 }
 
-// Asks Roblox where a specific server is, the same request the player makes
-// before connecting, then looks up the region of the server's address.
 async function serverRegion(cookie, placeId, jobId) {
-  // Roblox answers "queued" (status 22) for a few seconds before it returns
-  // the server's address (status 2), so keep asking for a little while.
   for (let attempt = 0; attempt < 20; attempt++) {
     const res = await authed(cookie, "https://gamejoin.roblox.com/v1/join-game-instance", {
       method: "POST",
@@ -484,8 +441,6 @@ async function serverRegion(cookie, placeId, jobId) {
   throw new Error("Roblox didn't answer in time");
 }
 
-// Turns a roblox.com share link (…/share?code=X&type=Server) into a place and
-// private-server link code.
 async function resolveShareLink(cookie, code) {
   const res = await authed(cookie, "https://apis.roblox.com/sharelinks/v1/resolve-link", {
     method: "POST", body: JSON.stringify({ linkId: String(code), linkType: "Server" }),
@@ -497,11 +452,8 @@ async function resolveShareLink(cookie, code) {
   return { placeId: d.placeId, linkCode: d.linkCode, universeId: d.universeId ?? null };
 }
 
-/* ---------- Avatar ---------- */
-// Roblox's CDN picks a server from the file hash.
 const cdnUrl = (hash) => { let i = 31; for (const ch of hash) i ^= ch.charCodeAt(0); return `https://t${i % 8}.rbxcdn.com/${hash}`; };
 
-// 3D avatar: OBJ model + MTL materials + textures (as data URLs so WebGL can use them).
 async function avatar3d(cookie, userId) {
   let r;
   for (let k = 0; k < 10; k++) {
@@ -531,7 +483,6 @@ async function avatarState(cookie) {
   return { type: a.playerAvatarType, bodyColors: a.bodyColor3s || a.bodyColors, scales: a.scales, assets: a.assets.map((x) => ({ ...x, image: img[x.id] ?? null })) };
 }
 
-// Asset type ids for the inventory tabs.
 const INVENTORY_TYPES = { hats: 8, hair: 41, face: 42, neck: 43, shoulder: 44, front: 45, back: 46, waist: 47, shirts: 11, pants: 12, tshirts: 2, faces: 18, gear: 19, emotes: 61, jackets: 64, sweaters: 65, shorts: 66, shoesL: 70, shoesR: 71, dresses: 67, heads: 17, animations: 48 };
 async function inventory(cookie, userId, kind, cursor = "") {
   const typeId = INVENTORY_TYPES[kind];
@@ -581,10 +532,6 @@ async function redraw(cookie) {
   await authed(cookie, "https://avatar.roblox.com/v1/avatar/redraw-thumbnail", { method: "POST", body: "{}" }).catch(() => {});
 }
 
-/* ---------- Buying catalog items ----------
-   Purchases use the same endpoints as roblox.com's Buy button and always send
-   the exact price the user confirmed (expectedPrice), so Roblox rejects the
-   purchase if the price changed. */
 async function itemDetails(cookie, userId, item) {
   const type = item.type === "Bundle" ? "Bundle" : "Asset";
   const res = await authed(cookie, "https://catalog.roblox.com/v1/catalog/items/details", { method: "POST", body: JSON.stringify({ items: [{ itemType: type, id: Number(item.id) }] }) });
@@ -632,7 +579,6 @@ async function buyItem(cookie, userId, item, expectedPrice) {
   return { ok: true, name: d.name, price: d.price };
 }
 
-/* ---------- Chat ---------- */
 const CHAT = "https://apis.roblox.com/platform-chat-api/v1";
 async function chatConversations(cookie, cursor = "") {
   const res = await authed(cookie, `${CHAT}/get-user-conversations?pageSize=30&include_user_data=true${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`);
@@ -646,8 +592,6 @@ async function chatConversations(cookie, cursor = "") {
     conversations: j.conversations.map((c) => {
       const users = c.user_data || {};
       return {
-        // Friends you have never messaged come back without an id; starting a
-        // chat with them creates the conversation first.
         id: c.id || null, startWith: c.id ? null : (c.participant_user_ids || [])[0] ?? null,
         type: c.type, name: c.name, unread: c.unread_message_count || 0, updated: c.updated_at,
         participants: (c.participant_user_ids || []).map((id) => ({ id, name: users[id]?.name || users[id]?.username || "", displayName: users[id]?.display_name || users[id]?.name || "", avatar: heads[id] ?? null })),
@@ -683,7 +627,6 @@ async function chatRead(cookie, conversationId) {
   await authed(cookie, `${CHAT}/mark-conversations`, { method: "POST", body: JSON.stringify({ conversation_ids: [conversationId] }) }).catch(() => {});
 }
 
-/* ---------- News ---------- */
 const NEWS_FEEDS = [
   { id: "announcements", label: "Roblox announcements", url: "https://devforum.roblox.com/c/updates/announcements/36.rss" },
   { id: "releases", label: "Release notes", url: "https://devforum.roblox.com/c/updates/release-notes/62.rss" },
@@ -705,7 +648,6 @@ async function news() {
     }
     for (const item of xml.split(/<item>/i).slice(1)) {
       const html = tag(item, "description");
-      // First real picture in the post (skip emoji and avatar images).
       const img = [...html.matchAll(/<img[^>]+src="([^"]+)"/gi)].map((m) => m[1]).find((u) => !/emoji|user_avatar|letter_avatar/i.test(u)) || null;
       out.push({ id: tag(item, "guid") || tag(item, "link"), source: f.id, sourceLabel: f.label, title: tag(item, "title"), author: tag(item, "dc:creator"), date: tag(item, "pubDate"), html, image: img && /^https:\/\//.test(img) ? img : null });
     }

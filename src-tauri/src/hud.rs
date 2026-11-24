@@ -1,13 +1,10 @@
-// In-game HUD: a transparent, click-through window kept over the Roblox
-// window while Roblox is in front. Reads only which window is in front and
-// where (standard Windows calls); never touches the Roblox process.
 use serde_json::{json, Value};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 
 static ENABLED: AtomicBool = AtomicBool::new(false);
-static STATE: Mutex<(bool, bool)> = Mutex::new((false, false)); // (roblox in front, showing)
+static STATE: Mutex<(bool, bool)> = Mutex::new((false, false));
 
 pub fn set_enabled(on: bool) { ENABLED.store(on, Ordering::SeqCst); }
 pub fn status() -> Value { let s = STATE.lock().unwrap(); json!({ "roblox": s.0, "showing": s.1, "enabled": ENABLED.load(Ordering::SeqCst) }) }
@@ -47,7 +44,6 @@ fn window(app: &tauri::AppHandle) -> Option<tauri::WebviewWindow> {
     Some(w)
 }
 
-/// Twice a second: is Roblox in front? Show the HUD over it, otherwise hide.
 pub fn start(app: tauri::AppHandle) {
     std::thread::spawn(move || loop {
         std::thread::sleep(std::time::Duration::from_millis(500));
@@ -68,7 +64,6 @@ pub fn start(app: tauri::AppHandle) {
     });
 }
 
-/// CPU and memory use for the "PC usage" widget.
 #[cfg(windows)]
 pub fn usage() -> Value {
     use windows::Win32::System::SystemInformation::{GlobalMemoryStatusEx, MEMORYSTATUSEX};
@@ -93,7 +88,6 @@ pub fn usage() -> Value {
 #[cfg(not(windows))]
 pub fn usage() -> Value { json!({ "cpu": 0, "ram": 0 }) }
 
-/// Connection ping: time to open a TCP connection to Roblox.
 pub async fn ping() -> i64 {
     let t = std::time::Instant::now();
     match tokio::time::timeout(std::time::Duration::from_secs(3), tokio::net::TcpStream::connect("www.roblox.com:443")).await {

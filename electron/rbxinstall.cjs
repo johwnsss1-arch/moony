@@ -1,15 +1,9 @@
-// Moony's own Roblox install, kept up to date the way Roblox's launcher does:
-// read the latest version from Roblox, download its packages from Roblox's
-// CDN (setup.rbxcdn.com), check each file's MD5, and unpack them into
-// %LOCALAPPDATA%\Moony\Roblox\<version>. Then Moony starts the player directly,
-// so no other launcher (Roblox's, Fishstrap, Bloxstrap) gets involved.
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const { unzipSync } = require("fflate");
 
 const CDN = "https://setup.rbxcdn.com";
-// Where each package unpacks inside the version folder (same layout Roblox uses).
 const DIRS = {
   "RobloxApp.zip": "", "redist.zip": "", "shaders.zip": "shaders/", "ssl.zip": "ssl/", "WebView2.zip": "",
   "WebView2RuntimeInstaller.zip": "WebView2RuntimeInstaller/",
@@ -39,7 +33,6 @@ function installedDir(guid) {
   const d = path.join(root(), guid);
   return fs.existsSync(path.join(d, "RobloxPlayerBeta.exe")) && fs.existsSync(path.join(d, ".moony-complete")) ? d : null;
 }
-// Newest complete Moony-managed install (used when offline).
 function anyInstalled() {
   if (!fs.existsSync(root())) return null;
   return fs.readdirSync(root()).map((d) => path.join(root(), d))
@@ -60,7 +53,6 @@ async function manifest(guid) {
   return out;
 }
 
-// Download one package with progress, retrying twice; verifies the MD5.
 async function download(guid, pkg, onBytes) {
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
@@ -83,18 +75,15 @@ async function download(guid, pkg, onBytes) {
 function extract(buf, dest, sub) {
   const files = unzipSync(new Uint8Array(buf));
   for (const [raw, data] of Object.entries(files)) {
-    // Roblox's zips use backslashes, including for folder entries.
     const name = raw.replace(/\\/g, "/");
     if (name.endsWith("/") || !name) continue;
     const target = path.resolve(dest, sub + name);
-    if (!target.startsWith(path.resolve(dest) + path.sep)) continue; // never write outside the install folder
+    if (!target.startsWith(path.resolve(dest) + path.sep)) continue;
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, data);
   }
 }
 
-// Download and unpack one version into root()/<guid>. Shared by updates and
-// the Versions tab (custom versions).
 const jobs = new Map();
 function install(guid, label, onProgress = () => {}, keep = false) {
   if (!GUID.test(guid)) return Promise.reject(new Error("That isn't a Roblox version hash (version-xxxxxxxxxxxxxxxx)"));
@@ -114,7 +103,6 @@ function install(guid, label, onProgress = () => {}, keep = false) {
       const now = Date.now();
       if (now - last > 300) { speed = ((done - lastDone) / (now - last)) * 1000; last = now; lastDone = done; onProgress({ phase: "Downloading Roblox…", done, total, speed }); }
     };
-    // Six packages at a time; each is unpacked as soon as it arrives.
     const queue = [...pkgs].sort((a, b) => b.packed - a.packed);
     await Promise.all(Array.from({ length: 6 }, async () => {
       while (queue.length) {
@@ -133,13 +121,12 @@ function install(guid, label, onProgress = () => {}, keep = false) {
   return job;
 }
 
-// Every Moony-managed version on disk.
 function list() {
   if (!fs.existsSync(root())) return [];
   return fs.readdirSync(root()).filter((d) => GUID.test(d)).map((guid) => {
     const d = path.join(root(), guid), done = path.join(d, ".moony-complete");
     let version = null, at = 0;
-    try { version = fs.readFileSync(done, "utf8").trim(); at = fs.statSync(done).mtimeMs; } catch { /* incomplete */ }
+    try { version = fs.readFileSync(done, "utf8").trim(); at = fs.statSync(done).mtimeMs; } catch { }
     return { guid, version, complete: !!version, keep: fs.existsSync(path.join(d, ".moony-keep")), at, dir: d };
   }).sort((a, b) => b.at - a.at);
 }
@@ -150,11 +137,6 @@ function remove(guid) {
 }
 
 let busy = null;
-// Make sure the latest Roblox is installed; returns its folder.
-// onProgress({ phase, done, total, speed }) for the bootstrapper window.
-// Make sure the Roblox version Moony should launch is installed; returns its
-// folder. opts.pinned = a version hash to always use; opts.channel = Roblox
-// release channel (default production). onProgress feeds the bootstrapper.
 function ensure(onProgress = () => {}, opts = {}) {
   if (busy) return busy;
   busy = (async () => {
@@ -171,7 +153,6 @@ function ensure(onProgress = () => {}, opts = {}) {
     const ready = installedDir(want.guid);
     if (ready) return { dir: ready, updated: false, version: want.version, guid: want.guid, channel: opts.channel || "production" };
     const dir = await install(want.guid, want.version, onProgress, false);
-    // Old automatic versions go; ones you downloaded yourself (Versions tab) stay.
     for (const v of list()) if (v.guid !== want.guid.toLowerCase() && !v.keep) remove(v.guid);
     return { dir, updated: true, version: want.version, guid: want.guid, channel: opts.channel || "production" };
   })().finally(() => { busy = null; });

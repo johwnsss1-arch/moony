@@ -1,7 +1,3 @@
-// Runs Moony's Roblox API client (electron/roblox.cjs, the same file the
-// Electron build uses) inside the page, with every request going through
-// Rust. Signed-in calls pass "moony:acct:<id>" instead of a cookie; Rust puts
-// the real cookie in and never sends it back.
 import create from "virtual:roblox-cjs";
 import { invoke } from "@tauri-apps/api/core";
 
@@ -20,7 +16,6 @@ async function rustFetch(url, opts = {}) {
   return new Response(body, { status: r.status, headers: r.headers });
 }
 
-// The small bits of Node the client uses.
 const nodeCrypto = { randomUUID: () => crypto.randomUUID() };
 const BufferShim = { from: (ab) => { const u = new Uint8Array(ab); return { toString: () => bytesToB64(u) }; } };
 

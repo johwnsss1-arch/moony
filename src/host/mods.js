@@ -1,6 +1,3 @@
-// Cosmetic mods for the Rust build (port of electron/mods.cjs). Same rules:
-// originals are backed up per Roblox version and mods are put back after
-// Roblox updates. File access goes through Rust, limited to Moony's folders.
 const SOUND = [".ogg", ".mp3"];
 const s = (f) => `content\\sounds\\${f}`;
 const t = (...p) => ["content", "textures", ...p].join("\\");
@@ -55,7 +52,6 @@ export function createMods(rust, playerDir) {
     const u32 = (o) => ((b.charCodeAt(o) << 24) | (b.charCodeAt(o + 1) << 16) | (b.charCodeAt(o + 2) << 8) | b.charCodeAt(o + 3)) >>> 0;
     return { width: u32(16), height: u32(20) };
   }
-  // Fit the user's image inside the original's size, centred, as a PNG (base64).
   async function fitPng(file, width, height) {
     const img = new Image();
     img.src = `data:image/png;base64,${await fs("read", file)}`;
@@ -147,7 +143,6 @@ export function createMods(rust, playerDir) {
       await save();
       return { ok: true, status: await apply() };
     },
-    // A cursor from moonylauncher.xyz/cursors.json: downloaded, then applied like a picked file.
     async online(kind, item) {
       await init();
       const k = KINDS[kind];

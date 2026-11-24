@@ -6,10 +6,8 @@ import { HudWidget } from "./components/HudWidgets";
 import { Crosshair } from "./components/Crosshair";
 import { listen } from "@tauri-apps/api/event";
 
-// Rust build: state arrives as a Tauri event instead of Electron IPC.
 if (window.__TAURI_INTERNALS__ && !window.moonyOverlay) window.moonyOverlay = { onState: (cb) => { listen("overlay:state", (e) => cb(e.payload)); } };
 
-// The in-game HUD window: transparent and click-through, placed over Roblox.
 function Hud() {
   const [state, setState] = useState(null);
   useEffect(() => { window.moonyOverlay?.onState(setState); }, []);

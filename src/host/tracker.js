@@ -1,6 +1,3 @@
-// Playtime tracker for the Rust build (same rules as electron/tracker.cjs).
-// Rust reads the newest lines of Roblox's own log and checks whether the
-// player is running; the bookkeeping happens here.
 const JOIN = /! Joining game '([0-9a-f-]{36})' place (\d+)/i;
 const UNIVERSE = /placeid:(\d+).*?universeid:(\d+)/i;
 const LEAVE = /Time to disconnect replication data|Client:Disconnect|leaveUGCGameInternal|NetworkClient:Remove/i;
@@ -70,13 +67,12 @@ export function createTracker(rust, emit) {
     try {
       const r = await rust("rlog:read", file, offset);
       if (!r) return;
-      // First read: skip what's already in the log; only new sessions count.
       if (offset < 0) { file = r.file; offset = r.size; return; }
       if (r.file !== file) { file = r.file; }
       offset = r.offset;
       if (r.text) for (const l of r.text.split(/\r?\n/)) line(l);
       flush(false);
-    } catch { /* no logs yet */ }
+    } catch { }
   }
   async function checkProcess() {
     if (!current) return;

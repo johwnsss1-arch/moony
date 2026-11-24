@@ -35,7 +35,7 @@ function ChatInner({ me }) {
     const others = c.participants.filter((p) => p.id !== me.id);
     return c.type === "group" && c.name ? c.name : others.map((p) => p.displayName || p.name).join(", ") || c.name || "Chat";
   };
-  const shown = useMemo(() => list.items.filter((c) => !q || titleOf(c).toLowerCase().includes(q.toLowerCase())), [list.items, q]); // eslint-disable-line react-hooks/exhaustive-deps
+  const shown = useMemo(() => list.items.filter((c) => !q || titleOf(c).toLowerCase().includes(q.toLowerCase())), [list.items, q]);
   const convs = shown.filter((c) => c.id);
   const starters = shown.filter((c) => !c.id && c.startWith);
 
@@ -103,7 +103,7 @@ function Conversation({ conv, me, title, onProfile, onSent }) {
   const load = useCallback(() => {
     chatApi().messages(me.id, conv.id).then((r) => setMsgs({ status: "ready", items: [...r.messages].sort((a, b) => new Date(a.at) - new Date(b.at)) })).catch((e) => setMsgs((m) => ({ ...m, status: m.items.length ? "ready" : "error", error: e.message })));
   }, [me.id, conv.id]);
-  useEffect(() => { load(); chatApi().markRead(me.id, conv.id); const t = setInterval(load, 5000); return () => clearInterval(t); }, [load]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); chatApi().markRead(me.id, conv.id); const t = setInterval(load, 5000); return () => clearInterval(t); }, [load]);
   useEffect(() => { box.current?.scrollTo({ top: box.current.scrollHeight }); }, [msgs.items.length]);
 
   const send = async () => {

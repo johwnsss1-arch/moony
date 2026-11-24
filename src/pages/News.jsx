@@ -7,8 +7,6 @@ import { Empty, ErrorState, Img, Skeleton } from "../components/ui";
 
 const SOURCES = [["all", "All news"], ["announcements", "Announcements"], ["releases", "Release notes"], ["community", "Community"], ["games", "Your games"]];
 
-// Feed HTML comes from Roblox's forum. Keep only safe formatting and https
-// images; links are shown but don't navigate away from Moony.
 const ALLOWED = new Set(["P", "BR", "B", "STRONG", "I", "EM", "U", "UL", "OL", "LI", "H1", "H2", "H3", "H4", "BLOCKQUOTE", "CODE", "PRE", "HR", "IMG", "A", "SPAN", "DIV", "TABLE", "THEAD", "TBODY", "TR", "TD", "TH", "FIGURE", "FIGCAPTION", "DETAILS", "SUMMARY"]);
 function sanitize(html) {
   const doc = new DOMParser().parseFromString(html, "text/html");
@@ -81,7 +79,6 @@ function Article({ item, onBack }) {
   );
 }
 
-// Latest update times for your favorite games.
 function GameUpdates() {
   const { favorites, openGame } = useApp();
   const ids = favorites.slice(0, 24).map((f) => f.universeId).join(",");

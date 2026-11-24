@@ -11,9 +11,6 @@ const STATE = {
   offline: "Offline, waiting for them to come online",
 };
 
-// Party mode: pick a friend as leader and Moony follows them into every
-// server they join, using Roblox presence. Each friend in the party picks
-// the same leader in their own Moony.
 export default function Party() {
   const { friends, party, setParty, launchAs, toast, setPage } = useApp();
   const [q, setQ] = useState("");

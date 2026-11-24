@@ -1,6 +1,3 @@
-// Discord status ("Rich Presence"). Talks to the Discord desktop app over its
-// local connection. Needs a Discord application ID; the application's name is
-// what Discord shows after "Playing", so name it "Moony".
 const { Client } = require("@xhayper/discord-rpc");
 
 class DiscordStatus {
@@ -8,7 +5,7 @@ class DiscordStatus {
     this.client = null;
     this.clientId = null;
     this.activity = null;
-    this.state = "off"; // off | connecting | connected | unavailable
+    this.state = "off";
     this.retry = null;
   }
 
@@ -28,14 +25,13 @@ class DiscordStatus {
     const client = new Client({ clientId: this.clientId, transport: { type: "ipc" } });
     client.on("disconnected", () => { this.state = "unavailable"; this.scheduleRetry(); });
     try {
-      // Discord can leave the handshake hanging (e.g. an unknown app ID).
       await Promise.race([client.login(), new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 10000))]);
       this.client = client;
       this.state = "connected";
       if (this.activity) await this.push();
     } catch {
-      this.state = "unavailable"; // Discord isn't running, or the ID is wrong
-      try { await client.destroy(); } catch { /* already closed */ }
+      this.state = "unavailable";
+      try { await client.destroy(); } catch { }
       this.scheduleRetry();
     }
   }
@@ -64,7 +60,7 @@ class DiscordStatus {
     try {
       if (!this.activity) await this.client.user.clearActivity();
       else await this.client.user.setActivity(this.activity);
-    } catch { /* Discord closed mid-update; retry will restore it */ }
+    } catch { }
   }
 }
 

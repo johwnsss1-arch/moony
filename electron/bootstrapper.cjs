@@ -1,11 +1,3 @@
-// Moony's bootstrapper: the small loading windows you see while Moony starts
-// and while Roblox launches, plus the fast-launch logic.
-//
-// Fast launch: when your Roblox install is already the latest version, Moony
-// starts RobloxPlayerBeta.exe directly with a one-time sign-in ticket. That
-// skips Roblox's own launcher, which otherwise checks for updates first. If
-// Roblox is out of date (or anything goes wrong) it falls back to the normal
-// roblox-player: link, so Roblox updates itself as usual.
 const { BrowserWindow } = require("electron");
 const { execFile, spawn } = require("child_process");
 const fs = require("fs");
@@ -75,7 +67,6 @@ class Splash {
   close(delay = 0) { setTimeout(() => { if (!this.closed) this.win.destroy(); }, delay); }
 }
 
-/* ---------- Version check (for fast launch) ---------- */
 let latest = { version: null, at: 0 };
 async function latestVersion() {
   if (latest.version && Date.now() - latest.at < 30 * 60e3) return latest.version;
@@ -83,7 +74,7 @@ async function latestVersion() {
     const r = await fetch("https://clientsettings.roblox.com/v2/client-version/WindowsPlayer", { signal: AbortSignal.timeout(6000) });
     const j = await r.json();
     latest = { version: j.version || null, at: Date.now() };
-  } catch { /* offline: can't confirm, so no fast launch */ }
+  } catch { }
   return latest.version;
 }
 const installedCache = new Map();
@@ -91,7 +82,6 @@ function installedVersion(dir) {
   if (installedCache.has(dir)) return Promise.resolve(installedCache.get(dir));
   const exe = path.join(dir, "RobloxPlayerBeta.exe");
   return new Promise((resolve) => {
-    // One quick read of the exe's version number, cached per Roblox folder.
     execFile("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", `(Get-Item -LiteralPath '${exe.replace(/'/g, "''")}').VersionInfo.FileVersion`], { windowsHide: true, timeout: 8000 }, (err, out) => {
       const v = err ? null : String(out).trim().replace(/,\s*/g, ".");
       installedCache.set(dir, v);
@@ -106,8 +96,6 @@ async function canFastLaunch(findPlayerDir) {
   return want && have && want === have ? dir : null;
 }
 
-// Start RobloxPlayerBeta.exe directly with the same values the roblox-player:
-// link would pass to Roblox's launcher.
 function directLaunch(dir, { ticket, launcherUrl, trackerId }) {
   const exe = path.join(dir, "RobloxPlayerBeta.exe");
   if (!fs.existsSync(exe)) throw new Error("Roblox Player not found");

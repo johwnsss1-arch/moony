@@ -1,6 +1,3 @@
-// What's playing on the PC (any app that shows in Windows' media controls:
-// Spotify, YouTube in a browser, Media Player...) and the live output level,
-// for the HUD music visualiser. Read-only.
 use serde_json::{json, Value};
 
 fn pretty_app(id: &str) -> String {
@@ -31,7 +28,6 @@ pub fn info() -> Value {
 #[cfg(not(windows))]
 pub fn info() -> Value { Value::Null }
 
-/// Peak output level of the default speakers, 0..1.
 #[cfg(windows)]
 pub fn level() -> f32 {
     use windows::Win32::Media::Audio::{eConsole, eRender, IMMDeviceEnumerator, MMDeviceEnumerator};

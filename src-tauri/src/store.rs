@@ -1,5 +1,3 @@
-// Small JSON files in %APPDATA%\xyz.moonylauncher.moony (settings, playtime,
-// versions...). Names are restricted so the page can't touch other files.
 use serde_json::Value;
 use std::path::PathBuf;
 use tauri::Manager;

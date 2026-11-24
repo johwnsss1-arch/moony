@@ -1,4 +1,3 @@
-// In-game crosshair, drawn as SVG at the centre of the HUD window.
 export const CROSSHAIRS = [
   { id: "plus", label: "Plus" }, { id: "gap", label: "Gap" }, { id: "dot", label: "Dot" },
   { id: "ring", label: "Ring" }, { id: "t", label: "T" }, { id: "x", label: "X" }, { id: "chevron", label: "Chevron" },

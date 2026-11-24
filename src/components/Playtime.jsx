@@ -17,7 +17,6 @@ function useTicker(active) {
   }, [active]);
 }
 
-// Live "now playing" strip, shown while Roblox is in a game.
 export function NowPlaying({ compact }) {
   const { nowPlaying, openGame, play, toast } = useApp();
   const [hopping, setHopping] = useState(false);
@@ -43,7 +42,6 @@ export function NowPlaying({ compact }) {
   );
 }
 
-// Home: totals plus your most played games.
 export function PlaytimeSection() {
   const { playtime, openGame } = useApp();
   const stats = useMemo(() => {
@@ -102,7 +100,6 @@ export function PlaytimeSection() {
   );
 }
 
-// Servers you were recently in, with one-click rejoin (handy after a disconnect).
 export function RecentServers({ limit = 6, compact = false }) {
   const { playtime, play, nowPlaying } = useApp();
   const list = (playtime.history || []).slice(0, limit).map((h) => ({ ...h, game: playtime.games?.[h.universeId] || {} }));
@@ -131,7 +128,6 @@ export function RecentServers({ limit = 6, compact = false }) {
   );
 }
 
-// Game details: your time in this one game.
 export function GamePlaytime({ universeId }) {
   const { playtime } = useApp();
   const g = playtime.games?.[universeId];

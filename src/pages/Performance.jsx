@@ -4,7 +4,6 @@ import { useApp } from "../lib/store";
 import { cleanName, duration } from "../lib/format";
 import { Empty, Toggle } from "../components/ui";
 
-// samples: [secondsIn, ping, cpu%, ram%]
 const avg = (a) => (a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : null);
 const col = (samples, i) => samples.map((s) => s[i]).filter((v) => v != null && v >= 0);
 const stats = (samples) => {
@@ -12,7 +11,6 @@ const stats = (samples) => {
   return { ping: avg(p), pingMax: p.length ? Math.max(...p) : null, spikes: p.filter((v) => v > 250).length, cpu: avg(c), ram: avg(r) };
 };
 
-// A small line chart for one column of samples.
 function Spark({ samples, i, max, color, h = 70 }) {
   const pts = samples.map((s, k) => [k, s[i]]).filter(([, v]) => v != null && v >= 0);
   if (pts.length < 2) return <div className="spark empty" style={{ height: h }}>Collecting…</div>;

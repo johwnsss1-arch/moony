@@ -1,6 +1,3 @@
-// "Open Roblox links with Moony": registers Moony for roblox-player: and
-// roblox: links (like Bloxstrap/Fishstrap). The previous handler is saved so
-// turning it off gives the links back.
 use serde_json::{json, Value};
 use std::process::Command;
 #[cfg(windows)]

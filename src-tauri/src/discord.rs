@@ -1,11 +1,9 @@
-// Discord status ("Rich Presence") over Discord's local connection.
 use discord_rich_presence::{activity, DiscordIpc, DiscordIpcClient};
 use serde_json::Value;
 use std::sync::Mutex;
 
 static CLIENT: Mutex<Option<(String, DiscordIpcClient)>> = Mutex::new(None);
 
-/// Connect (or disconnect when `id` is None). Returns "connected" / "unavailable" / "off".
 pub fn configure(id: Option<String>) -> &'static str {
     let mut g = CLIENT.lock().unwrap();
     let id = id.filter(|s| s.len() >= 15 && s.len() <= 25 && s.chars().all(|c| c.is_ascii_digit()));
@@ -20,7 +18,6 @@ pub fn configure(id: Option<String>) -> &'static str {
 
 pub fn status() -> &'static str { if CLIENT.lock().unwrap().is_some() { "connected" } else { "off" } }
 
-/// Set the activity from the page's JSON (null clears it).
 pub fn set(a: &Value) {
     let mut g = CLIENT.lock().unwrap();
     let Some((_, c)) = g.as_mut() else { return };
@@ -31,7 +28,6 @@ pub fn set(a: &Value) {
     if let Some(t) = a["startTimestamp"].as_i64() { act = act.timestamps(activity::Timestamps::new().start(t / 1000)); }
     let mut assets = activity::Assets::new().small_image("https://moonylauncher.xyz/img/icon.png").small_text("Moony · moonylauncher.xyz");
     if !large.is_empty() { assets = assets.large_image(&large).large_text(&large_t); }
-    // Discord allows two buttons: in a game, "Join my server" replaces the Discord invite.
     let join = s("joinUrl");
     let second = if join.starts_with("https://www.roblox.com/games/start?") { activity::Button::new("Join my server", &join) } else { activity::Button::new("Join the Discord", "https://discord.gg/moonylauncher") };
     act = act.assets(assets).buttons(vec![activity::Button::new("Get Moony", "https://moonylauncher.xyz"), second]);

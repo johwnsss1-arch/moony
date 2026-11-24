@@ -15,7 +15,6 @@ function range(kind) {
   return { from: new Date(n.getFullYear(), 0, 1), to: n, label: `${n.getFullYear()}` };
 }
 
-// Totals for one period, from the session log ({ u, start, end }).
 function compute(playtime, kind) {
   const { from, to, label } = range(kind);
   const a = from.getTime(), b = to.getTime();
@@ -35,7 +34,6 @@ function compute(playtime, kind) {
   const name = (u) => cleanName(playtime.games?.[u]?.name || "A Roblox game");
   const top = Object.entries(per).sort((x, y) => y[1] - x[1]).slice(0, 5).map(([u, secs]) => ({ u, secs, name: name(u), icon: playtime.games?.[u]?.icon }));
   const best = Object.entries(days).sort((x, y) => y[1] - x[1])[0];
-  // Longest run of consecutive days with play.
   const keys = Object.keys(days).sort();
   let streak = 0, run = 0, prev = null;
   for (const k of keys) { const t = new Date(k).getTime(); run = prev && t - prev === 864e5 ? run + 1 : 1; streak = Math.max(streak, run); prev = t; }
@@ -50,7 +48,6 @@ const loadImg = (src) => new Promise((ok) => { if (!src) return ok(null); const 
 async function draw(cv, d, user, accent) {
   const g = cv.getContext("2d");
   const font = (w, s) => `${w} ${s}px "Inter Variable", Inter, "Segoe UI", sans-serif`;
-  // Background
   g.fillStyle = "#08080b"; g.fillRect(0, 0, W, H);
   let gr = g.createRadialGradient(W * 0.85, 80, 0, W * 0.85, 80, 900); gr.addColorStop(0, accent + "cc"); gr.addColorStop(1, "transparent");
   g.fillStyle = gr; g.fillRect(0, 0, W, H);
@@ -63,11 +60,9 @@ async function draw(cv, d, user, accent) {
   g.fillStyle = "#fff"; g.font = font(800, 78); g.fillText(d.label, P, 205);
   if (user) { g.fillStyle = "rgba(255,255,255,.6)"; g.font = font(500, 32); g.fillText(`@${user}`, P, 255); }
 
-  // Big number
   g.fillStyle = "#fff"; g.font = font(900, 220); g.fillText(hrs(d.total), P - 8, 480);
   g.fillStyle = "rgba(255,255,255,.65)"; g.font = font(600, 36); g.fillText(`played across ${d.games} game${d.games === 1 ? "" : "s"} · ${d.count} sessions`, P, 540);
 
-  // Top games
   g.fillStyle = accent; g.font = font(800, 28); g.fillText("TOP GAMES", P, 625);
   const icons = await Promise.all(d.top.map((t) => loadImg(t.icon)));
   const max = d.top[0]?.secs || 1;
@@ -85,7 +80,6 @@ async function draw(cv, d, user, accent) {
     g.fillStyle = "rgba(255,255,255,.8)"; g.font = font(700, 30); g.textAlign = "right"; g.fillText(hrs(t.secs), W - P, y + 46); g.textAlign = "left";
   });
 
-  // Stat tiles
   const tiles = [
     ["Longest session", d.longest ? hrs(d.longest.secs) : "—"],
     ["Best streak", `${d.streak} day${d.streak === 1 ? "" : "s"}`],

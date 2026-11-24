@@ -1,6 +1,3 @@
-// Watches Roblox's own client logs to know when you join and leave a game,
-// whether it was launched from Moony or not. Only reads log files; it never
-// touches the running game. Playtime is saved to %APPDATA%\Moony\playtime.json.
 const fs = require("fs");
 const path = require("path");
 const { execFile } = require("child_process");
@@ -10,7 +7,6 @@ const LOG_DIR = path.join(process.env.LOCALAPPDATA || "", "Roblox", "logs");
 const JOIN = /! Joining game '([0-9a-f-]{36})' place (\d+)/i;
 const UNIVERSE = /placeid:(\d+).*?universeid:(\d+)/i;
 const LEAVE = /Time to disconnect replication data|Client:Disconnect|leaveUGCGameInternal|NetworkClient:Remove/i;
-// Lines Roblox writes when you're kicked or lose connection (not a normal leave).
 const DROPPED = /Disconnection Notification\. Reason: (\d+)|Lost connection with reason/i;
 const UDMUX = /UDMUX Address = (\d{1,3}(?:\.\d{1,3}){3})/i;
 
@@ -21,7 +17,7 @@ class Tracker extends EventEmitter {
     this.data = this.load();
     this.logFile = null;
     this.offset = 0;
-    this.current = null; // { placeId, universeId, jobId, startedAt, lastFlush }
+    this.current = null;
     this.timer = null;
   }
 
@@ -34,7 +30,6 @@ class Tracker extends EventEmitter {
   }
 
   start() {
-    // Skip anything already in existing logs: only sessions from now on count.
     const latest = this.latestLog();
     if (latest) { this.logFile = latest; this.offset = fs.statSync(latest).size; }
     this.timer = setInterval(() => this.poll(), 2500);
@@ -58,7 +53,7 @@ class Tracker extends EventEmitter {
   poll() {
     const latest = this.latestLog();
     if (!latest) return;
-    if (latest !== this.logFile) { this.logFile = latest; this.offset = 0; } // a new Roblox run
+    if (latest !== this.logFile) { this.logFile = latest; this.offset = 0; }
     let size;
     try { size = fs.statSync(latest).size; } catch { return; }
     if (size < this.offset) this.offset = 0;
@@ -87,15 +82,12 @@ class Tracker extends EventEmitter {
       this.current.ip = m[1];
       this.emit("server", { ...this.current });
     } else if ((m = DROPPED.exec(l)) && this.current) {
-      // Code 0 is a normal close; anything else is a kick or a dropped connection.
       if (m[1] !== "0") this.current.dropped = m[1] ? `code ${m[1]}` : "lost connection";
     } else if (LEAVE.test(l)) {
       this.end(this.current?.dropped ? "disconnected" : "left game");
     }
   }
 
-  // Roblox can close without writing a leave line; end the session if the
-  // player process is gone.
   checkProcess() {
     if (!this.current) return;
     execFile("tasklist", ["/FI", "IMAGENAME eq RobloxPlayerBeta.exe", "/NH"], { windowsHide: true }, (err, out) => {
@@ -103,8 +95,6 @@ class Tracker extends EventEmitter {
     });
   }
 
-  // Add time since the last flush to the totals (every poll, so a crash loses
-  // at most a few seconds).
   flush() {
     const c = this.current;
     if (!c || !c.universeId) return;
@@ -126,10 +116,9 @@ class Tracker extends EventEmitter {
     if (!c) return;
     if (c.dropped && reason === "Roblox closed") reason = "disconnected";
     if (c.universeId) {
-      c.lastFlush -= 15000; // force the final partial chunk to be written
+      c.lastFlush -= 15000;
       this.flush();
       this.data.games[c.universeId].sessions += 1;
-      // Session log for stats (most active hours, longest session).
       const s = (this.data.sessionLog ||= []);
       s.push({ u: c.universeId, start: c.startedAt, end: Date.now() });
       if (s.length > 1500) s.splice(0, s.length - 1500);
@@ -140,8 +129,6 @@ class Tracker extends EventEmitter {
     this.emit("update", this.summary());
   }
 
-  // Name/icon for a game. Creates the entry if the game hasn't been flushed yet
-  // (the name usually arrives before the first minute of play is recorded).
   setMeta(universeId, meta) {
     const g = (this.data.games[universeId] ||= { seconds: 0, sessions: 0, lastPlayed: Date.now() });
     Object.assign(g, meta);
@@ -149,7 +136,6 @@ class Tracker extends EventEmitter {
     this.emit("update", this.summary());
   }
 
-  // Servers you were in, newest first, for "rejoin".
   remember(entry) {
     const h = (this.data.history ||= []);
     const i = h.findIndex((x) => x.jobId === entry.jobId);

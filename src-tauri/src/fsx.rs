@@ -1,5 +1,3 @@
-// Limited file access for the page: only inside Moony's Roblox install and
-// Moony's own data folder (used by Mods). Paths outside those are refused.
 use base64::{engine::general_purpose::STANDARD as B64, Engine};
 use serde_json::{json, Value};
 use std::path::{Path, PathBuf};
@@ -26,7 +24,6 @@ pub fn call(app: &tauri::AppHandle, op: &str, a: &[Value]) -> Result<Value, Stri
         "writeText" => { let p = check(app, &s(0))?; mk(&p)?; std::fs::write(p, s(1)).map_err(|e| e.to_string())?; Ok(json!(true)) }
         "copy" => { let (f, t) = (check(app, &s(0))?, check(app, &s(1))?); mk(&t)?; std::fs::copy(f, t).map_err(|e| e.to_string())?; Ok(json!(true)) }
         "rm" => { let _ = std::fs::remove_file(check(app, &s(0))?); Ok(json!(true)) }
-        // Copy a file the user picked (any location) into the mods folder.
         "import" => {
             let src = PathBuf::from(s(0));
             let dest = check(app, &s(1))?;
@@ -35,7 +32,6 @@ pub fn call(app: &tauri::AppHandle, op: &str, a: &[Value]) -> Result<Value, Stri
             mk(&dest)?; std::fs::copy(&src, &dest).map_err(|e| e.to_string())?;
             Ok(json!(src.file_name().map(|n| n.to_string_lossy().to_string())))
         }
-        // Save a PNG the page drew (Wrapped card) to PicturesMoony and show it.
         "savePicture" => {
             let name: String = s(0).chars().filter(|c| c.is_ascii_alphanumeric() || *c == '-').take(60).collect();
             let dir = app.path().picture_dir().map_err(|e| e.to_string())?.join("Moony");
@@ -50,7 +46,6 @@ pub fn call(app: &tauri::AppHandle, op: &str, a: &[Value]) -> Result<Value, Stri
 }
 fn mk(p: &Path) -> Result<(), String> { if let Some(d) = p.parent() { std::fs::create_dir_all(d).map_err(|e| e.to_string())?; } Ok(()) }
 
-/// Download a preset from Moony's website into the mods folder.
 pub async fn download(app: &tauri::AppHandle, a: &[Value]) -> Result<Value, String> {
     let s = |i: usize| a.get(i).and_then(|v| v.as_str()).unwrap_or_default().to_string();
     let url = s(0);

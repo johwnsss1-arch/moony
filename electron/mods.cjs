@@ -1,7 +1,3 @@
-// Cosmetic mods: cursors, sounds and font. They work by replacing files in
-// Roblox's install folder (the same approach other launchers use). Originals
-// are backed up per Roblox version, and mods are re-applied when a Roblox
-// update replaces the folder. Nothing touches the running game.
 const fs = require("fs");
 const path = require("path");
 
@@ -9,8 +5,6 @@ const SOUND = [".ogg", ".mp3"];
 const s = (f) => path.join("content", "sounds", f);
 const t = (...p) => path.join("content", "textures", ...p);
 
-// targets: files replaced inside the Roblox version folder.
-// presets: built-in choices; each maps a target to a file from the same install.
 const KINDS = {
   cursor: { label: "Cursor", group: "Cursors", ext: [".png"], targets: [t("Cursors", "KeyboardMouse", "ArrowCursor.png"), t("Cursors", "KeyboardMouse", "ArrowFarCursor.png")],
     presets: { classic: { label: "Classic 2013 cursor", map: { [t("Cursors", "KeyboardMouse", "ArrowCursor.png")]: t("ArrowCursor.png"), [t("Cursors", "KeyboardMouse", "ArrowFarCursor.png")]: t("ArrowFarCursor.png") } } } },
@@ -29,9 +23,6 @@ const KINDS = {
   font: { label: "Font", group: "Text", ext: [".ttf", ".otf"], targets: [] },
 };
 
-// Roblox expects cursor images at exact sizes (e.g. 64×64). Fit the user's
-// image inside the original's size, keep its proportions, and pad with
-// transparency so it lines up like the original.
 function fitPng(srcPath, width, height) {
   const { nativeImage } = require("electron");
   const img = nativeImage.createFromPath(srcPath);
@@ -41,7 +32,7 @@ function fitPng(srcPath, width, height) {
   const w = Math.max(1, Math.round(s0.width * k)), h = Math.max(1, Math.round(s0.height * k));
   const resized = img.resize({ width: w, height: h, quality: "best" });
   if (w === width && h === height) return resized.toPNG();
-  const src = resized.toBitmap(); // BGRA
+  const src = resized.toBitmap();
   const out = Buffer.alloc(width * height * 4, 0);
   const ox = Math.floor((width - w) / 2), oy = Math.floor((height - h) / 2);
   for (let y = 0; y < h; y++) src.copy(out, ((oy + y) * width + ox) * 4, y * w * 4, (y + 1) * w * 4);
@@ -109,7 +100,7 @@ class Mods {
     const k = KINDS[kind];
     if (!k?.presets?.[preset]) throw new Error("Unknown preset");
     const player = this.findPlayerDir();
-    if (player) this.restore(kind, player); // start from the originals
+    if (player) this.restore(kind, player);
     this.state.files[kind] = { preset };
     this.save();
     return this.apply();
@@ -130,7 +121,6 @@ class Mods {
     const b = this.backupPath(player, target);
     if (fs.existsSync(target) && !fs.existsSync(b)) { fs.mkdirSync(path.dirname(b), { recursive: true }); fs.copyFileSync(target, b); }
   }
-  // The untouched Roblox file (backup if we've replaced it, else the live one).
   original(player, target) { const b = this.backupPath(player, target); return fs.existsSync(b) ? b : target; }
   restore(kind, player) {
     for (const tgt of this.targets(kind, player)) {
@@ -180,7 +170,6 @@ class Mods {
     return this.status();
   }
 
-  // Data URLs for the preview: what Roblox uses now vs the original.
   preview(kind) {
     const k = KINDS[kind];
     if (!k) throw new Error("Unknown mod");
@@ -195,7 +184,6 @@ class Mods {
     }
     if (f?.file) {
       current = toUrl(f.file);
-      // Preview images exactly as Roblox will get them (resized to fit).
       if (player && f.file.endsWith(".png") && kind !== "font") {
         const tgt = path.join(player, k.targets[0]);
         const size = fs.existsSync(this.original(player, tgt)) ? pngSize(this.original(player, tgt)) : null;

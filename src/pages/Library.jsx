@@ -17,7 +17,6 @@ export default function Library() {
   const [filter, setFilter] = useState("all");
   const [q, setQ] = useState("");
 
-  // Everything you've touched: played (tracked), favorited, or launched.
   const games = useMemo(() => {
     const map = new Map();
     const add = (g, extra) => {

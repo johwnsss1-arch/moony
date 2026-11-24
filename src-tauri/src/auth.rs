@@ -1,7 +1,3 @@
-// Sign in: Roblox's own login page in a separate, private window. You type
-// your password into Roblox, never into Moony. When Roblox sets its session
-// cookie, Rust reads it, checks who it belongs to, stores it encrypted (see
-// vault.rs) and closes the window.
 use serde_json::{json, Value};
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 
@@ -16,7 +12,6 @@ pub async fn login(app: &tauri::AppHandle) -> Result<Value, String> {
         .inner_size(480.0, 720.0)
         .center()
         .incognito(true)
-        // Keep the window on Roblox's own sites.
         .on_navigation(|u| u.scheme() == "https" && u.host_str().map(|h| h == "roblox.com" || h.ends_with(".roblox.com")).unwrap_or(false))
         .build()
         .map_err(|e| e.to_string())?;
@@ -24,7 +19,6 @@ pub async fn login(app: &tauri::AppHandle) -> Result<Value, String> {
     let target: tauri::Url = "https://www.roblox.com/".parse().unwrap();
     for _ in 0..900 {
         tokio::time::sleep(std::time::Duration::from_millis(800)).await;
-        // Closed by the user?
         if app.get_webview_window("login").is_none() {
             return Ok(json!({ "ok": false, "cancelled": true }));
         }

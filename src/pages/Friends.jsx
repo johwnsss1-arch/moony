@@ -90,7 +90,7 @@ function Following() {
       setTracked((list) => list.map((t) => ({ ...t, presence: p[t.id] ?? t.presence })));
     } catch (e) { toast("Couldn't refresh status: " + e.message, "error"); }
     setRefreshing(false);
-  }, [tracked.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tracked.length]);
   useEffect(() => { refresh(); const t = setInterval(refresh, 60000); return () => clearInterval(t); }, [refresh]);
 
   const follow = (u) => {

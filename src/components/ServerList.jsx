@@ -11,8 +11,6 @@ const SORTS = [
   { value: "ping", label: "Best ping" },
 ];
 
-// Region is found by asking Roblox where the server is (needs a signed-in
-// account), so it's checked on request instead of for every server.
 const regionCache = new Map();
 const COUNTRY = { US: "US", GB: "UK", DE: "Germany", NL: "Netherlands", FR: "France", SG: "Singapore", JP: "Japan", AU: "Australia", IN: "India", BR: "Brazil", HK: "Hong Kong", PL: "Poland" };
 const regionLabel = (r) => (r.country === "US" ? `US · ${r.region}` : `${COUNTRY[r.country] || r.country}${r.city ? ` · ${r.city}` : ""}`);
@@ -38,7 +36,6 @@ function RegionTag({ game, server }) {
 
 const pingClass = (p) => (p == null ? "" : p < 90 ? "good" : p < 180 ? "ok" : "bad");
 
-// Public servers for one game, with sorting, paging and per-server Join.
 export function ServerList({ game, compact = false }) {
   const { play, toast, nowPlaying } = useApp();
   const [busy, setBusy] = useState(null);

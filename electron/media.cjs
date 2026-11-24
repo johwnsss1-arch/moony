@@ -1,5 +1,3 @@
-// What's playing on the PC (Spotify, YouTube in a browser, etc.), read from
-// Windows' media controls, the same info Windows shows in its volume pop-up.
 const { spawn } = require("child_process");
 const { EventEmitter } = require("events");
 
@@ -20,7 +18,6 @@ while ($true) {
   Start-Sleep -Milliseconds 3000
 }`;
 
-// Friendly names for common players.
 const APPS = [
   [/spotify/i, "Spotify"], [/chrome/i, "Chrome"], [/msedge|edge/i, "Edge"], [/firefox/i, "Firefox"], [/opera/i, "Opera"], [/brave/i, "Brave"],
   [/zunemusic|music\.ui|groove/i, "Media Player"], [/vlc/i, "VLC"], [/itunes|applemusic/i, "Apple Music"], [/discord/i, "Discord"],

@@ -1,7 +1,5 @@
-/* Sidebar groups */
 .nav-group { display: flex; flex-direction: column; align-items: center; }
 
-/* ===================== Avatar page: scales with interface size ===================== */
 .avatar-layout { grid-template-columns: minmax(240px, 40%) minmax(0, 1fr); gap: 18px; }
 .avatar-stage .avatar3d { height: clamp(320px, calc(100vh - 250px), 620px) !important; }
 .avatar-side { min-width: 0; }
@@ -16,7 +14,6 @@
   .avatar-side .inv-grid { max-height: none; }
 }
 
-/* ===================== Server rows: fit at any width/scale ===================== */
 .servers { container-type: inline-size; }
 .server-head, .server-row { grid-template-columns: minmax(96px, 1fr) minmax(110px, 1.3fr) minmax(118px, auto) 76px !important; gap: 12px !important; }
 .server-ping-col { flex-direction: row !important; align-items: center; gap: 8px !important; flex-wrap: wrap; justify-content: flex-start; }
@@ -29,7 +26,6 @@
   .server-ping-col { flex-direction: column !important; align-items: flex-start; gap: 3px !important; }
 }
 
-/* ===================== Purchase dialog ===================== */
 .buy { padding: 24px; display: flex; flex-direction: column; gap: 14px; }
 .buy-head { display: flex; gap: 14px; align-items: center; }
 .buy-img { width: 84px; height: 84px; border-radius: 12px; flex: none; background: radial-gradient(circle at 50% 40%, var(--surface-3), var(--surface-2) 70%); }
@@ -44,7 +40,6 @@
 .buy-done svg { color: var(--good); }
 .owned-pill { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 8px; font-weight: 650; font-size: 12px; color: var(--good); background: rgba(61, 220, 151, 0.1); }
 
-/* ===================== Chat ===================== */
 .chat-layout { display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: 0; height: calc(100vh - 210px); min-height: 420px; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
 .chat-list { border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
 .chat-list .search-field { margin: 10px; height: 36px; }
@@ -70,7 +65,6 @@
 .chat-input textarea:focus { border-color: color-mix(in srgb, var(--accent) 70%, transparent); }
 .chat-empty { flex: 1; display: grid; place-items: center; color: var(--text-3); }
 
-/* ===================== HUD editor ===================== */
 .hud-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 18px; align-items: start; }
 .hud-screen { position: relative; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; border: 1px solid var(--line-2); background: linear-gradient(180deg, #5aa7ff 0%, #a7d6ff 58%, #47a252 58%, #3f9b4a 100%); user-select: none; }
 .hud-screen::after { content: "Drag widgets to place them on your Roblox screen"; position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); font-size: 11px; color: rgba(255, 255, 255, 0.8); text-shadow: 0 1px 3px #000; white-space: nowrap; }
@@ -88,13 +82,11 @@
 .hud-status .dot-live.on { background: var(--good); box-shadow: 0 0 0 4px rgba(61, 220, 151, 0.15); }
 @media (max-width: 1150px) { .hud-layout { grid-template-columns: 1fr; } }
 
-/* Fixes */
 .chat-list .search-field { flex: none; }
 .hud-status b, .hud-status small { display: block; }
 .hud-screen::after { content: none; }
 .hud-hint { display: block; margin-top: 8px; color: var(--text-3); font-size: 12px; }
 
-/* ===================== HUD editor stage ===================== */
 .hud-stage { position: relative; width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--line-2); background: #0d0e12; outline: none; user-select: none; }
 .hud-stage:focus-visible { border-color: var(--accent); }
 .hud-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }

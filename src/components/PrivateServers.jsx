@@ -5,9 +5,6 @@ import { api, auth } from "../lib/bridge";
 import { cleanName } from "../lib/format";
 import { Img } from "./ui";
 
-// Accepts the two link formats Roblox uses for private servers:
-//   https://www.roblox.com/games/123/Name?privateServerLinkCode=ABC
-//   https://www.roblox.com/share?code=XYZ&type=Server
 function parseLink(text) {
   let u;
   try { u = new URL(text.trim()); } catch { return null; }
@@ -39,12 +36,11 @@ export function PrivateServers({ placeId }) {
         if (!launchAs || !auth?.resolveLink) throw new Error("Share links need a signed-in account to open. Sign in on the Accounts page.");
         target = await auth.resolveLink(launchAs.id, parsed.code);
       }
-      // Look up the game for its name and icon.
       let game = {};
       try {
         const universeId = target.universeId || (await api("placeUniverse", target.placeId).catch(() => null));
         if (universeId) game = await api("gameDetails", universeId);
-      } catch { /* name stays generic */ }
+      } catch { }
       const entry = { id: `${target.placeId}:${target.linkCode}`, placeId: Number(target.placeId), linkCode: target.linkCode, universeId: game.universeId || null, name: game.name || "Private server", icon: game.icon || null, label: "" };
       if (privateServers.some((p) => p.id === entry.id)) throw new Error("That server is already saved.");
       setPrivateServers((l) => [entry, ...l]);

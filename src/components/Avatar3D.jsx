@@ -8,7 +8,6 @@ import { useApp } from "../lib/store";
 import { api as api2, avatarApi } from "../lib/bridge";
 import { Img, Skeleton } from "./ui";
 
-// Classic grey baseplate with studs, drawn on a canvas.
 function studTexture() {
   const c = document.createElement("canvas");
   c.width = c.height = 64;
@@ -26,8 +25,6 @@ function studTexture() {
   return tex;
 }
 
-// Shows a Roblox avatar in 3D. Needs a signed-in account (Roblox only serves
-// 3D models to signed-in users); otherwise shows the 2D picture.
 export function Avatar3D({ userId, fallback, version = 0, height = 420 }) {
   const { launchAs } = useApp();
   const mount = useRef(null);
@@ -36,7 +33,6 @@ export function Avatar3D({ userId, fallback, version = 0, height = 420 }) {
   const [err, setErr] = useState("");
   const [retry, setRetry] = useState(0);
   const [picture, setPicture] = useState(null);
-  // Full-body 2D picture to show instantly (and as the fallback).
   useEffect(() => {
     if (fallback || !userId) return;
     let live = true;
@@ -99,7 +95,6 @@ export function Avatar3D({ userId, fallback, version = 0, height = 420 }) {
     controls.target.copy(home.target);
     api.current.reset = () => { camera.position.copy(home.pos); controls.target.copy(home.target); controls.autoRotate = true; };
 
-    // Give up on 3D after 30 s and show the 2D picture (with a retry button).
     const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("3D took too long to load")), 30000));
     Promise.race([avatarApi.model3d(launchAs.id, userId), timeout]).then((m) => {
       if (disposed) return;
@@ -107,10 +102,6 @@ export function Avatar3D({ userId, fallback, version = 0, height = 420 }) {
       manager.setURLModifier((url) => { const key = url.split("/").pop(); return m.textures[key] || url; });
       const materials = new MTLLoader(manager).parse(m.mtl, "");
       materials.preload();
-      // Roblox body textures are clothing drawn over the skin colour: where the
-      // texture is transparent, the material colour should show through. Bake
-      // each body texture onto its colour so it renders solid. Accessories keep
-      // their alpha as cut-outs (e.g. hair strands).
       const bake = (mat) => {
         const img = mat.map?.image;
         if (!img || !img.width) return;
@@ -144,7 +135,6 @@ export function Avatar3D({ userId, fallback, version = 0, height = 420 }) {
       }
       const obj = new OBJLoader(manager).setMaterials(materials).parse(m.obj);
       obj.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-      // Stand the avatar on the baseplate, centred.
       const cx = (m.aabb.min.x + m.aabb.max.x) / 2, cz = (m.aabb.min.z + m.aabb.max.z) / 2;
       obj.position.set(-cx, -m.aabb.min.y, -cz);
       const hgt = m.aabb.max.y - m.aabb.min.y;
@@ -164,9 +154,8 @@ export function Avatar3D({ userId, fallback, version = 0, height = 420 }) {
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [launchAs?.id, userId, version, retry]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [launchAs?.id, userId, version, retry]);
 
-  // The 2D picture shows right away while 3D loads, and stays if 3D fails.
   const flat = fallback || picture;
   return (
     <div className="avatar3d" style={{ height }}>

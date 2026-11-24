@@ -1,6 +1,5 @@
 import { Component } from "react";
 
-// If a page crashes, show a message and a way out instead of a blank window.
 export class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null }; }
   static getDerivedStateFromError(error) { return { error }; }

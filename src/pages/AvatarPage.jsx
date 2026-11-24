@@ -11,7 +11,6 @@ const CATS = [
   ["tshirts", "T-shirts"], ["jackets", "Jackets"], ["sweaters", "Sweaters"], ["shorts", "Shorts"], ["dresses", "Dresses"],
   ["faces", "Faces"], ["heads", "Heads"], ["animations", "Animations"],
 ];
-// Asset types where only one can be worn at a time (wearing a new one replaces it).
 const SINGLE = new Set([2, 11, 12, 17, 18]);
 
 export default function AvatarPage() {
@@ -39,16 +38,15 @@ export default function AvatarPage() {
       }
     } catch (e) { setList({ status: "error", items: [], next: null, error: e.message }); }
   }, [launchAs, cat, list.next]);
-  useEffect(() => { loadList(false); }, [cat, launchAs?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { loadList(false); }, [cat, launchAs?.id]);
 
-  // Apply a change, then refresh what's worn and re-render the 3D model.
   const change = async (fn, done) => {
     setBusy(true);
     try {
       await fn();
       toast(done, "success");
       loadWearing();
-      setTimeout(() => setVersion((v) => v + 1), 1800); // give Roblox a moment to re-render
+      setTimeout(() => setVersion((v) => v + 1), 1800);
     } catch (e) { toast(e.message.replace(/^.*Error: /, ""), "error"); }
     setBusy(false);
   };

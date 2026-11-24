@@ -18,15 +18,11 @@ const SORTS = [
 ];
 const QUICK = ["hat", "hair", "face", "sunglasses", "aura", "wings", "crown", "headphones", "sword", "scarf"];
 
-
-// Buying inside Moony: check the real price and ownership, then a confirm step.
-// Nothing is bought until "Confirm" is pressed, and Roblox rejects the purchase
-// if the price changed since you saw it.
 function BuyBox({ item, onDetails }) {
   const { launchAs, robux, refreshRobux, signIn, toast } = useApp();
   const market = window.orbit?.market;
   const [d, setD] = useState({ status: "loading" });
-  const [step, setStep] = useState("view"); // view | confirm | buying | done
+  const [step, setStep] = useState("view");
   useEffect(() => {
     setStep("view");
     if (!launchAs || !market) return setD({ status: "nosession" });
@@ -34,7 +30,7 @@ function BuyBox({ item, onDetails }) {
     market.details(launchAs.id, { id: item.id, type: item.type })
       .then((x) => { setD({ status: "ready", ...x }); if (!x.resaleOnly) onDetails?.(x); })
       .catch((e) => setD({ status: "error", error: e.message.replace(/^.*Error: /, "") }));
-  }, [item.id, item.type, launchAs?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [item.id, item.type, launchAs?.id]);
 
   if (d.status === "nosession") return <button className="btn primary" onClick={() => signIn()}>Sign in to buy</button>;
   if (d.status === "loading") return <button className="btn primary" disabled>Checking price…</button>;
@@ -79,10 +75,6 @@ function BuyBox({ item, onDetails }) {
   );
 }
 
-// ---- "For you": a feed that learns what you like ----
-// Your taste is kept on this PC only: words from items you open or buy, and
-// the kinds of items (hats, hair, faces...) you look at most. The feed mixes
-// popular and trending paid items with searches built from that taste.
 const TASTE_KEY = "moony-market-taste";
 const STOP = new Set(["the", "and", "for", "with", "of", "a", "an", "in", "on", "by", "to", "my", "your", "pack", "new", "set", "roblox", "ugc", "limited"]);
 const loadTaste = () => { try { return JSON.parse(localStorage.getItem(TASTE_KEY)) || { kw: {}, type: {} }; } catch { return { kw: {}, type: {} }; } };
@@ -93,10 +85,9 @@ function learn(item, weight = 1) {
   for (const w of String(item.name).toLowerCase().match(/[a-z]{3,}/g) || []) if (!STOP.has(w)) t.kw[w] = (t.kw[w] || 0) + weight;
   const kind = item.assetType ? `a${item.assetType}` : item.bundleType ? `b${item.bundleType}` : null;
   if (kind) t.type[kind] = (t.type[kind] || 0) + weight;
-  try { localStorage.setItem(TASTE_KEY, JSON.stringify(t)); } catch { /* storage full */ }
+  try { localStorage.setItem(TASTE_KEY, JSON.stringify(t)); } catch { }
 }
 const top = (o, n) => Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, n).map(([k]) => k);
-// Asset type → catalog category, so a liked kind of item steers the feed.
 const TYPE_CAT = (k) => (k?.startsWith("b") ? "bodyparts" : [2, 11, 12].includes(Number(k?.slice(1))) ? "clothing" : [61, 48, 49, 50, 51, 52, 53, 54, 55, 56].includes(Number(k?.slice(1))) ? "animations" : "accessories");
 
 function feedStreams(mode, includeFree) {
@@ -119,7 +110,7 @@ export default function Market() {
   const { robux } = useApp();
   const [q, setQ] = useState("");
   const [deb, setDeb] = useState("");
-  const [mode, setMode] = useState("foryou"); // foryou | popular | trending
+  const [mode, setMode] = useState("foryou");
   const [cat, setCat] = useState("all");
   const [sort, setSort] = useState("favorited");
   const [includeFree, setIncludeFree] = useState(false);
@@ -130,11 +121,10 @@ export default function Market() {
   const streams = useRef([]);
   const seen = useRef(new Set());
   const sentinel = useRef(null);
-  const gen = useRef(0); // ignores answers from a feed that's been replaced
+  const gen = useRef(0);
   const searching = !!deb || cat !== "all" || !!price.min || !!price.max;
   useEffect(() => { const t = setTimeout(() => setDeb(q.trim()), 400); return () => clearTimeout(t); }, [q]);
 
-  // One "page" = the next batch from every stream, interleaved and de-duplicated.
   const loadMore = useCallback(async (reset) => {
     if (reset) {
       gen.current++;
@@ -163,7 +153,6 @@ export default function Market() {
   }, [mode, includeFree, searching, deb, cat, sort, price.min, price.max]);
   useEffect(() => { loadMore(true); }, [loadMore]);
 
-  // Endless scroll, like a feed.
   useEffect(() => {
     const el = sentinel.current;
     if (!el) return;

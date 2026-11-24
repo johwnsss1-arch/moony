@@ -5,7 +5,7 @@ import { api, auth, discordApi, launchGame, notifyApi, playtimeApi, win } from "
 const read = (key, fallback) => {
   try { const v = JSON.parse(localStorage.getItem("orbit:" + key)); return v ?? fallback; } catch { return fallback; }
 };
-const write = (key, v) => { try { localStorage.setItem("orbit:" + key, JSON.stringify(v)); } catch { /* storage unavailable */ } };
+const write = (key, v) => { try { localStorage.setItem("orbit:" + key, JSON.stringify(v)); } catch { } };
 
 function usePersisted(key, fallback) {
   const [v, setV] = useState(() => read(key, fallback));
@@ -16,12 +16,12 @@ function usePersisted(key, fallback) {
 export const DEFAULT_SETTINGS = {
   startPage: "home",
   rightPanel: true,
-  accent: "theme", // "theme" = use the theme's accent
+  accent: "theme",
   theme: "midnight",
   reduceMotion: false,
   ambience: true,
   scale: 100,
-  afterLaunch: "nothing", // nothing | minimize | close
+  afterLaunch: "nothing",
   keepHistory: true,
   fpsCap: 0,
   defaultAccount: null,
@@ -33,7 +33,6 @@ export const DEFAULT_SETTINGS = {
   loading: { style: "classic", tagline: "", gameArt: true, fx: "stars" },
   uiFont: "inter",
   discordJoinButton: true,
-  // In-game overlay: each widget has on/off and a position (percent of the Roblox window).
   hud: {
     enabled: true, opacity: 0.92, scale: 1,
     widgets: {
@@ -83,7 +82,6 @@ export function AppProvider({ children }) {
   const [favorites, setFavorites] = usePersisted("favorites", []);
   const [recent, setRecent] = usePersisted("recent", []);
   const [tracked, setTracked] = usePersisted("tracked", []);
-  // Navigation: a small history stack so game and profile pages can go Back.
   const [nav, setNav] = useState(() => ({ stack: [{ page: read("settings", DEFAULT_SETTINGS).startPage || "home", param: null }] }));
   const route = nav.stack[nav.stack.length - 1];
   const page = route.page;
@@ -103,11 +101,8 @@ export function AppProvider({ children }) {
   const toastId = useRef(0);
 
   const s = useMemo(() => ({ ...DEFAULT_SETTINGS, ...settings }), [settings]);
-  // One-time switch to the festive red accent when the Christmas theme arrives.
   useEffect(() => { if (!settings.festiveV1) setSettings((p) => ({ ...p, festiveV1: true, christmas: true })); }, [settings.festiveV1, setSettings]);
-  // Themes replaced the Christmas switch: carry it over once.
   useEffect(() => { if (!settings.theme) setSettings((p) => ({ ...p, theme: p.christmas === false ? "midnight" : "christmas", accent: "theme" })); }, [settings.theme, setSettings]);
-  // One-time: use the Moony Discord app and turn the status on.
   useEffect(() => { if (!settings.discordV1) setSettings((p) => ({ ...p, discordV1: true, discordEnabled: true, discordClientId: "1133419230113566730" })); }, [settings.discordV1, setSettings]);
   const updateSettings = useCallback((patch) => setSettings((p) => ({ ...p, ...patch })), [setSettings]);
 
@@ -134,15 +129,11 @@ export function AppProvider({ children }) {
 
   const activeAccount = accounts.find((a) => a.id === activeId) || accounts[0] || null;
 
-  // Which linked accounts have a saved, signed-in session (desktop only).
   const [sessions, setSessions] = useState([]);
   const refreshSessions = useCallback(() => { auth?.sessions().then(setSessions).catch(() => {}); }, []);
   useEffect(refreshSessions, [refreshSessions]);
-  // Roblox ended a saved session: update the UI and say so.
-  useEffect(() => auth?.onExpired?.(() => { refreshSessions(); toast("Roblox signed this account out. Sign in again on the Accounts page.", "error"); }), [refreshSessions]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => auth?.onExpired?.(() => { refreshSessions(); toast("Roblox signed this account out. Sign in again on the Accounts page.", "error"); }), [refreshSessions]);
 
-  // On startup, bring back every account that still has a saved sign-in
-  // (refreshing its name and avatar), and make one active if none is.
   useEffect(() => {
     if (!auth?.restore) return;
     auth.restore().then((users) => {
@@ -155,12 +146,10 @@ export function AppProvider({ children }) {
       setActiveId((cur) => cur ?? users[0].id);
       refreshSessions();
     }).catch(() => {});
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const isSignedIn = useCallback((id) => sessions.includes(Number(id)), [sessions]);
 
-  // Playtime totals and the game being played right now (desktop only; the
-  // main process reads them from Roblox's own logs).
   const [playtime, setPlaytime] = useState({ games: {}, days: {} });
   const [nowPlaying, setNowPlaying] = useState(null);
   useEffect(() => {
@@ -171,7 +160,6 @@ export function AppProvider({ children }) {
     return () => { off1(); off2(); };
   }, []);
 
-  // Discord status follows the settings.
   const [discordState, setDiscordState] = useState("off");
   useEffect(() => {
     if (!discordApi) return;
@@ -213,7 +201,6 @@ export function AppProvider({ children }) {
     else toast(r?.error || "Couldn't launch Roblox", "error");
   }, [refreshSessions, toast]);
 
-  // Real friends list for the signed-in active account, refreshed every minute.
   const [friends, setFriends] = useState({ status: "idle", data: [], error: null });
   const launchAsId = launchAs?.id ?? null;
   const loadFriends = useCallback(async () => {
@@ -228,7 +215,7 @@ export function AppProvider({ children }) {
   useEffect(() => {
     setFriends({ status: "idle", data: [], error: null });
     loadFriends();
-    const t = setInterval(() => { if (!document.hidden) loadFriends(); }, 60000); // skip while minimized
+    const t = setInterval(() => { if (!document.hidden) loadFriends(); }, 60000);
     return () => clearInterval(t);
   }, [loadFriends]);
 
@@ -238,7 +225,6 @@ export function AppProvider({ children }) {
     const r = await launchGame(game.placeId, { accountId: launchAs?.id, jobId: opts.jobId, linkCode: opts.linkCode, name: game.name, icon: game.icon });
     if (!r?.ok) return handleLaunchError(r);
     const where = opts.linkCode ? " (private server)" : opts.jobId ? " (chosen server)" : "";
-    // The desktop app shows its own bootstrapper window, so no in-app pop-up.
     if (!window.orbit) toast(r.as ? `Opening ${game.name}${where} as ${launchAs.displayName}…` : `Opening ${game.name}${where} in Roblox…`, "success");
     if (s.keepHistory) setRecent((list) => [{ ...slim(game), playedAt: Date.now() }, ...list.filter((g) => g.universeId !== game.universeId)].slice(0, 20));
     afterLaunch();
@@ -252,15 +238,13 @@ export function AppProvider({ children }) {
     afterLaunch();
   }, [launchAs, handleLaunchError, afterLaunch, toast]);
 
-  // Friend alerts: compare each friends refresh with the previous one and
-  // show a Windows notification when someone comes online or joins a game.
   const lastPresence = useRef(null);
   useEffect(() => {
     if (friends.status !== "ready") return;
     const now = new Map(friends.data.map((f) => [f.id, f]));
     const prev = lastPresence.current;
     lastPresence.current = new Map([...now].map(([id, f]) => [id, f.presence?.type ?? 0]));
-    if (!prev || !notifyApi) return; // first load: nothing to compare with
+    if (!prev || !notifyApi) return;
     for (const [id, f] of now) {
       const before = prev.get(id) ?? 0, after = f.presence?.type ?? 0;
       if (s.alertsInGame && after === 2 && before !== 2) {
@@ -270,10 +254,8 @@ export function AppProvider({ children }) {
       }
     }
   }, [friends, s.alertsInGame, s.alertsOnline]);
-  // Reset the comparison when the signed-in account changes.
   useEffect(() => { lastPresence.current = null; }, [launchAs?.id]);
 
-  // Clicking an alert: join that friend, or open the Friends page.
   useEffect(() => {
     if (!notifyApi) return;
     return notifyApi.onClick(({ userId, canJoin }) => {
@@ -283,7 +265,6 @@ export function AppProvider({ children }) {
     });
   }, [friends.data, joinFriend]);
 
-  // Robux for the signed-in active account.
   const [robux, setRobux] = useState(null);
   const refreshRobux = useCallback(() => {
     if (!launchAs || !auth?.robux) return setRobux(null);
@@ -291,10 +272,8 @@ export function AppProvider({ children }) {
   }, [launchAs]);
   useEffect(() => { refreshRobux(); const t = setInterval(() => { if (!document.hidden) refreshRobux(); }, 120000); return () => clearInterval(t); }, [refreshRobux]);
 
-  // Saved private (VIP) server links.
   const [privateServers, setPrivateServers] = usePersisted("privateServers", []);
 
-  // Installer "Link Roblox account": open Roblox sign-in right away.
   useEffect(() => {
     const l = window.orbit?.linkAccount;
     if (!l) return;
@@ -303,8 +282,7 @@ export function AppProvider({ children }) {
     return l.onRequest(go);
   }, [signIn]);
 
-  // Party mode: follow a leader into every server they join.
-  const [party, setParty] = useState(null); // { leader, since, state, lastJob }
+  const [party, setParty] = useState(null);
   const partyRef = useRef(null); partyRef.current = party;
   const nowRef = useRef(null); nowRef.current = nowPlaying;
   useEffect(() => {
@@ -321,14 +299,13 @@ export function AppProvider({ children }) {
           toast(`Following ${cur.leader.displayName} into ${p.lastLocation || "their game"}`, "success");
           play({ placeId: p.placeId, universeId: p.universeId, name: p.lastLocation || "Party game" }, { jobId: p.gameId });
         } else if (cur.state !== st || cur.where !== p.lastLocation) setParty({ ...cur, state: st, where: p.lastLocation });
-      } catch { /* try again next tick */ }
+      } catch { }
     };
     tick();
     const t = setInterval(tick, 8000);
     return () => { stop = true; clearInterval(t); };
-  }, [party?.leader?.id, launchAs, play, toast]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [party?.leader?.id, launchAs, play, toast]);
 
-  // Disconnected from a game: offer to rejoin the same server.
   const [rejoinOffer, setRejoinOffer] = useState(null);
   const rejoinTries = useRef({ job: null, n: 0, at: 0 });
   const autoRejoinRef = useRef(false);
@@ -338,7 +315,6 @@ export function AppProvider({ children }) {
     if (!g) return;
     const offs = [
       g.onDisconnected((info) => {
-        // Auto-rejoin: at most 3 tries for the same server in 5 minutes.
         const now = Date.now(), r = rejoinTries.current;
         if (r.job !== info.jobId || now - r.at > 300000) { r.job = info.jobId; r.n = 0; r.at = now; }
         if (autoRejoinRef.current && r.n < 3) { r.n++; setTimeout(() => play({ placeId: info.placeId, universeId: info.universeId, name: info.name, icon: info.icon }, { jobId: info.jobId }), 3000); }
@@ -350,14 +326,12 @@ export function AppProvider({ children }) {
     return () => offs.forEach((off) => off());
   }, [play, openGame]);
 
-  // Settings the main process uses (auto-close Roblox, the in-game HUD).
   const friendsOnline = friends.data.filter((f) => f.presence?.type > 0).length;
   useEffect(() => {
     const accent = s.accent === "theme" || !ACCENTS[s.accent] ? themeById(s.theme).accent[0] : ACCENTS[s.accent][0];
     window.orbit?.setPrefs?.({ loading: s.loading, boost: !!s.boost, autoCloseRoblox: s.autoCloseRoblox, hud: { ...s.hud, friendsOnline, theme: s.theme, accent }, activeAccountId: launchAs?.id ?? null, accent });
   }, [s.loading, s.boost, s.autoCloseRoblox, s.hud, friendsOnline, launchAs?.id, s.accent, s.theme]);
 
-  // Game update alerts follow the favorites list.
   useEffect(() => {
     window.orbit?.game?.watchUpdates(favorites.map((f) => f.universeId), s.alertsUpdates);
   }, [favorites, s.alertsUpdates]);
@@ -390,6 +364,6 @@ export function useAsync(fn, deps) {
       .then((data) => live && setSt({ status: "ready", data, error: null }))
       .catch((e) => live && setSt({ status: "error", data: null, error: e.message }));
     return () => { live = false; };
-  }, deps); // eslint-disable-line react-hooks/exhaustive-deps
+  }, deps);
   return st;
 }

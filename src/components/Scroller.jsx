@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-// A horizontal row that scrolls, with faded edges and arrow buttons that
-// appear only when there's more to see, so overflow reads as "scroll me".
 export function Scroller({ children, className = "" }) {
   const ref = useRef(null);
   const [edge, setEdge] = useState({ start: true, end: true });

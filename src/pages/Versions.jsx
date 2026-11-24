@@ -7,8 +7,6 @@ const api = window.orbit?.versions;
 const GUID = /^version-[0-9a-f]{16}$/i;
 const mb = (n) => (n / 1e6).toFixed(n > 1e8 ? 0 : 1);
 
-// Pick which Roblox build Moony launches: always the latest, or a version you
-// pin. Any version hash can be downloaded straight from Roblox's CDN.
 export default function Versions() {
   const { toast } = useApp();
   const [info, setInfo] = useState(null);

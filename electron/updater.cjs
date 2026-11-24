@@ -1,9 +1,3 @@
-// Auto-updates. Every Moony checks a small JSON feed (published with each
-// GitHub release) at startup and every 6 hours:
-//   { "version": "1.0.1", "url": "https://.../Moony-Setup-1.0.1.exe", "sha256": "...", "notes": "..." }
-// If it's newer, the setup exe is downloaded in the background and verified.
-// The user clicks "Restart to update" (or it applies the next time Moony quits),
-// which runs the new setup with --update: it replaces the files and reopens Moony.
 const { app, ipcMain, net } = require("electron");
 const { spawn } = require("child_process");
 const crypto = require("crypto");
@@ -67,11 +61,9 @@ function startUpdater(winGetter) {
   ipcMain.handle("update:get", () => state);
   ipcMain.handle("update:check", () => check());
   ipcMain.handle("update:apply", () => apply());
-  // Clear out old downloads.
-  try { fs.rmSync(dir(), { recursive: true, force: true }); } catch { /* none */ }
+  try { fs.rmSync(dir(), { recursive: true, force: true }); } catch { }
   setTimeout(check, 15000);
   timer = setInterval(check, 6 * 3600 * 1000);
-  // A downloaded update installs itself when Moony quits normally.
   app.on("will-quit", () => { if (file && !applying) { applying = true; spawn(file, ["--update", "--quiet"], { detached: true, stdio: "ignore" }).unref(); } });
 }
 

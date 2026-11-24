@@ -1,5 +1,3 @@
-// FFlags: saved in fflags.json and written to the launched Roblox version's
-// ClientSettings\ClientAppSettings.json (port of the Electron logic).
 use serde_json::{json, Map, Value};
 
 fn player_dir() -> Option<std::path::PathBuf> {
@@ -28,7 +26,6 @@ pub fn set(app: &tauri::AppHandle, flags: Value) -> Result<Value, String> {
     Ok(status(app))
 }
 
-/// Put saved flags into the current Roblox version (also after Roblox updates).
 pub fn reapply(app: &tauri::AppHandle) {
     let mut s = crate::store::get(app, "fflags").unwrap_or(Value::Null);
     if s["flags"].as_object().map(|o| o.is_empty()).unwrap_or(true) { return; }

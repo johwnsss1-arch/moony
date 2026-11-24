@@ -1,12 +1,7 @@
-// In-game HUD: a transparent, click-through, always-on-top window placed over
-// the Roblox window. It never touches the Roblox process; it only reads which
-// window is in front (and where) using standard Windows calls.
 const { BrowserWindow, screen, session } = require("electron");
 const os = require("os");
 const net = require("net");
 
-// Connection ping: time to open a TCP connection to Roblox (one round trip).
-// Done here in the main process; the HUD page itself can't reach Roblox.
 function tcpPing(host = "www.roblox.com", port = 443) {
   return new Promise((resolve) => {
     const t0 = process.hrtime.bigint();
@@ -19,8 +14,6 @@ function tcpPing(host = "www.roblox.com", port = 443) {
 }
 const path = require("path");
 
-// Reads the foreground window straight from Windows (user32) in-process: no
-// helper processes. Loaded lazily so a failure just disables the HUD.
 let win32 = null;
 function loadWin32() {
   if (win32 !== null) return win32;
@@ -77,8 +70,7 @@ class Overlay {
   }
 
   start() {
-    // A few cheap system calls twice a second.
-    this.poll = setInterval(() => { try { const f = readForeground(); if (f) this.onForeground(f); } catch { /* ignore one bad read */ } }, 500);
+    this.poll = setInterval(() => { try { const f = readForeground(); if (f) this.onForeground(f); } catch { } }, 500);
     this.tick = setInterval(() => this.push(), 1000);
   }
 
@@ -93,7 +85,6 @@ class Overlay {
     const isRoblox = title === "Roblox" && !min && Number(w) > 200;
     if (isRoblox !== this.robloxFocused) { this.robloxFocused = isRoblox; this.report(); }
     if (!isRoblox || !this.prefs.enabled) return this.hide();
-    // Window rect is in physical pixels; Electron positions in DIPs.
     const rect = screen.screenToDipRect(null, { x: Number(x), y: Number(y), width: Number(w), height: Number(h) });
     if (!this.lastRect || this.lastRect.width !== rect.width || this.lastRect.height !== rect.height) { this.lastRect = rect; this.report(); }
     this.show(rect);
@@ -102,7 +93,6 @@ class Overlay {
   ensureWindow() {
     if (this.win && !this.win.isDestroyed()) return this.win;
     const partition = "overlay";
-    // The visualiser listens to what your PC is playing (system audio loopback).
     session.fromPartition(partition).setDisplayMediaRequestHandler((_req, cb) => {
       require("electron").desktopCapturer.getSources({ types: ["screen"] }).then((s) => cb({ video: s[0], audio: "loopback" })).catch(() => cb({}));
     });
@@ -146,10 +136,8 @@ class Overlay {
 
   push() {
     if (!this.win || this.win.isDestroyed()) return;
-    // Ping every 5 s, only while the ping widget is on and the HUD is showing.
     if (this.prefs?.widgets?.ping?.on && this.status?.showing !== false && Date.now() - (this.pingAt || 0) > 5000) {
       this.pingAt = Date.now();
-      // DNS is resolved on the first try; later connects measure the network only.
       tcpPing().then((ms) => { this.ping = ms; });
     }
     this.win.webContents.send("overlay:state", { prefs: this.prefs, now: this.getNowPlaying(), media: this.getMedia(), system: this.system(), ping: this.ping ?? null, time: Date.now() });

@@ -15,14 +15,9 @@ const SORT_OPTIONS = [
   { value: "fun-with-friends", label: "Fun with friends" },
 ];
 
-// Roblox's genres. Picking one loads that genre's games from every chart
-// plus a keyword search, so each has dozens to 100+ games.
 const GENRES = ["Action", "Adventure", "Entertainment", "Obby & Platformer", "Party & Casual", "Puzzle", "RPG", "Roleplay & Avatar Sim", "Shooter", "Shopping", "Simulation", "Social", "Sports & Racing", "Strategy", "Survival", "Education"];
 const PAGE = 60;
 
-// Smart discovery: picks based on what you actually play.
-// "Because you played": well-rated games in your most-played game's genre.
-// "Hidden gems": highly rated games that aren't crowded yet.
 function ForYou({ allGames }) {
   const { playtime } = useApp();
   const played = useMemo(() => new Set(Object.keys(playtime.games || {}).map(Number)), [playtime.games]);

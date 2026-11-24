@@ -1,6 +1,3 @@
-// The bootstrapper window shown while a game launches (channel, version,
-// progress, Cancel). A small transparent window running public/splash.html;
-// state is pushed in with eval so the page needs no permissions.
 use serde_json::Value;
 use std::sync::atomic::{AtomicBool, Ordering};
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
@@ -8,7 +5,6 @@ use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 pub static CANCELLED: AtomicBool = AtomicBool::new(false);
 
 pub fn open(app: &tauri::AppHandle, accent: &str, opts: &str) -> Result<(), String> {
-    // Extra look options from the page, already URL-encoded; anything else is dropped.
     let opts: String = opts.chars().filter(|c| c.is_ascii_alphanumeric() || "-_.~%=&".contains(*c)).take(600).collect();
     CANCELLED.store(false, Ordering::SeqCst);
     if let Some(w) = app.get_webview_window("splash") { let _ = w.close(); }
@@ -30,7 +26,6 @@ pub fn open(app: &tauri::AppHandle, accent: &str, opts: &str) -> Result<(), Stri
 pub fn set(app: &tauri::AppHandle, state: &Value) {
     if let Some(w) = app.get_webview_window("splash") {
         let js = format!("window.setState && setState({})", serde_json::to_string(state).unwrap_or_default());
-        // The page may still be loading: try again shortly.
         let _ = w.eval(&js);
         let w2 = w.clone();
         tauri::async_runtime::spawn(async move { tokio::time::sleep(std::time::Duration::from_millis(400)).await; let _ = w2.eval(&js); });

@@ -1,11 +1,3 @@
-// Moony themes. Each sets the colour palette, a background particle effect,
-// the wordmark colours and optional decorations. Colours are CSS variables
-// read by every stylesheet, so a theme restyles the whole app at once.
-//
-// particles: snow | sakura | hearts | stars | embers | bubbles | leaves | null
-// festive: Christmas lights + snow caps on cards
-// logo: hat | bow | witch | null (decoration on the moon logo)
-
 const dark = (o = {}) => ({
   "--bg-0": "#0a0b0e", "--bg-1": "#0f1014", "--surface": "#14151a", "--surface-2": "#1a1b21", "--surface-3": "#22232b",
   "--text": "#ececf1", "--text-2": "#a4a6b3", "--text-3": "#6c6e7b", ...o,
@@ -91,5 +83,4 @@ export const THEMES = [
 
 export const themeById = (id) => THEMES.find((t) => t.id === id) || THEMES[0];
 
-// Heading font of each theme (also set in pages5.css as --display).
 export const THEME_FONTS = { midnight: "Fredoka", kawaii: "Baloo 2", anime: "M PLUS Rounded 1c", halloween: "Creepster", christmas: "Mountains of Christmas", ocean: "Baloo 2", forest: "Baloo 2", cyberpunk: "Orbitron", galaxy: "Space Grotesk", sunset: "Pacifico", mono: "Space Grotesk" };

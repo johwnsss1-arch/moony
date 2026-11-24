@@ -20,7 +20,6 @@ export function BarChart({ data, label, height = 110, highlight }) {
   );
 }
 
-// Overall stats (no universeId) or one game's stats.
 export function RichStats({ universeId }) {
   const { playtime } = useApp();
   const sessions = playtime.sessions || [];

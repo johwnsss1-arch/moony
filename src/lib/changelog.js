@@ -1,5 +1,3 @@
-// Shown in the "What's new" popup after an update. Newest first.
-// Add an entry here for every release.
 export const CHANGELOG = [
   {
     version: "3.0.0",

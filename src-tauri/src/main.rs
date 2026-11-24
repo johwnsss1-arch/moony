@@ -1,9 +1,3 @@
-// Moony (Rust/Tauri edition).
-//
-// The React interface is the same one the Electron build used. Everything
-// that touches the operating system or the network lives here in Rust:
-// HTTP (with each account's Roblox cookie kept out of the web page),
-// settings files, launching programs, and opening folders and links.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod auth;
@@ -24,8 +18,6 @@ mod vault;
 use serde_json::{json, Value};
 use tauri::Manager;
 
-/// One entry point for the interface: `ipc(channel, args)`. Mirrors the
-/// channel names the Electron preload used, so the UI code didn't change.
 #[tauri::command]
 async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result<Value, String> {
     let a = |i: usize| args.get(i).cloned().unwrap_or(Value::Null);
@@ -38,7 +30,6 @@ async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result
         }
         "protocol:get" => Ok(json!(protocol::is_set())),
         "protocol:set" => Ok(protocol::set(&app, a(0).as_bool().unwrap_or(false))),
-        // Start the player with arguments from a roblox-player: link.
         "roblox:start-link" => {
             let o = a(0);
             let dir = std::path::PathBuf::from(o["dir"].as_str().unwrap_or_default());
@@ -61,8 +52,6 @@ async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result
         "update:check" => Ok(updater::check(&app).await),
         "update:apply" => Ok(json!(updater::apply(&app))),
         "app:argv" => Ok(json!(std::env::args().collect::<Vec<_>>())),
-        // Feedback goes to the team's Discord webhook. The URL is baked in at
-        // build time (MOONY_FEEDBACK_WEBHOOK) and isn't in the source code.
         "feedback:send" => {
             let Some(hook) = option_env!("MOONY_FEEDBACK_WEBHOOK") else { return Err("Feedback isn't set up yet. Post it in the Moony Discord instead!".into()) };
             let p = a(0);
@@ -92,7 +81,6 @@ async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result
             let p = a(0).as_str().unwrap_or_default().to_string();
             open_detached("explorer", &[&p]).map(|_| json!(true))
         }
-        // Roblox install + launch. Prefs for pinned version/channel live in versions.json.
         "roblox:ensure" => {
             let prefs = store::get(&app, "versions").unwrap_or(Value::Null);
             let r = rbx::ensure(&app, prefs["pinned"].as_str().map(String::from), prefs["channel"].as_str().map(String::from)).await;
@@ -146,7 +134,6 @@ async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result
         "fflags:get" => Ok(flags::status(&app)),
         "fflags:set" => flags::set(&app, a(0)),
         "fflags:presets" => Ok(flags::presets().await),
-        // Newest Roblox player log: returns the text added since `offset`.
         "rlog:read" => Ok(read_log(a(0).as_str(), a(1).as_i64().unwrap_or(-1))),
         "proc:running" => Ok(json!(process_running(a(0).as_str().unwrap_or("RobloxPlayerBeta.exe")))),
         "proc:kill-roblox" => { let _ = open_detached("taskkill", &["/IM", "RobloxPlayerBeta.exe", "/F"]); Ok(json!(true)) }
@@ -171,9 +158,6 @@ async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result
     }
 }
 
-/* Rounded corners: Windows 11 rounds Moony's window itself. Windows 10
-   doesn't, so the window is clipped to a rounded rectangle (redone on resize;
-   square when maximized). */
 static RADIUS: std::sync::atomic::AtomicI32 = std::sync::atomic::AtomicI32::new(16);
 #[cfg(windows)]
 fn round(w: &tauri::WebviewWindow) {
@@ -182,7 +166,6 @@ fn round(w: &tauri::WebviewWindow) {
     static BUILD: std::sync::OnceLock<u32> = std::sync::OnceLock::new();
     let build = *BUILD.get_or_init(|| { let mut c = std::process::Command::new("cmd"); c.args(["/c", "ver"]); { use std::os::windows::process::CommandExt; c.creation_flags(0x0800_0000); } let v = c.output().ok().map(|o| String::from_utf8_lossy(&o.stdout).to_string()).unwrap_or_default(); v.split('.').nth(2).and_then(|x| x.trim_end_matches(']').trim().parse().ok()).unwrap_or(0) });
     if build >= 22000 { return; }
-    // Square corners (by request): clear any rounded region.
     if let Ok(h) = w.hwnd() { unsafe { let _ = SetWindowRgn(HWND(h.0 as _), HRGN::default(), true); } }
     return;
     #[allow(unreachable_code)]
@@ -241,14 +224,12 @@ fn open_detached(cmd: &str, args: &[&str]) -> Result<(), String> {
     let mut c = Command::new(cmd);
     c.args(args);
     #[cfg(windows)]
-    c.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
+    c.creation_flags(0x0800_0000);
     c.spawn().map(|_| ()).map_err(|e| e.to_string())
 }
 
 fn main() {
     tauri::Builder::default()
-        // Only one Moony: a second start (e.g. a Roblox link opened with Moony)
-        // hands its arguments to the running one.
         .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
             if let Some(w) = app.get_webview_window("main") { let _ = w.unminimize(); let _ = w.show(); let _ = w.set_focus(); }
             let _ = tauri::Emitter::emit(app, "app:argv", argv);

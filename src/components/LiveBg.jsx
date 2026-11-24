@@ -1,7 +1,5 @@
 import { useEffect, useRef } from "react";
 
-// Animated backgrounds drawn on one canvas, capped at 30 fps and paused while
-// Moony is idle, hidden or minimised so they cost nothing in game.
 export const LIVE_BGS = [
   { id: "off", label: "Off" },
   { id: "starfield", label: "Warp stars" },

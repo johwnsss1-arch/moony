@@ -1,5 +1,3 @@
-// Boost mode: while a game runs, Roblox gets high CPU priority and Windows
-// switches to the High performance power plan. Both are put back afterwards.
 use serde_json::{json, Value};
 use std::sync::Mutex;
 

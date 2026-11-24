@@ -1,5 +1,3 @@
-// Your own background picture or GIF, kept in this browser profile's
-// IndexedDB (too big for localStorage). Only ever on your own PC.
 const DB = "moony-bg", STORE = "bg", KEY = "current";
 
 function open() {

@@ -14,8 +14,6 @@ import { UpdateBanner } from "./components/UpdateBanner";
 import { WhatsNew, FoundUs, FeedbackModal, FeedbackNudge, useLaunchCounter } from "./components/Engage";
 import Home from "./pages/Home";
 
-// Everything except Home loads on first visit, so startup doesn't pay for
-// three.js (3D avatars) and the heavier tabs.
 const Discover = lazy(() => import("./pages/Discover"));
 const Favorites = lazy(() => import("./pages/Favorites"));
 const Charts = lazy(() => import("./pages/Charts"));
@@ -63,27 +61,20 @@ function Frame() {
       else if (e.key.toLowerCase() === "k") { e.preventDefault(); openSearch(); }
       else if (e.key.toLowerCase() === "b") { e.preventDefault(); updateSettings({ rightPanel: !settings.rightPanel }); }
     };
-    // Mouse "back" button
     const onMouse = (e) => { if (e.button === 3) { e.preventDefault(); back(); } };
     window.addEventListener("keydown", onKey);
     window.addEventListener("mouseup", onMouse);
     return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("mouseup", onMouse); };
   });
 
-  // Theme: palette, background effect and decorations. Accent can follow the
-  // theme (default) or be picked separately in Settings.
   const theme = themeById(settings.theme);
   const [a, b] = settings.accent === "theme" || !ACCENTS[settings.accent] ? theme.accent : ACCENTS[settings.accent];
-  // Interface scale: CSS zoom on <body> (see pages6.css). The main process
-  // resets page zoom to 100% and grows the window's minimum size to match.
   useEffect(() => {
     const z = Math.min(1.5, Math.max(0.75, (settings.scale || 100) / 100));
     document.documentElement.style.setProperty("--ui-scale", String(z));
     window.orbit?.setZoom?.(z);
   }, [settings.scale]);
   useEffect(() => { window.orbit?.setRadius?.(settings.winRadius ?? 16); }, [settings.winRadius]);
-  // When Moony isn't the window you're using (e.g. you're in a game), freeze
-  // every decorative animation so it stops using CPU/GPU in the background.
   const [idle, setIdle] = useState(false);
   useEffect(() => {
     let t;
@@ -93,8 +84,6 @@ function Frame() {
     document.addEventListener("visibilitychange", () => (document.hidden ? setIdle(true) : on()));
     return () => { clearTimeout(t); window.removeEventListener("blur", off); window.removeEventListener("focus", on); };
   }, []);
-  // At big scales or small windows there isn't room for the side panel; hide
-  // it until there is (measured in scaled CSS pixels, not screen pixels).
   const [narrow, setNarrow] = useState(false);
   useEffect(() => {
     const check = () => setNarrow(window.innerWidth / ((settings.scale || 100) / 100) < 1180);
@@ -103,7 +92,6 @@ function Frame() {
     return () => window.removeEventListener("resize", check);
   }, [settings.scale]);
   const showPanel = settings.rightPanel && !narrow;
-  // Your own background picture/GIF.
   const [bgUrl, setBgUrl] = useState(null);
   const [bgKind, setBgKind] = useState("image");
   useEffect(() => {
@@ -119,7 +107,6 @@ function Frame() {
     const off = onBgChange(load);
     return () => { alive = false; off(); if (url) URL.revokeObjectURL(url); };
   }, []);
-  // Parallax: the scene leans away from the mouse.
   useEffect(() => {
     if (settings.reduceMotion) return;
     let raf = 0;
@@ -194,7 +181,6 @@ function Frame() {
   );
 }
 
-// Shown after Roblox disconnects you, to put you back in the same server.
 function RejoinPrompt() {
   const { rejoinOffer, setRejoinOffer, play } = useApp();
   if (!rejoinOffer) return null;
