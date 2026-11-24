@@ -39,3 +39,15 @@ pub fn call(app: &tauri::AppHandle, op: &str, a: &[Value]) -> Result<Value, Stri
     }
 }
 fn mk(p: &Path) -> Result<(), String> { if let Some(d) = p.parent() { std::fs::create_dir_all(d).map_err(|e| e.to_string())?; } Ok(()) }
+
+/// Download a preset from Moony's website into the mods folder.
+pub async fn download(app: &tauri::AppHandle, a: &[Value]) -> Result<Value, String> {
+    let s = |i: usize| a.get(i).and_then(|v| v.as_str()).unwrap_or_default().to_string();
+    let url = s(0);
+    if !url.starts_with("https://moonylauncher.xyz/") { return Err("Only Moony's own presets can be downloaded".into()); }
+    let dest = check(app, &s(1))?;
+    let bytes = reqwest::get(&url).await.map_err(|e| e.to_string())?.error_for_status().map_err(|e| e.to_string())?.bytes().await.map_err(|e| e.to_string())?;
+    if bytes.len() > 5 * 1024 * 1024 { return Err("File is too large".into()); }
+    mk(&dest)?; std::fs::write(&dest, &bytes).map_err(|e| e.to_string())?;
+    Ok(json!(true))
+}

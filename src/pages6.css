@@ -380,3 +380,17 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .rp-promo-dots { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
 .rp-promo-dots i { width: 6px; height: 6px; border-radius: 99px; background: var(--line-2, rgba(255,255,255,.2)); cursor: pointer; transition: width .2s; }
 .rp-promo-dots i.on { width: 16px; background: var(--accent); }
+
+/* Cursor presets (Mods) */
+.cur-presets { margin: 14px 0 6px; }
+.cur-presets .list-title small { font-weight: 500; color: var(--text-3); text-transform: none; letter-spacing: 0; }
+.cur-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+.cur-tile { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px 8px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); cursor: pointer; transition: border-color .15s, transform .15s; }
+.cur-tile:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.cur-tile.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.cur-img { width: 56px; height: 56px; border-radius: 10px; display: grid; place-items: center; background: repeating-conic-gradient(#2a2a30 0 25%, #1e1e24 0 50%) 0 0 / 12px 12px; }
+.cur-img img { width: 52px; height: 52px; image-rendering: auto; }
+.cur-tile small { font-size: 11.5px; color: var(--text-2); text-align: center; }
+
+.flag-import { display: flex; gap: 8px; width: 100%; margin-top: 4px; }
+.flag-import .input { flex: 1; }

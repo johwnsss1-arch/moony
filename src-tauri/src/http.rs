@@ -17,7 +17,7 @@ static CLIENT: Lazy<reqwest::Client> = Lazy::new(|| {
         .expect("http client")
 });
 
-const ALLOWED: &[&str] = &["roblox.com", "rbxcdn.com", "roblox.qq.com", "moonylauncher.xyz", "github.com", "githubusercontent.com", "ip-api.com", "ipinfo.io", "discord.com"];
+const ALLOWED: &[&str] = &["roblox.com", "rbxcdn.com", "roblox.qq.com", "moonylauncher.xyz", "github.com", "githubusercontent.com", "ip-api.com", "ipinfo.io", "discord.com", "pastebin.com", "gitlab.com", "codeberg.org", "hastebin.com", "rentry.co"];
 
 pub async fn request(app: &tauri::AppHandle, req: Value) -> Result<Value, String> {
     let url = req["url"].as_str().ok_or("missing url")?;

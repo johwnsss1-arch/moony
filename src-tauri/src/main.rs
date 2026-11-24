@@ -45,6 +45,7 @@ async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result
             let args: Vec<String> = o["args"].as_array().map(|v| v.iter().filter_map(|x| x.as_str().map(String::from)).collect()).unwrap_or_default();
             std::process::Command::new(dir.join("RobloxPlayerBeta.exe")).current_dir(&dir).args(args).spawn().map(|_| json!(true)).map_err(|e| e.to_string())
         }
+        "fs:download" => fsx::download(&app, &args).await,
         c if c.starts_with("fs:") => fsx::call(&app, &c[3..], &args),
         "media:info" => Ok(tokio::task::spawn_blocking(media::info).await.unwrap_or(Value::Null)),
         "media:level" => Ok(json!(media::level())),

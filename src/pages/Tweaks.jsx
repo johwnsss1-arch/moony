@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Brush, Check, Code2, FileUp, Globe, Pause, Play, Plus, RefreshCw, RotateCcw, Save, Search, Sliders, Trash2, Wand2, WifiOff } from "lucide-react";
+import { Link2, Brush, Check, Code2, FileUp, Globe, Pause, Play, Plus, RefreshCw, RotateCcw, Save, Search, Sliders, Trash2, Wand2, WifiOff } from "lucide-react";
 import { useApp } from "../lib/store";
 import { fflagsApi, modsApi } from "../lib/bridge";
 import { Empty, Segmented, Toggle } from "../components/ui";
@@ -58,6 +58,7 @@ function Mods() {
       <div className="mod-detail" key={sel}>
         <h2>{cur.label}</h2>
         <ModPreview kind={sel} group={cur.group} rev={rev} />
+        {cur.group === "Cursors" && modsApi.online && <OnlineCursors kind={sel} current={cur.current?.name} onPick={(item) => run(modsApi.online(sel, item), `${item.name} applied.`)} />}
         <div className="mod-actions">
           {Object.entries(cur.presets).map(([pk, label]) => (
             <button key={pk} className={"btn " + (cur.current?.preset === pk ? "primary" : "secondary")} onClick={() => run(modsApi.preset(sel, pk), `${label} applied.`)}><Wand2 size={13} /> {label}</button>
@@ -66,6 +67,30 @@ function Mods() {
           {cur.current && <button className="btn ghost" onClick={() => run(modsApi.remove(sel), `${cur.label} reset to Roblox's default.`)}><RotateCcw size={13} /> Reset to default</button>}
         </div>
         <p className="settings-foot">Moony keeps Roblox's original files and puts your mods back automatically after Roblox updates ({st.version}{st.upToDate ? ", mods applied" : ""}). Only you see them.</p>
+      </div>
+    </div>
+  );
+}
+
+// Cursor presets hosted on moonylauncher.xyz (new ones appear without an update).
+let cursorCache = null;
+function OnlineCursors({ kind, current, onPick }) {
+  const [items, setItems] = useState(cursorCache);
+  useEffect(() => { if (!cursorCache) fetch("https://moonylauncher.xyz/cursors.json", { cache: "no-store" }).then((r) => r.json()).then((j) => { cursorCache = j.items || []; setItems(cursorCache); }).catch(() => setItems([])); }, []);
+  const want = kind === "crosshair" ? "crosshair" : "cursor";
+  const list = (items || []).filter((x) => x.kind === want);
+  if (!items) return <p className="muted-text" style={{ margin: "10px 0" }}>Loading cursor presets…</p>;
+  if (!list.length) return null;
+  return (
+    <div className="cur-presets">
+      <h3 className="list-title">Cursor presets <small>· from moonylauncher.xyz</small></h3>
+      <div className="cur-grid">
+        {list.map((it) => (
+          <button key={it.id} className={"cur-tile" + (current === it.name ? " on" : "")} onClick={() => onPick(it)} title={it.name}>
+            <span className="cur-img"><img src={it.url} alt="" /></span>
+            <small>{it.name}</small>
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -174,6 +199,46 @@ function FFlags() {
   );
 }
 
+// Pull flags out of whatever a link returns: a JSON object of flags, a
+// {"flags": {...}} wrapper, or JSON with comments/trailing commas around it.
+function parseFlagText(text) {
+  const start = text.indexOf("{"), end = text.lastIndexOf("}");
+  if (start < 0 || end < start) throw new Error("No flags found in that link");
+  let body = text.slice(start, end + 1).replace(/\/\/[^\n]*/g, "").replace(/,\s*([}\]])/g, "$1");
+  let j = JSON.parse(body);
+  if (j.flags && typeof j.flags === "object") j = j.flags;
+  const out = {};
+  for (const [k, v] of Object.entries(j)) if (/^[A-Za-z][A-Za-z0-9_]{2,100}$/.test(k) && ["string", "number", "boolean"].includes(typeof v)) out[k] = typeof v === "string" && /^(true|false)$/i.test(v) ? v.toLowerCase() === "true" : typeof v === "string" && /^-?\d+$/.test(v) ? Number(v) : v;
+  if (!Object.keys(out).length) throw new Error("No flags found in that link");
+  return out;
+}
+
+function ImportLink({ setDraft }) {
+  const { toast } = useApp();
+  const [open, setOpen] = useState(false);
+  const [url, setUrl] = useState("");
+  const [busy, setBusy] = useState(false);
+  if (!fflagsApi.fromUrl) return null;
+  const go = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const flags = parseFlagText(await fflagsApi.fromUrl(url));
+      setDraft((d) => ({ ...d, ...flags }));
+      toast(`Added ${Object.keys(flags).length} flags. Review them, then Save to Roblox.`, "success");
+      setOpen(false); setUrl("");
+    } catch (err) { toast(err.message.replace(/^.*Error: /, ""), "error"); }
+    setBusy(false);
+  };
+  return open ? (
+    <form className="flag-import" onSubmit={go}>
+      <input className="input" autoFocus placeholder="Paste a link: raw GitHub, Gist, Pastebin…" value={url} onChange={(e) => setUrl(e.target.value)} />
+      <button className="btn primary" disabled={busy || !url.trim()}>{busy ? "Loading…" : "Import"}</button>
+      <button type="button" className="btn ghost" onClick={() => setOpen(false)}>Cancel</button>
+    </form>
+  ) : <button className="btn sm secondary" onClick={() => setOpen(true)}><Link2 size={13} /> Import from link</button>;
+}
+
 function PresetLibrary({ draft, setDraft }) {
   const [lib, setLib] = useState(null);
   const [tag, setTag] = useState("All");
@@ -199,6 +264,7 @@ function PresetLibrary({ draft, setDraft }) {
         <span className={"preset-src" + (lib.online ? " on" : "")}>{lib.online ? <><Globe size={12} /> Live from moonylauncher.xyz</> : <><WifiOff size={12} /> Offline copy</>}</span>
         <span className="grow" />
         <div className="preset-tags">{tags.map((t) => <button key={t} className={"chip" + (tag === t ? " on" : "")} onClick={() => setTag(t)}>{t}</button>)}</div>
+        <ImportLink setDraft={setDraft} />
       </div>
       <div className="preset-grid">
         {list.map((p) => {

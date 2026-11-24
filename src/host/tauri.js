@@ -4,7 +4,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { roblox } from "./roblox-web";
+import { roblox, rustFetch } from "./roblox-web";
 import { createTracker } from "./tracker";
 import { createMods } from "./mods";
 import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification";
@@ -284,7 +284,19 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
       open: (g) => rust("versions:open", g),
       onProgress: on("versions:progress"),
     },
-    fflags: { get: () => rust("fflags:get"), set: (f) => rust("fflags:set", f), presets: () => rust("fflags:presets") },
+    fflags: {
+      get: () => rust("fflags:get"), set: (f) => rust("fflags:set", f), presets: () => rust("fflags:presets"),
+      // Read a flag list from a link (raw GitHub/Gist, Pastebin...). Returns the text.
+      fromUrl: async (url) => {
+        let u = String(url).trim();
+        if (!/^https:\/\//.test(u)) throw new Error("Use an https:// link");
+        u = u.replace(/^https:\/\/pastebin\.com\/(?!raw\/)([A-Za-z0-9]+)$/, "https://pastebin.com/raw/$1")
+             .replace(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/, "https://raw.githubusercontent.com/$1/$2/$3");
+        const r = await rustFetch(u);
+        if (!r.ok) throw new Error(`That link returned ${r.status}`);
+        return r.text();
+      },
+    },
     game: { onDisconnected: on("game:disconnected"), onRejoin: on("game:rejoin"), onOpen: on("game:open"), watchUpdates: (ids, enabled) => { watchList = enabled ? (ids || []).filter((x) => /^\d+$/.test(String(x))).map(Number) : []; checkUpdates(); return Promise.resolve(true); } },
     mods: {
       status: () => mods.status(),
@@ -292,6 +304,7 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
       remove: (k) => mods.remove(k).catch((e) => ({ ok: false, error: e.message })),
       preset: (k, p) => mods.preset(k, p).catch((e) => ({ ok: false, error: e.message })),
       preview: (k) => mods.preview(k),
+      online: (k, item) => mods.online(k, item).catch((e) => ({ ok: false, error: e.message })),
       apply: () => mods.apply().then((st) => ({ ok: true, status: st })).catch((e) => ({ ok: false, error: e.message })),
       onReapplied: on("mods:reapplied"),
     },

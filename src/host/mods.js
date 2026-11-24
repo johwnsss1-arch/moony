@@ -147,6 +147,17 @@ export function createMods(rust, playerDir) {
       await save();
       return { ok: true, status: await apply() };
     },
+    // A cursor from moonylauncher.xyz/cursors.json: downloaded, then applied like a picked file.
+    async online(kind, item) {
+      await init();
+      const k = KINDS[kind];
+      if (!k || !k.ext.includes(".png")) return { ok: false, error: "This mod doesn't use images" };
+      const dest = join(modsDir(), kind + ".png");
+      await fs("download", item.url, dest);
+      state.files[kind] = { name: item.name, file: dest };
+      await save();
+      return { ok: true, status: await apply() };
+    },
     async preset(kind, preset) {
       await init();
       if (!KINDS[kind]?.presets?.[preset]) return { ok: false, error: "Unknown preset" };
