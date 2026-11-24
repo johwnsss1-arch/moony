@@ -16,7 +16,7 @@
 
 ## Safety
 - You sign in on Roblox's own login page. Moony never sees your password.
-- Your Roblox session is stored only on your PC, encrypted with Windows (Electron `safeStorage`).
+- Your Roblox session is stored only on your PC, encrypted with Windows (DPAPI), and handled only by Moony's Rust core: the interface never sees it.
 - Moony doesn't inject into the game or provide any gameplay advantage.
 
 Moony is a fan project and is not affiliated with Roblox Corporation.
@@ -32,7 +32,9 @@ Requires Node 20+ on Windows. See [RELEASING.md](RELEASING.md) for publishing up
 ## Project layout
 | Path | What |
 |---|---|
-| `electron/` | Main process: launching Roblox, sessions, installer, updater, HUD overlay |
+| `src-tauri/` | Rust core (Tauri): window, network, sessions, Roblox install/launch, HUD overlay, updater |
+| `src/host/` | Bridge between the interface and the Rust core |
+| `electron/` | The old 1.x Electron build (kept for reference; `roblox.cjs` is still shared) |
 | `src/` | React UI (pages, components, themes) |
 
 ## License

@@ -25,7 +25,22 @@ const DIRS: &[(&str, &str)] = &[
 ];
 const APP_SETTINGS: &str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<Settings>\r\n\t<ContentFolder>content</ContentFolder>\r\n\t<BaseUrl>http://www.roblox.com</BaseUrl>\r\n</Settings>\r\n";
 
-pub fn root() -> PathBuf { dirs::data_local_dir().unwrap_or_default().join("Moony").join("Roblox") }
+// Roblox lives in Moony's data folder, not next to the app, so reinstalling
+// or uninstalling Moony never touches it. Moony 1.x kept it in
+// %LOCALAPPDATA%MoonyRoblox; that copy is moved over once (no re-download).
+pub fn root() -> PathBuf {
+    let local = dirs::data_local_dir().unwrap_or_default();
+    let new = local.join("xyz.moonylauncher.moony").join("Roblox");
+    static MOVED: std::sync::Once = std::sync::Once::new();
+    MOVED.call_once(|| {
+        let old = local.join("Moony").join("Roblox");
+        if !new.exists() && old.exists() {
+            if let Some(p) = new.parent() { let _ = std::fs::create_dir_all(p); }
+            let _ = std::fs::rename(&old, &new);
+        }
+    });
+    new
+}
 pub fn valid_guid(g: &str) -> bool { g.len() == 24 && g.starts_with("version-") && g[8..].chars().all(|c| c.is_ascii_hexdigit()) }
 
 pub async fn latest(channel: Option<&str>) -> Result<(String, String), String> {

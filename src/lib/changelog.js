@@ -2,6 +2,17 @@
 // Add an entry here for every release.
 export const CHANGELOG = [
   {
+    version: "2.0.0",
+    title: "The new, lighter Moony",
+    items: [
+      "Rebuilt on Rust: about half the memory, and a 3 MB download instead of 80 MB.",
+      "Same look, themes and features you know.",
+      "Please sign in to your Roblox account(s) once more. Your theme and HUD layout start fresh too.",
+      "Marketplace: a For you feed, plus Trending and Popular.",
+      "Clips and the walking pets have been removed.",
+    ],
+  },
+  {
     version: "1.0.11",
     title: "A Marketplace that knows you",
     items: [
