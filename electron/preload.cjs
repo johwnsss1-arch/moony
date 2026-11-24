@@ -72,11 +72,6 @@ contextBridge.exposeInMainWorld("orbit", {
   feedback: {
     send: (payload) => ipcRenderer.invoke("feedback:send", payload),
   },
-  clips: {
-    now: () => ipcRenderer.invoke("clips:now"),
-    folder: () => ipcRenderer.invoke("clips:folder"),
-    onSaved: (fn) => { const h = (_e, d) => fn(d); ipcRenderer.on("clips:saved", h); return () => ipcRenderer.removeListener("clips:saved", h); },
-  },
   versions: {
     info: (ch) => ipcRenderer.invoke("versions:info", ch),
     install: (guid) => ipcRenderer.invoke("versions:install", guid),

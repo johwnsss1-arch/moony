@@ -1,36 +1,3 @@
-/* ===================== Pets ===================== */
-.pets { position: fixed; left: 0; right: 0; bottom: 0; height: 120px; pointer-events: none; z-index: 4; overflow: hidden; }
-.pet { position: absolute; left: 0; bottom: 6px; width: 40px; height: 40px; animation: pet-cross var(--dur) linear var(--delay) infinite; will-change: transform; }
-.pet.small { transform: scale(.75); bottom: 4px; }
-.pet svg { display: block; overflow: visible; filter: drop-shadow(0 3px 4px rgba(0,0,0,.35)); }
-@keyframes pet-cross { from { transform: translateX(-60px); } to { transform: translateX(calc(100vw + 60px)); } }
-.pet.small { animation-name: pet-cross-s; }
-@keyframes pet-cross-s { from { transform: translateX(-60px) scale(.75); } to { transform: translateX(calc(100vw + 60px)) scale(.75); } }
-.pet-legs .l1 { transform-origin: 50% 0; transform-box: fill-box; animation: leg .45s ease-in-out infinite alternate; }
-.pet-legs .l2 { transform-origin: 50% 0; transform-box: fill-box; animation: leg .45s ease-in-out infinite alternate-reverse; }
-@keyframes leg { from { transform: rotate(-22deg); } to { transform: rotate(22deg); } }
-.pet-tail { transform-origin: 100% 100%; transform-box: fill-box; animation: tail 1.6s ease-in-out infinite alternate; }
-@keyframes tail { from { transform: rotate(-12deg); } to { transform: rotate(14deg); } }
-.pet-walk .pet-bob, .pet-scuttle .pet-bob { animation: bob .45s ease-in-out infinite alternate; }
-@keyframes bob { to { transform: translateY(-2px); } }
-.pet-hop .pet-bob { animation: hop .9s cubic-bezier(.3,0,.5,1) infinite; }
-@keyframes hop { 0%, 100% { transform: translateY(0) scale(1.06, .94); } 15% { transform: translateY(0) scale(1); } 50% { transform: translateY(-22px) scale(.96, 1.05); } 85% { transform: translateY(0); } }
-.pet-hop .pet-ear { transform-origin: 50% 100%; transform-box: fill-box; animation: tail .9s ease-in-out infinite alternate; }
-.pet-waddle .pet-bob { animation: waddle .5s ease-in-out infinite alternate; transform-origin: 50% 100%; }
-@keyframes waddle { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
-.pet-fly { bottom: auto; top: calc(100% - 110px); }
-.pet-fly .pet-bob { animation: flyy 2.4s ease-in-out infinite; }
-@keyframes flyy { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-26px); } }
-.pet-wing { transform-origin: 50% 100%; transform-box: fill-box; animation: flap .22s ease-in-out infinite alternate; }
-.pet-wing.w2 { animation-direction: alternate-reverse; }
-@keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(.35); } }
-.pet-prop { transform-origin: 50% 50%; transform-box: fill-box; animation: flap .08s linear infinite alternate; }
-.pet-swim { bottom: 40px; }
-.pet-swim .pet-bob { animation: swim 3s ease-in-out infinite; }
-@keyframes swim { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-14px) rotate(3deg); } }
-.pet-swim .pet-tail { animation-duration: .35s; transform-origin: 100% 50%; }
-.frame.no-anim .pets { display: none; }
-
 /* ===================== Theme frames & controls v4 ===================== */
 /* Every theme gets its own window border, title bar, sidebar, buttons,
    toggles, chips and inputs. */
@@ -339,18 +306,7 @@ body { zoom: var(--ui-scale, 1); width: calc(100vw / var(--ui-scale, 1)); height
 .game-grid > *, .grid > .tile, .wide-row > * { content-visibility: auto; contain-intrinsic-size: auto 220px; }
 .content { contain: layout paint; }
 
-/* ---- Clips settings ---- */
-.clip-hero { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 18px; align-items: center; padding: 16px; margin-bottom: 14px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
-.clip-hero-txt { display: flex; flex-direction: column; gap: 6px; }
-.clip-hero-txt b { font-size: 16px; }
-.clip-hero-txt small { color: var(--text-2); line-height: 1.5; }
 kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border: 1px solid var(--line-2, rgba(255,255,255,.18)); border-bottom-width: 2px; font: 600 12px ui-monospace, Consolas, monospace; color: var(--text); }
-.clip-outro { position: relative; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background: radial-gradient(60% 60% at 50% 40%, rgba(139,125,255,.35), transparent 70%), #07060f; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
-.clip-outro img { width: 46px; filter: drop-shadow(0 0 16px rgba(170,160,255,.9)); }
-.co-name { font: 800 24px var(--display); background: linear-gradient(180deg, #fff, #b8aeff); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.co-pills { display: flex; gap: 6px; }
-.co-pills i { font-style: normal; font-size: 9.5px; font-weight: 700; padding: 4px 8px; border-radius: 99px; background: rgba(255,255,255,.08); border: 1px solid rgba(184,174,255,.35); color: #fff; }
-
 /* ---- Marketplace feed ---- */
 .mk-modes button { display: inline-flex; align-items: center; gap: 6px; }
 .mk-free { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); }
@@ -362,4 +318,4 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 
 /* ---- Idle: Moony is in the background, so nothing decorative moves ---- */
 .frame.idle *, .frame.idle *::before, .frame.idle *::after { animation-play-state: paused !important; }
-.frame.idle .snow, .frame.idle .pets { visibility: hidden; }
+.frame.idle .snow { visibility: hidden; }

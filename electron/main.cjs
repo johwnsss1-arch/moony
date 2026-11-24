@@ -688,8 +688,6 @@ function startTracking() {
   tracker = new Tracker(app.getPath("userData"));
   tracker.on("start", async (s) => {
     launchJoined();
-    clearTimeout(clipsStopTimer);
-    clips?.start();
     nowPlaying = { universeId: s.universeId, placeId: s.placeId, jobId: s.jobId, name: null, icon: null, startedAt: s.startedAt };
     if (s.universeId) {
       try {
@@ -707,9 +705,6 @@ function startTracking() {
     if (nowPlaying && nowPlaying.jobId === s.jobId) { nowPlaying = { ...nowPlaying, region }; sendUI("game:now", nowPlaying); }
   });
   tracker.on("end", ({ reason, session }) => {
-    // Teleports end and start a session; keep the replay buffer through them.
-    clearTimeout(clipsStopTimer);
-    clipsStopTimer = setTimeout(() => clips?.stop(), 20000);
     // Left a game normally: close the Roblox app (instead of dropping you on
     // its home screen) and bring Moony back. Waits a few seconds so teleports
     // between places, which also "leave", don't close anything.
@@ -837,10 +832,6 @@ function watchMods() {
 const { Overlay } = require("./overlay.cjs");
 const { Splash, canFastLaunch, directLaunch, latestVersion } = require("./bootstrapper.cjs");
 const rbxinstall = require("./rbxinstall.cjs");
-const { Clips } = require("./clips.cjs");
-let clips = null, clipsStopTimer = null;
-ipcMain.handle("clips:now", () => clips ? clips.clip() : { ok: false, error: "Clips aren't ready" });
-ipcMain.handle("clips:folder", () => { if (clips) shell.openPath(clips.folder()); return true; });
 const { runSetup } = require("./setup.cjs");
 const { startUpdater } = require("./updater.cjs");
 const { Media } = require("./media.cjs");
@@ -850,7 +841,6 @@ ipcMain.handle("media:get", () => media.current);
 let overlay = null;
 let hudStatus = { roblox: false, showing: false, enabled: true };
 function startOverlay() {
-  clips = new Clips({ icon: path.join(__dirname, "..", "build", "icon.png"), onSaved: (file) => sendUI("clips:saved", { file }) });
   overlay = new Overlay({
     devUrl: DEV_URL, distDir: path.join(__dirname, "..", "dist"),
     getNowPlaying: () => nowPlaying,
@@ -917,7 +907,6 @@ ipcMain.handle("ui:zoom", (_e, f) => {
 ipcMain.handle("prefs:set", (_e, p) => {
   appPrefs = { ...appPrefs, accent: /^#[0-9a-f]{6}$/i.test(p?.accent || "") ? p.accent : appPrefs.accent, autoCloseRoblox: !!p?.autoCloseRoblox, activeAccountId: /^d+$/.test(String(p?.activeAccountId)) ? Number(p.activeAccountId) : null };
   overlay?.setPrefs?.(p?.hud);
-  clips?.setPrefs?.(p?.clips);
   // The music reader only runs while the visualiser widget is switched on.
   if (p?.hud?.enabled && p.hud.widgets?.visualizer?.on) media.start(); else media.stop();
   return true;

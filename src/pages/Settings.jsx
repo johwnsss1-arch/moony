@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Clapperboard, FolderOpen, ImagePlus, Trash2, Bell, Brush, Check, Cpu, ExternalLink, Gamepad2, Keyboard, Lock, MessageCircle, Palette, SlidersHorizontal, UsersRound, Wrench } from "lucide-react";
+import { ImagePlus, Trash2, Bell, Brush, Check, Cpu, ExternalLink, Gamepad2, Keyboard, Lock, MessageCircle, Palette, SlidersHorizontal, UsersRound, Wrench } from "lucide-react";
 import { ACCENTS, DEFAULT_SETTINGS, useApp } from "../lib/store";
 import { THEMES, THEME_FONTS, themeById } from "../lib/themes";
 import { SceneArt } from "../components/ThemeArt";
@@ -70,7 +70,6 @@ const CATS = [
   { id: "appearance", label: "Appearance", icon: Palette },
   { id: "performance", label: "Performance", icon: Cpu },
   { id: "launch", label: "Game Launch", icon: Gamepad2 },
-  { id: "clips", label: "Clips", icon: Clapperboard },
   { id: "accounts", label: "Accounts", icon: UsersRound },
   { id: "notifications", label: "Notifications", icon: Bell },
   { id: "discord", label: "Discord", icon: MessageCircle },
@@ -99,7 +98,6 @@ export default function Settings() {
           {cat === "appearance" && <Appearance />}
           {cat === "performance" && <Performance />}
           {cat === "launch" && <Launch />}
-          {cat === "clips" && <ClipsCat />}
           {cat === "accounts" && <AccountsCat />}
           {cat === "notifications" && <Notifications />}
           {cat === "discord" && <Discord />}
@@ -170,7 +168,6 @@ function Appearance() {
       <Section title="Effects">
         <div className="settings-group">
           <Row title="Theme artwork" desc="The illustrated scene and frame decorations."><Toggle checked={s.themeArt !== false} onChange={(v) => u({ themeArt: v })} /></Row>
-          <Row title="Pets" desc="Little animals that wander along the bottom of the window."><Toggle checked={s.pets !== false} onChange={(v) => u({ pets: v })} /></Row>
           <Row title="Background effect" desc={current.particles ? `${EFFECT_NAMES[current.particles]} for ${current.name}.` : "This theme has no background effect."}><Toggle checked={!!s.snow && !!current.particles} onChange={(v) => u({ snow: v })} /></Row>
           <Row title="Background glow" desc="Soft animated light behind the interface."><Toggle checked={s.ambience} onChange={(v) => u({ ambience: v })} /></Row>
           <Row title="Reduce motion" desc="Turns off most animations. Also saves CPU."><Toggle checked={s.reduceMotion} onChange={(v) => u({ reduceMotion: v })} /></Row>
@@ -191,44 +188,6 @@ function Appearance() {
         </div>
       </Section>
     </div>
-  );
-}
-
-const HOTKEYS = ["Alt+C", "F8", "F9", "F10", "Ctrl+Shift+C", "Alt+F10"];
-function ClipsCat() {
-  const { settings: s, updateSettings: u, toast } = useApp();
-  const c = { ...DEFAULT_SETTINGS.clips, ...s.clips };
-  const set = (p) => u({ clips: { ...c, ...p } });
-  const api = window.orbit?.clips;
-  return (
-    <>
-      <div className="clip-hero">
-        <div className="clip-hero-txt">
-          <b>Instant replay for Roblox</b>
-          <small>Press <kbd>{c.hotkey}</kbd> in game to save the last {c.seconds} seconds. Every clip ends with a short Moony card with the website and Discord.</small>
-        </div>
-        <div className="clip-outro" aria-hidden>
-          <img src="./moony.svg" alt="" />
-          <span className="co-name">Moony</span>
-          <span className="co-pills"><i>moonylauncher.xyz</i><i>discord.gg/moonylauncher</i></span>
-        </div>
-      </div>
-      <div className="settings-group">
-        <Row title="Clips" desc="Records the Roblox window while you play, keeping only the last minute or so in memory. Nothing is saved until you press the hotkey."><Toggle checked={c.enabled} onChange={(v) => set({ enabled: v })} /></Row>
-        <Row title="Hotkey" desc="Works while Roblox is in front."><Select value={c.hotkey} width={150} onChange={(v) => set({ hotkey: v })} options={HOTKEYS.map((h) => ({ value: h, label: h }))} /></Row>
-        <Row title="Clip length"><Segmented value={String(c.seconds)} onChange={(v) => set({ seconds: Number(v) })} options={[15, 30, 60, 90].map((n) => ({ value: String(n), label: n + "s" }))} /></Row>
-        <Row title="Quality" desc="Higher uses more CPU/GPU while you play."><Segmented value={c.quality} onChange={(v) => set({ quality: v })} options={[{ value: "720", label: "720p" }, { value: "1080", label: "1080p" }, { value: "1440", label: "1440p" }]} /></Row>
-        <Row title="Frame rate"><Segmented value={String(c.fps)} onChange={(v) => set({ fps: Number(v) })} options={[{ value: "30", label: "30 FPS" }, { value: "60", label: "60 FPS" }]} /></Row>
-        <Row title="Record sound" desc="Your PC's audio (game, music, voice chat)."><Toggle checked={c.sound} onChange={(v) => set({ sound: v })} /></Row>
-        <Row title="Moony end card" desc="The 3-second logo, website and Discord card at the end of each clip."><Toggle checked={c.outro} onChange={(v) => set({ outro: v })} /></Row>
-        <Row title="Saved clips" desc="Videos › Moony Clips">
-          <div style={{ display: "flex", gap: 8 }}>
-            <button className="btn sm secondary" disabled={!api} onClick={() => api.folder()}><FolderOpen size={13} /> Open folder</button>
-            <button className="btn sm primary" disabled={!api || !c.enabled} onClick={async () => { const r = await api.now(); if (!r?.ok) toast(r?.error || "Couldn't save the clip", "error"); }}><Clapperboard size={13} /> Clip now</button>
-          </div>
-        </Row>
-      </div>
-    </>
   );
 }
 

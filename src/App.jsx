@@ -11,7 +11,6 @@ import { loadBg, onBgChange } from "./lib/custombg";
 import { Img, Skeleton } from "./components/ui";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { UpdateBanner } from "./components/UpdateBanner";
-import { Pets } from "./components/Pets";
 import { WhatsNew, FoundUs, FeedbackModal, FeedbackNudge, useLaunchCounter } from "./components/Engage";
 import Home from "./pages/Home";
 
@@ -78,7 +77,6 @@ function Frame() {
     window.orbit?.setZoom?.(z);
   }, [settings.scale]);
   useEffect(() => { window.orbit?.setRadius?.(settings.winRadius ?? 16); }, [settings.winRadius]);
-  useEffect(() => window.orbit?.clips?.onSaved(({ file }) => toast(`Clip saved: ${file.split(/[\\/]/).pop()}`, "success")), [toast]);
   // When Moony isn't the window you're using (e.g. you're in a game), freeze
   // every decorative animation so it stops using CPU/GPU in the background.
   const [idle, setIdle] = useState(false);
@@ -144,7 +142,6 @@ function Frame() {
       {bgUrl && <div className={"custom-bg fit-" + (settings.bgFit || "cover")} aria-hidden style={{ "--bg-dim": (settings.bgDim ?? 55) / 100, "--bg-blur": `${settings.bgBlur ?? 0}px` }}>{bgKind === "video" ? <video src={bgUrl} autoPlay loop muted playsInline /> : <img src={bgUrl} alt="" />}</div>}
       {settings.themeArt !== false && !bgUrl && <SceneArt id={theme.id} />}
       {settings.themeArt !== false && <FrameDeco id={theme.id} />}
-      {settings.pets !== false && !settings.reduceMotion && <Pets id={theme.id} />}
       {festive && <Lights />}
       <TitleBar onSearch={openSearch} />
       <Sidebar />

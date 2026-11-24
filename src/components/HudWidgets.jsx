@@ -10,7 +10,7 @@ export const WIDGETS = {
   friends: { label: "Friends online", desc: "How many friends are online" },
   system: { label: "PC usage", desc: "CPU and memory use" },
   visualizer: { label: "Music visualiser", desc: "Bars that move to the audio your PC is playing" },
-  watermark: { label: "Made with Moony", desc: "A small Moony tag that shows up in your clips and screenshots" },
+  watermark: { label: "Made with Moony", desc: "A small Moony tag that shows up in your recordings and screenshots" },
   date: { label: "Date", desc: "Today's day and date" },
   ping: { label: "Internet ping", desc: "Your connection's response time to Roblox" },
   battery: { label: "Battery", desc: "Laptop battery level and charging" },

@@ -265,7 +265,6 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
     gameView: { frame: () => Promise.resolve(null), shots: () => Promise.resolve([]), openFolder: () => Promise.resolve(true), save: unavailable("Saving snapshots") },
     linkAccount: { take: () => Promise.resolve(false), onRequest: off },
     feedback: { send: (p) => rust("feedback:send", p) },
-    clips: { now: unavailable("Clips"), folder: () => Promise.resolve(true), onSaved: off },
     versions: {
       info: (ch) => rust("versions:info", ch ?? null),
       install: (g) => rust("versions:install", g),
