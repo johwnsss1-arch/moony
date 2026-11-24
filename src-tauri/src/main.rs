@@ -12,6 +12,7 @@ mod flags;
 mod fsx;
 mod http;
 mod hud;
+mod media;
 mod protocol;
 mod rbx;
 mod splash;
@@ -45,6 +46,8 @@ async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result
             std::process::Command::new(dir.join("RobloxPlayerBeta.exe")).current_dir(&dir).args(args).spawn().map(|_| json!(true)).map_err(|e| e.to_string())
         }
         c if c.starts_with("fs:") => fsx::call(&app, &c[3..], &args),
+        "media:info" => Ok(tokio::task::spawn_blocking(media::info).await.unwrap_or(Value::Null)),
+        "media:level" => Ok(json!(media::level())),
         "hud:enabled" => { hud::set_enabled(a(0).as_bool().unwrap_or(false)); Ok(hud::status()) }
         "hud:status" => Ok(hud::status()),
         "hud:push" => { hud::push(&app, a(0)); Ok(json!(true)) }
@@ -175,6 +178,10 @@ fn round(w: &tauri::WebviewWindow) {
     static BUILD: std::sync::OnceLock<u32> = std::sync::OnceLock::new();
     let build = *BUILD.get_or_init(|| { let mut c = std::process::Command::new("cmd"); c.args(["/c", "ver"]); { use std::os::windows::process::CommandExt; c.creation_flags(0x0800_0000); } let v = c.output().ok().map(|o| String::from_utf8_lossy(&o.stdout).to_string()).unwrap_or_default(); v.split('.').nth(2).and_then(|x| x.trim_end_matches(']').trim().parse().ok()).unwrap_or(0) });
     if build >= 22000 { return; }
+    // Square corners (by request): clear any rounded region.
+    if let Ok(h) = w.hwnd() { unsafe { let _ = SetWindowRgn(HWND(h.0 as _), HRGN::default(), true); } }
+    return;
+    #[allow(unreachable_code)]
     let Ok(h) = w.hwnd() else { return };
     let hwnd = HWND(h.0 as _);
     let max = w.is_maximized().unwrap_or(false) || w.is_fullscreen().unwrap_or(false);

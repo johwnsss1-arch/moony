@@ -366,3 +366,17 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .frame .input:focus, .frame .search-field:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
 .frame .tile-art, .frame .item-img { box-shadow: 0 10px 26px -14px color-mix(in srgb, var(--accent) 60%, #000); }
 .frame .tag { background: color-mix(in srgb, var(--accent) 16%, transparent); color: color-mix(in srgb, var(--accent) 40%, #fff); }
+
+/* v2.0.2: square window, no outline; easy-to-grab resize edges */
+:root, .frame.desktop { --win-r: 0px !important; }
+.frame.desktop { border-radius: 0 !important; border: 0 !important; }
+.frame::after { border-radius: 0 !important; }
+.rz-n, .rz-s { height: 7px; left: 0; right: 0; } .rz-e, .rz-w { width: 7px; top: 0; bottom: 0; }
+.rz-ne, .rz-nw, .rz-se, .rz-sw { width: 14px; height: 14px; z-index: 301; }
+.rp-promo { display: block; width: 100%; padding: 0; border: 0; background: transparent; border-radius: 16px; overflow: hidden; cursor: default; }
+.rp-promo.link { cursor: pointer; }
+.rp-promo video { display: block; width: 100%; height: 100%; object-fit: contain; }
+.rp-promo.link:hover video { filter: brightness(1.08); }
+.rp-promo-dots { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
+.rp-promo-dots i { width: 6px; height: 6px; border-radius: 99px; background: var(--line-2, rgba(255,255,255,.2)); cursor: pointer; transition: width .2s; }
+.rp-promo-dots i.on { width: 16px; background: var(--accent); }

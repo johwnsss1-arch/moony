@@ -69,12 +69,18 @@ export function Visualizer({ bars = 36, media, demo }) {
   const canvas = useRef(null);
   const [live, setLive] = useState(false);
   useEffect(() => {
-    let stream, ctx, analyser, raf, stopped = false;
+    let stream, ctx, analyser, raf, stopped = false, tauriLevel = null, smooth = 0;
     const data = new Uint8Array(256);
     (async () => {
       // The Rust build can't capture sound silently (Windows would ask you to
       // pick a screen to share), so the bars use their idle animation there.
-      if (window.__TAURI_INTERNALS__) return;
+      if (window.__TAURI_INTERNALS__) {
+        // Rust build: the live output level of your speakers drives the bars.
+        const poll = async () => { if (stopped) return; try { tauriLevel = await window.__TAURI_INTERNALS__.invoke("ipc", { channel: "media:level", args: [] }); } catch { /* ignore */ } setTimeout(poll, 50); };
+        poll();
+        if (!stopped) setLive(true);
+        return;
+      }
       try {
         stream = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: { width: 1, height: 1, frameRate: 1 } });
         stream.getVideoTracks().forEach((t) => t.stop());
@@ -98,7 +104,15 @@ export function Visualizer({ bars = 36, media, demo }) {
         for (let i = 0; i < bars; i++) {
           // Log-ish frequency mapping so bass and treble both show.
           const idx = Math.min(200, Math.floor(Math.pow(i / bars, 1.7) * 180) + 2);
-          const v = analyser ? data[idx] / 255 : 0.12 + 0.1 * Math.sin(t / 600 + i * 0.5);
+          let v;
+          if (analyser) v = data[idx] / 255;
+          else if (tauriLevel != null) {
+            if (i === 0) smooth += (Math.min(1, tauriLevel * 1.6) - smooth) * 0.35;
+            // One level, spread into a lively spectrum: louder in the lows, moving bars.
+            const shape = 0.55 + 0.45 * Math.cos((i / bars) * Math.PI * 0.9);
+            const wob = 0.65 + 0.35 * Math.sin(t / 90 + i * 1.7) * Math.sin(t / 230 + i * 0.6);
+            v = Math.max(0.04, smooth * shape * wob);
+          } else v = 0.12 + 0.1 * Math.sin(t / 600 + i * 0.5);
           const h = Math.max(2 * devicePixelRatio, v * H);
           const grad = g.createLinearGradient(0, H, 0, H - h);
           grad.addColorStop(0, "rgba(255,255,255,0.55)");

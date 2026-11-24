@@ -82,7 +82,6 @@ export function TitleBar({ onSearch }) {
   return (
     <header className="titlebar" data-tauri-drag-region onDoubleClick={(e) => e.target === e.currentTarget && win?.toggleMaximize()}>
       <div className="tb-brand"><Logo size={22} variant={themeById(settings.theme).logo} /><span>Moony</span></div>
-      <button className="tb-icon tb-back" disabled={!canGoBack} onClick={back} title="Back"><ArrowLeft size={16} /></button>
 
       <button className="tb-search" onClick={onSearch}>
         <Search size={14} /><span>Search games</span>
@@ -233,6 +232,7 @@ export function RightPanel() {
           </div>
         ))}
       </section>
+      <PromoFrame />
     </aside>
   );
 }
@@ -263,5 +263,42 @@ export function Toasts() {
         </div>
       ))}
     </div>
+  );
+}
+
+// A rotating, looping video card under "Recently played" (Discord invite,
+// giveaways, "update coming"...). The list lives on moonylauncher.xyz/promos.json
+// so it can change any time without an app update.
+const PROMO_FEED = "https://moonylauncher.xyz/promos.json";
+function PromoFrame() {
+  const [items, setItems] = useState([]);
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    const load = () => fetch(PROMO_FEED + "?t=" + Math.floor(Date.now() / 6e5), { cache: "no-store" })
+      .then((r) => r.json())
+      .then((j) => { if (!alive) return; const now = Date.now(); setItems((j.items || []).filter((x) => /^https:\/\//.test(x.video || "") && (!x.until || Date.parse(x.until) > now))); })
+      .catch(() => {});
+    load();
+    const t = setInterval(load, 30 * 60e3);
+    return () => { alive = false; clearInterval(t); };
+  }, []);
+  useEffect(() => {
+    if (items.length < 2) return;
+    const it = items[i % items.length];
+    const t = setTimeout(() => setI((n) => (n + 1) % items.length), (it.seconds || 12) * 1000);
+    return () => clearTimeout(t);
+  }, [i, items]);
+  if (!items.length) return null;
+  const it = items[i % items.length];
+  const open = () => { if (/^https:\/\//.test(it.link || "")) window.open(it.link, "_blank"); };
+  return (
+    <section className="rp-section rp-promo-wrap">
+      {it.label && <div className="rp-head"><h3>{it.label}</h3></div>}
+      <button className={"rp-promo" + (it.link ? " link" : "")} onClick={open} title={it.title || ""} style={{ aspectRatio: it.ratio || "1 / 1" }}>
+        <video key={it.video} src={it.video} poster={it.poster} autoPlay loop muted playsInline />
+      </button>
+      {items.length > 1 && <div className="rp-promo-dots">{items.map((_, k) => <i key={k} className={k === i % items.length ? "on" : ""} onClick={() => setI(k)} />)}</div>}
+    </section>
   );
 }

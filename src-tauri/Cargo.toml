@@ -1,6 +1,6 @@
 [package]
 name = "moony"
-version = "2.0.1"
+version = "2.0.2"
 edition = "2021"
 description = "Moony, a free Roblox launcher"
 
@@ -27,7 +27,7 @@ tauri-plugin-dialog = "2"
 tauri-plugin-single-instance = "2"
 
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.58", features = ["Win32_Foundation", "Win32_Security_Cryptography", "Win32_Graphics_Gdi", "Win32_UI_WindowsAndMessaging", "Win32_System_Registry", "Win32_System_SystemInformation", "Win32_System_Threading"] }
+windows = { version = "0.58", features = ["Win32_Foundation", "Win32_Security_Cryptography", "Win32_Graphics_Gdi", "Win32_UI_WindowsAndMessaging", "Win32_System_Registry", "Win32_System_SystemInformation", "Win32_System_Threading", "Win32_System_Com", "Win32_Media_Audio", "Win32_Media_Audio_Endpoints", "Media_Control", "Foundation"] }
 
 [profile.release]
 opt-level = "s"

@@ -196,6 +196,13 @@ async function handleLink(uri) {
   }
 }
 
+// What's playing (Spotify, a browser tab, Media Player...): checked every
+// 2 s; the UI hears about changes.
+let media = null;
+setInterval(async () => {
+  const m = await rust("media:info").catch(() => null);
+  if (JSON.stringify(m) !== JSON.stringify(media)) { media = m; emit("media:change", m); }
+}, 2000);
 // Feed the HUD once a second while it's showing.
 let hudPing = null, hudPingAt = 0;
 async function hudTick() {
@@ -204,10 +211,13 @@ async function hudTick() {
   const hp = prefs.hud || {};
   if (hp.widgets?.ping?.on && Date.now() - hudPingAt > 5000) { hudPingAt = Date.now(); rust("net:ping").then((ms) => { hudPing = ms; }).catch(() => {}); }
   const system = hp.widgets?.system?.on ? await rust("sys:usage").catch(() => null) : null;
-  rust("hud:push", { prefs: hp, now: nowPlaying, media: null, system, ping: hudPing, time: Date.now() }).catch(() => {});
+  rust("hud:push", { prefs: hp, now: nowPlaying, media, system, ping: hudPing, time: Date.now() }).catch(() => {});
 }
 
 if (window.__TAURI_INTERNALS__ && !window.orbit) {
+  // Links (Discord, website, promos) open in your normal browser.
+  window.open = (url) => { if (/^https:\/\//.test(String(url))) rust("open:url", String(url)).catch(() => {}); return null; };
+  document.addEventListener("click", (e) => { const a = e.target.closest?.("a[href^='https://']"); if (a) { e.preventDefault(); rust("open:url", a.href).catch(() => {}); } }, true);
   tracker.start();
   setInterval(hudTick, 1000);
   rust("app:argv").then((argv) => argv.slice(1).forEach(handleLink)).catch(() => {});
@@ -249,7 +259,7 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
     setZoom: () => Promise.resolve(true),
     setRadius: (r) => rust("ui:radius", Number(r) || 0),
     protocol: { get: () => rust("protocol:get"), set: (v) => rust("protocol:set", !!v) },
-    media: { get: () => Promise.resolve(null), onChange: off },
+    media: { get: () => rust("media:info"), onChange: on("media:change") },
     hud: { status: () => rust("hud:status"), onStatus: on("hud:status") },
     market: {
       details: (acc, item) => withSession(acc, (c) => roblox.itemDetails(c, acc, item)),

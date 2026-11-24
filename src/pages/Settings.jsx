@@ -182,9 +182,6 @@ function Appearance() {
               <Slider value={s.scale} min={75} max={150} step={5} onChange={(v) => u({ scale: v })} format={(v) => v + "%"} />
             </div>
           </Row>
-          <Row title="Window corners" desc="How round the window's corners are.">
-            <Slider value={s.winRadius ?? 16} min={0} max={28} step={2} onChange={(v) => u({ winRadius: v })} format={(v) => (v ? v + "px" : "Square")} />
-          </Row>
         </div>
       </Section>
     </div>
