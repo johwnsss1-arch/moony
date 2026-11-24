@@ -59,8 +59,8 @@
 .theme-kawaii .toggle.on { background: #ff8cbf; }
 .theme-kawaii .toggle.on .knob::after { content: "♥"; position: absolute; inset: 0; font-size: 10px; line-height: 16px; text-align: center; color: #ff6fae; }
 .theme-kawaii .input { border-radius: 999px; border: 2px solid rgba(255,156,200,.3); }
-.theme-kawaii .nav-btn { border-radius: 50%; }
-.theme-kawaii .nav-btn.on { background: rgba(255,140,191,.22); box-shadow: 0 0 0 2px rgba(255,140,191,.5) !important; }
+.theme-kawaii .nav-btn { border-radius: 999px; }
+.theme-kawaii .nav-btn.on { background: linear-gradient(180deg, rgba(255,163,204,.28), rgba(255,111,174,.18)); box-shadow: inset 0 0 0 2px rgba(255,140,191,.55), 0 4px 12px -4px rgba(255,111,174,.5) !important; color: #fff; }
 
 /* ---- Anime Night: neon tube outlines ---- */
 .theme-anime::after { box-shadow: inset 0 0 0 1px rgba(255,111,168,.55), inset 0 0 22px rgba(255,111,168,.15), inset 0 0 0 4px rgba(120,130,255,.12); }
@@ -325,3 +325,28 @@ body { zoom: var(--ui-scale, 1); width: calc(100vw / var(--ui-scale, 1)); height
 .reduce-motion .nav-dot { animation: none; }
 .ap-scale { flex-wrap: nowrap; } .ap-scale .slider { width: 150px; min-width: 0; } .ap-sec .setting > div:first-child { min-width: 180px; }
 .settings-panel { min-width: 0; } .settings-panel .setting { min-width: 0; } .settings-panel .setting > div:first-child { min-width: 0; }
+
+/* ---- Rendering performance (v1.0.10) ----
+   Blurring what's behind a large panel or every game card is redrawn on each
+   animation frame and while scrolling; solid tints look the same and cost
+   nothing. Long grids skip drawing cards that are off screen. */
+.content, .sidebar, .rpanel { backdrop-filter: none !important; }
+.content { background: color-mix(in srgb, var(--bg-1) 78%, transparent); }
+.rpanel { background: color-mix(in srgb, var(--bg-1) 86%, transparent); }
+.tile-fav, .wide-genre, .hero-badge, .btn.glass { backdrop-filter: none !important; }
+.tile-fav, .wide-genre { background: rgba(0, 0, 0, .55); }
+.btn.glass { background: rgba(20, 20, 28, .55); }
+.game-grid > *, .grid > .tile, .wide-row > * { content-visibility: auto; contain-intrinsic-size: auto 220px; }
+.content { contain: layout paint; }
+
+/* ---- Clips settings ---- */
+.clip-hero { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 18px; align-items: center; padding: 16px; margin-bottom: 14px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+.clip-hero-txt { display: flex; flex-direction: column; gap: 6px; }
+.clip-hero-txt b { font-size: 16px; }
+.clip-hero-txt small { color: var(--text-2); line-height: 1.5; }
+kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border: 1px solid var(--line-2, rgba(255,255,255,.18)); border-bottom-width: 2px; font: 600 12px ui-monospace, Consolas, monospace; color: var(--text); }
+.clip-outro { position: relative; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background: radial-gradient(60% 60% at 50% 40%, rgba(139,125,255,.35), transparent 70%), #07060f; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+.clip-outro img { width: 46px; filter: drop-shadow(0 0 16px rgba(170,160,255,.9)); }
+.co-name { font: 800 24px var(--display); background: linear-gradient(180deg, #fff, #b8aeff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.co-pills { display: flex; gap: 6px; }
+.co-pills i { font-style: normal; font-size: 9.5px; font-weight: 700; padding: 4px 8px; border-radius: 99px; background: rgba(255,255,255,.08); border: 1px solid rgba(184,174,255,.35); color: #fff; }

@@ -3,6 +3,20 @@
 // window is in front (and where) using standard Windows calls.
 const { BrowserWindow, screen, session } = require("electron");
 const os = require("os");
+const net = require("net");
+
+// Connection ping: time to open a TCP connection to Roblox (one round trip).
+// Done here in the main process; the HUD page itself can't reach Roblox.
+function tcpPing(host = "www.roblox.com", port = 443) {
+  return new Promise((resolve) => {
+    const t0 = process.hrtime.bigint();
+    const s = net.connect({ host, port });
+    const done = (ms) => { s.destroy(); resolve(ms); };
+    s.setTimeout(3000, () => done(-1));
+    s.once("connect", () => done(Math.max(1, Math.round(Number(process.hrtime.bigint() - t0) / 1e6))));
+    s.once("error", () => done(-1));
+  });
+}
 const path = require("path");
 
 // Reads the foreground window straight from Windows (user32) in-process: no
@@ -132,7 +146,13 @@ class Overlay {
 
   push() {
     if (!this.win || this.win.isDestroyed()) return;
-    this.win.webContents.send("overlay:state", { prefs: this.prefs, now: this.getNowPlaying(), media: this.getMedia(), system: this.system(), time: Date.now() });
+    // Ping every 5 s, only while the ping widget is on and the HUD is showing.
+    if (this.prefs?.widgets?.ping?.on && this.status?.showing !== false && Date.now() - (this.pingAt || 0) > 5000) {
+      this.pingAt = Date.now();
+      // DNS is resolved on the first try; later connects measure the network only.
+      tcpPing().then((ms) => { this.ping = ms; });
+    }
+    this.win.webContents.send("overlay:state", { prefs: this.prefs, now: this.getNowPlaying(), media: this.getMedia(), system: this.system(), ping: this.ping ?? null, time: Date.now() });
   }
 }
 

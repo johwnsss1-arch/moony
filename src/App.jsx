@@ -41,7 +41,7 @@ export default function App() {
 }
 
 function Frame() {
-  const { page, route, setPage, back, settings, updateSettings } = useApp();
+  const { page, route, setPage, back, settings, updateSettings, toast } = useApp();
   const max = useMaximized();
   const [searchKey, setSearchKey] = useState(0);
   const [fb, setFb] = useState(false);
@@ -77,6 +77,8 @@ function Frame() {
     document.documentElement.style.setProperty("--ui-scale", String(z));
     window.orbit?.setZoom?.(z);
   }, [settings.scale]);
+  useEffect(() => { window.orbit?.setRadius?.(settings.winRadius ?? 16); }, [settings.winRadius]);
+  useEffect(() => window.orbit?.clips?.onSaved(({ file }) => toast(`Clip saved: ${file.split(/[\\/]/).pop()}`, "success")), [toast]);
   // At big scales or small windows there isn't room for the side panel; hide
   // it until there is (measured in scaled CSS pixels, not screen pixels).
   const [narrow, setNarrow] = useState(false);

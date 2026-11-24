@@ -38,6 +38,7 @@ contextBridge.exposeInMainWorld("orbit", {
   openRobloxPage: (accountId, url) => ipcRenderer.invoke("roblox:page", accountId, url),
   setPrefs: (p) => ipcRenderer.invoke("prefs:set", p),
   setZoom: (f) => ipcRenderer.invoke("ui:zoom", f),
+  setRadius: (r) => ipcRenderer.invoke("ui:radius", r),
   protocol: { get: () => ipcRenderer.invoke("protocol:get"), set: (on) => ipcRenderer.invoke("protocol:set", on) },
   media: {
     get: () => ipcRenderer.invoke("media:get"),
@@ -70,6 +71,11 @@ contextBridge.exposeInMainWorld("orbit", {
   },
   feedback: {
     send: (payload) => ipcRenderer.invoke("feedback:send", payload),
+  },
+  clips: {
+    now: () => ipcRenderer.invoke("clips:now"),
+    folder: () => ipcRenderer.invoke("clips:folder"),
+    onSaved: (fn) => { const h = (_e, d) => fn(d); ipcRenderer.on("clips:saved", h); return () => ipcRenderer.removeListener("clips:saved", h); },
   },
   versions: {
     info: (ch) => ipcRenderer.invoke("versions:info", ch),

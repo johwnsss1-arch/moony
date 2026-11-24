@@ -43,7 +43,7 @@ export function HudWidget({ id, state, demo }) {
     case "date":
       return <div className="hw"><small>{new Date(state?.time || Date.now()).toLocaleDateString(undefined, { weekday: "long" })}</small><b>{new Date(state?.time || Date.now()).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</b></div>;
     case "ping":
-      return <PingWidget demo={demo} />;
+      return <PingWidget ms={demo ? 42 : state?.ping} />;
     case "battery":
       return <BatteryWidget demo={demo} />;
     case "breaks": {
@@ -129,15 +129,10 @@ export function Visualizer({ bars = 36, media, demo }) {
 function useEvery(ms, fn, deps = []) {
   useEffect(() => { fn(); const t = setInterval(fn, ms); return () => clearInterval(t); }, deps); // eslint-disable-line
 }
-// Round-trip time of a tiny request to Roblox's edge, every 5 seconds.
-function PingWidget({ demo }) {
-  const [ms, setMs] = useState(demo ? 42 : null);
-  useEvery(5000, async () => {
-    const t0 = performance.now();
-    try { await fetch("https://www.roblox.com/favicon.ico?" + Date.now(), { mode: "no-cors", cache: "no-store" }); setMs(Math.round(performance.now() - t0)); } catch { setMs(-1); }
-  });
+// Ping comes from the main process (a TCP connect to Roblox every 5 s).
+function PingWidget({ ms }) {
   const c = ms == null || ms < 0 ? "" : ms < 80 ? "good" : ms < 160 ? "ok" : "bad";
-  return <div className={"hw hw-ping " + c}><small>Ping</small><b>{ms == null ? "…" : ms < 0 ? "Offline" : ms + " ms"}</b></div>;
+  return <div className={"hw hw-ping " + c}><small>Ping</small><b>{ms == null ? "…" : ms < 0 ? "No connection" : ms + " ms"}</b></div>;
 }
 function BatteryWidget({ demo }) {
   const [b, setB] = useState(demo ? { level: 0.82, charging: false } : null);

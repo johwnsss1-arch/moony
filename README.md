@@ -1,7 +1,7 @@
 <p align="center"><img src="build/icon.png" width="96" alt="Moony" /></p>
 <h1 align="center">Moony</h1>
 <p align="center">A free, open-source Roblox launcher for Windows.<br/>Server regions, playtime tracking, an in-game HUD, mods and hand-drawn themes.</p>
-<p align="center"><a href="https://github.com/johwnsss1-arch/moony/releases/latest"><b>Download</b></a> · <a href="https://moonylauncher.xyz">Website</a> · <a href="https://discord.gg/wsphtTzsP">Discord</a></p>
+<p align="center"><a href="https://github.com/johwnsss1-arch/moony/releases/latest"><b>Download</b></a> · <a href="https://moonylauncher.xyz">Website</a> · <a href="https://discord.gg/moonylauncher">Discord</a></p>
 
 ---
 

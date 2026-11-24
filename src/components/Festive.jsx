@@ -75,8 +75,12 @@ export function Particles({ kind = "snow", density = 1 }) {
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
     resize();
+    // 30 fps is plenty for drifting particles, and only 10 fps while Moony
+    // isn't the window you're using (e.g. while you play).
     const tick = (now) => {
-      const dt = Math.min(0.05, (now - last) / 1000);
+      const minGap = document.hasFocus() ? 32 : 100;
+      if (now - last < minGap) { raf = requestAnimationFrame(tick); return; }
+      const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       ctx.clearRect(0, 0, w, h);
       for (const p of items) {

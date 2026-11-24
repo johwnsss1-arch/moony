@@ -94,8 +94,12 @@ function createWindow() {
     minWidth: 1000,
     minHeight: 640,
     frame: false,
-    transparent: true, // lets the UI draw its own rounded corners
-    backgroundColor: "#00000000",
+    // Opaque window: Windows draws see-through (layered) windows without full
+    // GPU help, which made scrolling and animations stutter. Rounded corners
+    // come from a window shape instead (see applyShape).
+    transparent: false,
+    backgroundColor: "#0a0b0e",
+    thickFrame: true,
     hasShadow: true,
     resizable: true,
     title: "Moony",
@@ -131,10 +135,35 @@ function createWindow() {
 
   // Closing Moony quits it (the hidden HUD window shouldn't keep it running).
   win.on("closed", () => { win = null; app.quit(); });
-  const sendState = () => win.webContents.send("win:maximized", win.isMaximized());
+  const sendState = () => { win.webContents.send("win:maximized", win.isMaximized()); applyShape(); };
   win.on("maximize", sendState);
   win.on("unmaximize", sendState);
+  win.on("resize", applyShape);
+  win.on("enter-full-screen", applyShape);
+  win.on("leave-full-screen", applyShape);
+  applyShape();
 }
+
+/* ---------- Rounded corners on an opaque window ----------
+   Windows 11 rounds frameless windows itself; Windows 10 doesn't, so Moony
+   clips the window to a rounded shape made of one-pixel rows. */
+let winRadius = 16;
+const isWin11 = process.platform === "win32" && Number(require("os").release().split(".")[2] || 0) >= 22000;
+function applyShape() {
+  if (!win || win.isDestroyed() || process.platform !== "win32") return;
+  const [w, h] = win.getSize();
+  const r = Math.min(winRadius, Math.floor(Math.min(w, h) / 2));
+  if (isWin11 || !r || win.isMaximized() || win.isFullScreen()) { win.setShape([]); return; }
+  const rows = [];
+  for (let y = 0; y < r; y++) {
+    const dy = r - y - 0.5;
+    const inset = Math.round(r - Math.sqrt(Math.max(0, r * r - dy * dy)));
+    rows.push({ x: inset, y, width: w - inset * 2, height: 1 }, { x: inset, y: h - 1 - y, width: w - inset * 2, height: 1 });
+  }
+  rows.push({ x: 0, y: r, width: w, height: h - r * 2 });
+  win.setShape(rows);
+}
+ipcMain.handle("ui:radius", (_e, r) => { const n = Number(r); if (n >= 0 && n <= 40) { winRadius = Math.round(n); applyShape(); } return true; });
 
 /* ---------- window controls ---------- */
 ipcMain.on("win:minimize", () => win?.minimize());
@@ -647,7 +676,10 @@ function updateDiscord() {
     startTimestamp: nowPlaying.startedAt,
     largeImageKey: named && nowPlaying.icon ? nowPlaying.icon : undefined,
     largeImageText: named ? nowPlaying.name.slice(0, 128) : undefined,
-    buttons: named && nowPlaying.placeId ? [{ label: "View game", url: `https://www.roblox.com/games/${nowPlaying.placeId}` }] : undefined,
+    smallImageKey: "https://moonylauncher.xyz/img/icon.png",
+    smallImageText: "Moony · moonylauncher.xyz",
+    // Discord allows two buttons: the website and the community server.
+    buttons: [{ label: "Get Moony", url: "https://moonylauncher.xyz" }, { label: "Join the Discord", url: "https://discord.gg/moonylauncher" }],
     instance: false,
   });
 }
@@ -656,6 +688,8 @@ function startTracking() {
   tracker = new Tracker(app.getPath("userData"));
   tracker.on("start", async (s) => {
     launchJoined();
+    clearTimeout(clipsStopTimer);
+    clips?.start();
     nowPlaying = { universeId: s.universeId, placeId: s.placeId, jobId: s.jobId, name: null, icon: null, startedAt: s.startedAt };
     if (s.universeId) {
       try {
@@ -673,6 +707,9 @@ function startTracking() {
     if (nowPlaying && nowPlaying.jobId === s.jobId) { nowPlaying = { ...nowPlaying, region }; sendUI("game:now", nowPlaying); }
   });
   tracker.on("end", ({ reason, session }) => {
+    // Teleports end and start a session; keep the replay buffer through them.
+    clearTimeout(clipsStopTimer);
+    clipsStopTimer = setTimeout(() => clips?.stop(), 20000);
     // Left a game normally: close the Roblox app (instead of dropping you on
     // its home screen) and bring Moony back. Waits a few seconds so teleports
     // between places, which also "leave", don't close anything.
@@ -800,6 +837,10 @@ function watchMods() {
 const { Overlay } = require("./overlay.cjs");
 const { Splash, canFastLaunch, directLaunch, latestVersion } = require("./bootstrapper.cjs");
 const rbxinstall = require("./rbxinstall.cjs");
+const { Clips } = require("./clips.cjs");
+let clips = null, clipsStopTimer = null;
+ipcMain.handle("clips:now", () => clips ? clips.clip() : { ok: false, error: "Clips aren't ready" });
+ipcMain.handle("clips:folder", () => { if (clips) shell.openPath(clips.folder()); return true; });
 const { runSetup } = require("./setup.cjs");
 const { startUpdater } = require("./updater.cjs");
 const { Media } = require("./media.cjs");
@@ -809,6 +850,7 @@ ipcMain.handle("media:get", () => media.current);
 let overlay = null;
 let hudStatus = { roblox: false, showing: false, enabled: true };
 function startOverlay() {
+  clips = new Clips({ icon: path.join(__dirname, "..", "build", "icon.png"), onSaved: (file) => sendUI("clips:saved", { file }) });
   overlay = new Overlay({
     devUrl: DEV_URL, distDir: path.join(__dirname, "..", "dist"),
     getNowPlaying: () => nowPlaying,
@@ -875,6 +917,7 @@ ipcMain.handle("ui:zoom", (_e, f) => {
 ipcMain.handle("prefs:set", (_e, p) => {
   appPrefs = { ...appPrefs, accent: /^#[0-9a-f]{6}$/i.test(p?.accent || "") ? p.accent : appPrefs.accent, autoCloseRoblox: !!p?.autoCloseRoblox, activeAccountId: /^d+$/.test(String(p?.activeAccountId)) ? Number(p.activeAccountId) : null };
   overlay?.setPrefs?.(p?.hud);
+  clips?.setPrefs?.(p?.clips);
   // The music reader only runs while the visualiser widget is switched on.
   if (p?.hud?.enabled && p.hud.widgets?.visualizer?.on) media.start(); else media.stop();
   return true;

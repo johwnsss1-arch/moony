@@ -2,6 +2,18 @@
 // Add an entry here for every release.
 export const CHANGELOG = [
   {
+    version: "1.0.10",
+    title: "Clips, and a smoother Moony",
+    items: [
+      "Moony Clips: press Alt+C in game to save the last 30 seconds (Settings › Clips).",
+      "Every clip ends with a short Moony card with the website and Discord.",
+      "Smoother scrolling and animations: Moony's window is drawn much more efficiently.",
+      "The HUD ping widget works now.",
+      "Kawaii theme: sidebar buttons fixed.",
+      "Your Discord status shows Get Moony and Join the Discord buttons.",
+    ],
+  },
+  {
     version: "1.0.9",
     title: "Faster, lighter and more yours",
     items: [

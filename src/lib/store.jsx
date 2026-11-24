@@ -47,6 +47,7 @@ export const DEFAULT_SETTINGS = {
       text: { on: false, x: 50, y: 97, label: "" },
     },
   },
+  clips: { enabled: false, hotkey: "Alt+C", seconds: 30, fps: 60, quality: "1080", outro: true, sound: true },
   christmas: true,
   snow: true,
   discordEnabled: false,
@@ -314,8 +315,8 @@ export function AppProvider({ children }) {
   const friendsOnline = friends.data.filter((f) => f.presence?.type > 0).length;
   useEffect(() => {
     const accent = s.accent === "theme" || !ACCENTS[s.accent] ? themeById(s.theme).accent[0] : ACCENTS[s.accent][0];
-    window.orbit?.setPrefs?.({ autoCloseRoblox: s.autoCloseRoblox, hud: { ...s.hud, friendsOnline }, activeAccountId: launchAs?.id ?? null, accent });
-  }, [s.autoCloseRoblox, s.hud, friendsOnline, launchAs?.id, s.accent, s.theme]);
+    window.orbit?.setPrefs?.({ autoCloseRoblox: s.autoCloseRoblox, hud: { ...s.hud, friendsOnline }, activeAccountId: launchAs?.id ?? null, accent, clips: { ...DEFAULT_SETTINGS.clips, ...s.clips } });
+  }, [s.autoCloseRoblox, s.hud, friendsOnline, launchAs?.id, s.accent, s.theme, s.clips]);
 
   // Game update alerts follow the favorites list.
   useEffect(() => {
