@@ -14,6 +14,7 @@
     "dist": "vite build && electron-builder --win portable && node build/make-feed.cjs"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.12.5",
     "@xhayper/discord-rpc": "^1.2.1",
     "fflate": "^0.8.2",
     "koffi": "^2.9.2"
@@ -31,6 +32,7 @@
     "@fontsource/pacifico": "^5.3.0",
     "@fontsource/space-grotesk": "^5.3.0",
     "@fontsource/unbounded": "^5.3.0",
+    "@tauri-apps/cli": "^2.12.6",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",

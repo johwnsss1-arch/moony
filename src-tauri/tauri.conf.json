@@ -1,0 +1,37 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Moony",
+  "version": "2.0.0",
+  "identifier": "xyz.moonylauncher.moony",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeBuildCommand": "npx vite build"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Moony",
+        "width": 1320,
+        "height": 820,
+        "minWidth": 1000,
+        "minHeight": 640,
+        "decorations": false,
+        "shadow": true,
+        "resizable": true,
+        "center": true,
+        "visible": true,
+        "backgroundColor": "#0a0b0e"
+      }
+    ],
+    "security": { "csp": null }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": ["icons/icon.ico", "icons/icon.png"],
+    "windows": { "webviewInstallMode": { "type": "downloadBootstrapper" } }
+  }
+}

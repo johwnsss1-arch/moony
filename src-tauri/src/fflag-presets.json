@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "updated": "2026-11-24",
+  "note": "Moony FFlag presets. Only flags on Roblox's launcher allowlist are used, so every one of these actually applies.",
+  "presets": [
+    {
+      "id": "max-fps",
+      "name": "Max FPS",
+      "tag": "Performance",
+      "desc": "Raises the frame cap to 240 and turns off the heaviest extras.",
+      "flags": { "DFIntTaskSchedulerTargetFps": 240, "FIntDebugForceMSAASamples": 0, "DFFlagDebugPauseVoxelizer": true }
+    },
+    {
+      "id": "potato",
+      "name": "Potato PC",
+      "tag": "Performance",
+      "desc": "Lowest textures, no grass, low-detail models and a flat sky. For old laptops.",
+      "flags": {
+        "DFFlagTextureQualityOverrideEnabled": true, "DFIntTextureQualityOverride": 0,
+        "FIntFRMMaxGrassDistance": 0, "FIntFRMMinGrassDistance": 0,
+        "DFIntCSGLevelOfDetailSwitchingDistance": 0, "DFIntCSGLevelOfDetailSwitchingDistanceL12": 0, "DFIntCSGLevelOfDetailSwitchingDistanceL23": 0, "DFIntCSGLevelOfDetailSwitchingDistanceL34": 0,
+        "FFlagDebugSkyGray": true, "FIntDebugForceMSAASamples": 0, "DFIntDebugFRMQualityLevelOverride": 1, "DFFlagDebugPauseVoxelizer": true
+      }
+    },
+    {
+      "id": "competitive",
+      "name": "Competitive",
+      "tag": "Performance",
+      "desc": "No grass, no anti-aliasing and a 240 FPS cap. Cleaner view, faster frames.",
+      "flags": { "DFIntTaskSchedulerTargetFps": 240, "FIntFRMMaxGrassDistance": 0, "FIntFRMMinGrassDistance": 0, "FIntDebugForceMSAASamples": 0, "FIntGrassMovementReducedMotionFactor": 0 }
+    },
+    {
+      "id": "crisp",
+      "name": "Crisp visuals",
+      "tag": "Graphics",
+      "desc": "Highest textures and 4x anti-aliasing for smooth edges.",
+      "flags": { "DFFlagTextureQualityOverrideEnabled": true, "DFIntTextureQualityOverride": 3, "FIntDebugForceMSAASamples": 4 }
+    },
+    {
+      "id": "ultra-aa",
+      "name": "Ultra anti-aliasing",
+      "tag": "Graphics",
+      "desc": "8x MSAA. Very smooth edges, needs a strong GPU.",
+      "flags": { "FIntDebugForceMSAASamples": 8 }
+    },
+    {
+      "id": "vulkan",
+      "name": "Vulkan",
+      "tag": "Renderer",
+      "desc": "Use Vulkan. Can be smoother on some AMD and NVIDIA cards.",
+      "flags": { "FFlagDebugGraphicsPreferVulkan": true }
+    },
+    {
+      "id": "d3d11",
+      "name": "DirectX 11",
+      "tag": "Renderer",
+      "desc": "Force DirectX 11. The most compatible choice.",
+      "flags": { "FFlagDebugGraphicsPreferD3D11": true }
+    },
+    {
+      "id": "opengl",
+      "name": "OpenGL",
+      "tag": "Renderer",
+      "desc": "Use OpenGL. Helps on a few older Intel GPUs.",
+      "flags": { "FFlagDebugGraphicsPreferOpenGL": true }
+    },
+    {
+      "id": "calm-grass",
+      "name": "Still grass",
+      "tag": "Visual",
+      "desc": "Grass stays but stops swaying.",
+      "flags": { "FIntGrassMovementReducedMotionFactor": 0 }
+    },
+    {
+      "id": "gray-sky",
+      "name": "Gray sky",
+      "tag": "Visual",
+      "desc": "Swaps the skybox for flat gray. Small FPS boost.",
+      "flags": { "FFlagDebugSkyGray": true }
+    },
+    {
+      "id": "sharp-ui",
+      "name": "Sharp UI",
+      "tag": "Visual",
+      "desc": "Turns off DPI scaling for crisper UI on high-DPI screens.",
+      "flags": { "DFFlagDisableDPIScale": true }
+    },
+    {
+      "id": "fullscreen",
+      "name": "Real fullscreen",
+      "tag": "Display",
+      "desc": "Alt+Enter uses exclusive fullscreen instead of a borderless window.",
+      "flags": { "FFlagHandleAltEnterFullscreenManually": false }
+    }
+  ]
+}

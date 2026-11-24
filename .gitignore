@@ -31,3 +31,4 @@ trailer/out/
 !website/media/*.mp4
 trailer/
 website/
+src-tauri/target/

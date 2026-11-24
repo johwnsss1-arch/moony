@@ -80,7 +80,7 @@ export function TitleBar({ onSearch }) {
   }, [menu]);
 
   return (
-    <header className="titlebar" onDoubleClick={(e) => e.target === e.currentTarget && win?.toggleMaximize()}>
+    <header className="titlebar" data-tauri-drag-region onDoubleClick={(e) => e.target === e.currentTarget && win?.toggleMaximize()}>
       <div className="tb-brand"><Logo size={22} variant={themeById(settings.theme).logo} /><span>Moony</span></div>
       <button className="tb-icon tb-back" disabled={!canGoBack} onClick={back} title="Back"><ArrowLeft size={16} /></button>
 
