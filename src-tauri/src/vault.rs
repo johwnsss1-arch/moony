@@ -60,3 +60,31 @@ pub fn remove(app: &tauri::AppHandle, id: u64) {
 pub fn accounts(app: &tauri::AppHandle) -> Vec<Value> {
     load(app).into_iter().map(|e| json!({ "id": e.id, "name": e.name, "displayName": e.display_name, "avatar": e.avatar })).collect()
 }
+
+/// One-time move from the Electron build: its sessions.json holds cookies
+/// encrypted by Chromium (AES-256-GCM with a key protected by DPAPI in
+/// "Local State"). Decrypt them on this PC and store them in our own vault.
+/// Returns how many accounts were imported.
+pub fn import_electron(app: &tauri::AppHandle) -> usize {
+    use aes_gcm::{aead::Aead, Aes256Gcm, KeyInit, Nonce};
+    let Some(roaming) = dirs::config_dir() else { return 0 };
+    let old = roaming.join("Moony");
+    let (Ok(state), Ok(sessions)) = (std::fs::read(old.join("Local State")), std::fs::read(old.join("sessions.json"))) else { return 0 };
+    let (Ok(state), Ok(sessions)) = (serde_json::from_slice::<Value>(&state), serde_json::from_slice::<Value>(&sessions)) else { return 0 };
+    let Some(enc_key) = state["os_crypt"]["encrypted_key"].as_str().and_then(|k| B64.decode(k).ok()) else { return 0 };
+    if !enc_key.starts_with(b"DPAPI") { return 0; }
+    let Some(key) = protect(&enc_key[5..], false) else { return 0 };
+    let Ok(cipher) = Aes256Gcm::new_from_slice(&key) else { return 0 };
+    let mut n = 0;
+    let have: Vec<u64> = load(app).iter().map(|e| e.id).collect();
+    for (id, v) in sessions.as_object().into_iter().flatten() {
+        let Ok(id) = id.parse::<u64>() else { continue };
+        if have.contains(&id) { continue; }
+        let Some(raw) = v.as_str().and_then(|s| B64.decode(s).ok()) else { continue };
+        if raw.len() < 3 + 12 + 16 || &raw[..3] != b"v10" { continue; }
+        let Ok(plain) = cipher.decrypt(Nonce::from_slice(&raw[3..15]), &raw[15..]) else { continue };
+        let Ok(cookie) = String::from_utf8(plain) else { continue };
+        if add(app, id, "", "", &cookie, None) { n += 1; }
+    }
+    n
+}

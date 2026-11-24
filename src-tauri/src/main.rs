@@ -9,9 +9,14 @@
 mod auth;
 mod discord;
 mod flags;
+mod fsx;
 mod http;
+mod hud;
+mod protocol;
 mod rbx;
+mod splash;
 mod store;
+mod updater;
 mod vault;
 
 use serde_json::{json, Value};
@@ -27,6 +32,42 @@ async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result
             use std::io::Write;
             let p = app.path().app_data_dir().map_err(|e| e.to_string())?.join("moony.log");
             if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(p) { let _ = writeln!(f, "{}", a(0).as_str().unwrap_or_default()); }
+            Ok(json!(true))
+        }
+        "protocol:get" => Ok(json!(protocol::is_set())),
+        "protocol:set" => Ok(protocol::set(&app, a(0).as_bool().unwrap_or(false))),
+        // Start the player with arguments from a roblox-player: link.
+        "roblox:start-link" => {
+            let o = a(0);
+            let dir = std::path::PathBuf::from(o["dir"].as_str().unwrap_or_default());
+            if !dir.starts_with(rbx::root()) { return Err("Unknown Roblox folder".into()); }
+            let args: Vec<String> = o["args"].as_array().map(|v| v.iter().filter_map(|x| x.as_str().map(String::from)).collect()).unwrap_or_default();
+            std::process::Command::new(dir.join("RobloxPlayerBeta.exe")).current_dir(&dir).args(args).spawn().map(|_| json!(true)).map_err(|e| e.to_string())
+        }
+        c if c.starts_with("fs:") => fsx::call(&app, &c[3..], &args),
+        "hud:enabled" => { hud::set_enabled(a(0).as_bool().unwrap_or(false)); Ok(hud::status()) }
+        "hud:status" => Ok(hud::status()),
+        "hud:push" => { hud::push(&app, a(0)); Ok(json!(true)) }
+        "sys:usage" => Ok(hud::usage()),
+        "net:ping" => Ok(json!(hud::ping().await)),
+        "update:get" => Ok(updater::get(&app)),
+        "update:check" => Ok(updater::check(&app).await),
+        "update:apply" => Ok(json!(updater::apply(&app))),
+        "app:argv" => Ok(json!(std::env::args().collect::<Vec<_>>())),
+        // Feedback goes to the team's Discord webhook. The URL is baked in at
+        // build time (MOONY_FEEDBACK_WEBHOOK) and isn't in the source code.
+        "feedback:send" => {
+            let Some(hook) = option_env!("MOONY_FEEDBACK_WEBHOOK") else { return Err("Feedback isn't set up yet. Post it in the Moony Discord instead!".into()) };
+            let p = a(0);
+            let kind = p["kind"].as_str().filter(|k| ["idea", "bug", "love", "source"].contains(k)).unwrap_or("idea");
+            let text: String = p["text"].as_str().unwrap_or_default().replace("@everyone", "@​everyone").replace("@here", "@​here").chars().take(1500).collect();
+            if text.trim().is_empty() { return Err("Empty message".into()); }
+            static LAST: std::sync::Mutex<Option<std::time::Instant>> = std::sync::Mutex::new(None);
+            { let mut l = LAST.lock().unwrap(); if l.map(|t| t.elapsed().as_secs() < 20).unwrap_or(false) { return Err("Please wait a few seconds before sending again.".into()); } *l = Some(std::time::Instant::now()); }
+            let label = match kind { "bug" => "🐛 Bug", "love" => "💜 Love", "source" => "📍 Found Moony via", _ => "💡 Idea" };
+            let body = json!({ "username": "Moony Feedback", "allowed_mentions": { "parse": [] }, "embeds": [{ "title": label, "description": text, "color": 0x8b7dff, "footer": { "text": format!("Moony {}", app.package_info().version) } }] });
+            let r = reqwest::Client::new().post(hook).json(&body).send().await.map_err(|e| e.to_string())?;
+            if !r.status().is_success() { return Err("Couldn't send feedback. Try again later.".into()); }
             Ok(json!(true))
         }
         "app:version" => Ok(json!(app.package_info().version.to_string())),
@@ -109,7 +150,13 @@ async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result
         }
         "discord:status" => Ok(json!(discord::status())),
         "discord:set" => { let v = a(0); let _ = tokio::task::spawn_blocking(move || discord::set(&v)).await; Ok(json!(true)) }
+        "splash:open" => splash::open(&app, a(0).as_str().unwrap_or("#8b7dff")).map(|_| json!(true)),
+        "splash:set" => { splash::set(&app, &a(0)); Ok(json!(true)) }
+        "splash:close" => { splash::close(&app, a(0).as_u64().unwrap_or(0)); Ok(json!(true)) }
+        "splash:cancel" => { splash::cancel(&app); Ok(json!(true)) }
+        "splash:cancelled" => Ok(json!(splash::CANCELLED.load(std::sync::atomic::Ordering::SeqCst))),
         "auth:login" => auth::login(&app).await,
+        "vault:import" => Ok(json!(vault::import_electron(&app))),
         "vault:accounts" => Ok(json!(vault::accounts(&app))),
         "vault:remove" => { vault::remove(&app, a(0).as_u64().unwrap_or(0)); Ok(json!(true)) }
         _ => Err(format!("{channel} isn't available in this build yet")),
@@ -163,9 +210,19 @@ fn open_detached(cmd: &str, args: &[&str]) -> Result<(), String> {
 
 fn main() {
     tauri::Builder::default()
+        // Only one Moony: a second start (e.g. a Roblox link opened with Moony)
+        // hands its arguments to the running one.
+        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+            if let Some(w) = app.get_webview_window("main") { let _ = w.unminimize(); let _ = w.show(); let _ = w.set_focus(); }
+            let _ = tauri::Emitter::emit(app, "app:argv", argv);
+        }))
+        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             let dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&dir)?;
+            hud::start(app.handle().clone());
+            updater::start(app.handle().clone());
             #[cfg(debug_assertions)]
             if std::env::var("MOONY_DEVTOOLS").is_ok() { if let Some(w) = app.get_webview_window("main") { w.open_devtools(); } }
             Ok(())

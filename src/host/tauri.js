@@ -6,9 +6,53 @@ import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { roblox } from "./roblox-web";
 import { createTracker } from "./tracker";
+import { createMods } from "./mods";
+import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification";
 
 const rust = (channel, ...args) => invoke("ipc", { channel, args });
 const appWin = getCurrentWindow();
+
+async function notify(title, body) {
+  try {
+    let ok = await isPermissionGranted();
+    if (!ok) ok = (await requestPermission()) === "granted";
+    if (ok) sendNotification({ title: String(title).slice(0, 120), body: String(body).slice(0, 240) });
+  } catch { /* notifications off */ }
+}
+
+// Mods work on the Roblox version Moony launches (newest complete install).
+const playerDir = async () => { const st = await rust("versions:info").catch(() => null); const v = st?.installed?.find((x) => x.complete); return v ? String(v.dir) : null; };
+const mods = createMods(rust, playerDir);
+
+// Game update alerts: every 15 minutes, check favourites for a newer update time.
+let watchList = [];
+async function checkUpdates() {
+  if (!watchList.length) return;
+  const seen = (await rust("store:get", "game-updates").catch(() => null)) || {};
+  for (const id of watchList.slice(0, 50)) {
+    try {
+      const g = await roblox.gameDetails(id);
+      const prev = seen[id];
+      seen[id] = g.updated;
+      if (prev && g.updated && new Date(g.updated) > new Date(prev)) notify(`${g.name} just updated`, "Open Moony to see what's new.");
+    } catch { /* skip */ }
+  }
+  rust("store:set", "game-updates", seen).catch(() => {});
+}
+setInterval(checkUpdates, 15 * 60e3);
+
+// FPS cap goes through the FFlags store so the editor stays in sync.
+async function setFps(fps) {
+  const n = Number(fps);
+  if (!Number.isInteger(n) || n < 0 || n > 1000) return { ok: false, error: "Invalid FPS value" };
+  const st = await rust("fflags:get");
+  if (!st.installed) return { ok: false, error: "Roblox Player isn't installed" };
+  const flags = { ...st.flags };
+  if (n === 0) delete flags.DFIntTaskSchedulerTargetFps; else flags.DFIntTaskSchedulerTargetFps = n;
+  const r = await rust("fflags:set", flags);
+  return { ok: true, version: r.version };
+}
+
 
 // Events: from Rust (Tauri events) and from this file (local).
 const local = new Map();
@@ -39,8 +83,24 @@ const PUBLIC = new Set(["sorts", "search", "gameDetails", "lookupUser", "searchU
 
 // Launch a game: make sure Roblox is installed (Rust downloads it with
 // progress), get a one-time sign-in ticket, then Rust starts the player.
-async function launch({ placeId, accountId, followUserId, jobId, linkCode }) {
-  const isId = (v) => /^d+$/.test(String(v));
+const mb = (n) => (n / 1e6).toFixed(n > 1e8 ? 0 : 1);
+let splashTimer = null, splashOff = null;
+const splash = (s) => rust("splash:set", s).catch(() => {});
+async function launch({ placeId, accountId, followUserId, jobId, linkCode, name, icon }) {
+  const title = (followUserId ? `Joining ${name || "your friend"}` : name || "Roblox").slice(0, 80);
+  await rust("splash:open", prefs.accent || "#8b7dff").catch(() => {});
+  splash({ title, step: "Getting ready…", progress: 10, image: /^https:\/\/[a-z0-9.-]*rbxcdn\.com\//i.test(icon || "") ? icon : null, foot: "Moony" });
+  clearTimeout(splashTimer); splashTimer = setTimeout(() => rust("splash:close", 0), 45000);
+  splashOff?.(); splashOff = on("launch:progress")((p) => splash(p.total ? { step: `${p.phase} ${mb(p.done)} / ${mb(p.total)} MB`, progress: 8 + (p.done / p.total) * 45, foot: "Updating Roblox" } : { step: p.phase, progress: null }));
+  const r = await launchInner({ placeId, accountId, followUserId, jobId, linkCode });
+  splashOff?.(); splashOff = null;
+  if (!r.ok) { if (!r.cancelled) { splash({ step: r.error, error: true, progress: 100 }); rust("splash:close", 3500); } }
+  else splash({ step: r.as ? "Loading the game…" : "Opening Roblox…", progress: 85, foot: "Moony bootstrapper" });
+  if (r.ok && !r.as) rust("splash:close", 3000);
+  return r;
+}
+async function launchInner({ placeId, accountId, followUserId, jobId, linkCode }) {
+  const isId = (v) => /^\d+$/.test(String(v));
   if (placeId && !isId(placeId)) return { ok: false, error: "Invalid place" };
   if (followUserId && !isId(followUserId)) return { ok: false, error: "Invalid user" };
   if (jobId && !/^[0-9a-f-]{36}$/i.test(String(jobId))) return { ok: false, error: "Invalid server" };
@@ -52,7 +112,11 @@ async function launch({ placeId, accountId, followUserId, jobId, linkCode }) {
     return { ok: true, as: null };
   }
   try {
+    splash({ step: "Checking for Roblox updates…", progress: 8 });
     const [rbx, ticket] = await Promise.all([rust("roblox:ensure"), withSession(accountId, (c) => roblox.authTicket(c))]);
+    splash({ channel: rbx.channel || "production", version: rbx.version || "", step: "Starting Roblox…", progress: 60, foot: "Moony" });
+    if (await mods.reapplyIfNeeded().catch(() => false)) emit("mods:reapplied", await mods.status());
+    if (await rust("splash:cancelled")) return { ok: false, cancelled: true };
     const tracker = String(Date.now() * 1000 + Math.floor(Math.random() * 1000));
     const request = followUserId ? `request=RequestFollowUser&userId=${followUserId}`
       : linkCode ? `request=RequestPrivateGame&placeId=${placeId}&linkCode=${linkCode}`
@@ -77,6 +141,8 @@ let prefs = {};
 let nowPlaying = null;
 const tracker = createTracker(rust, emit);
 tracker.on("start", async (s) => {
+  clearTimeout(splashTimer);
+  splash({ step: "You're in!", progress: 100 }); rust("splash:close", 700).catch(() => {});
   nowPlaying = { universeId: s.universeId, placeId: s.placeId, jobId: s.jobId, name: null, icon: null, startedAt: s.startedAt };
   if (s.universeId) {
     try { const g = await roblox.gameDetails(s.universeId); nowPlaying = { ...nowPlaying, name: g.name, icon: g.icon }; tracker.setMeta(s.universeId, { name: g.name, icon: g.icon, placeId: g.placeId }); } catch { /* no name */ }
@@ -96,15 +162,60 @@ tracker.on("end", ({ reason, session }) => {
   nowPlaying = null;
   emit("game:now", null);
   updateDiscord();
+  if (reason === "disconnected" && session?.jobId && session.placeId) notify("Disconnected from Roblox", `Open Moony to rejoin the same ${last?.name || "game"} server.`);
   if (reason === "disconnected" && session?.jobId && session.placeId) emit("game:disconnected", { placeId: session.placeId, jobId: session.jobId, universeId: session.universeId, name: last?.name || "your game", icon: last?.icon || null });
 });
 
+// A Roblox link opened with Moony (at start-up or while running).
+async function handleLink(uri) {
+  if (!/^roblox(-player)?:/i.test(String(uri))) return;
+  if (/^roblox-player:/i.test(uri)) {
+    const parts = Object.fromEntries(uri.replace(/^roblox-player:/i, "").split("+").map((kv) => { const i = kv.indexOf(":"); return [kv.slice(0, i), kv.slice(i + 1)]; }));
+    await rust("splash:open", prefs.accent || "#8b7dff").catch(() => {});
+    splash({ title: parts.launchmode === "app" ? "Roblox" : "Joining game", step: "Checking for Roblox updates…", progress: 8, foot: "Moony bootstrapper" });
+    splashOff?.(); splashOff = on("launch:progress")((p) => splash(p.total ? { step: `${p.phase} ${mb(p.done)} / ${mb(p.total)} MB`, progress: 8 + (p.done / p.total) * 50 } : { step: p.phase, progress: null }));
+    try {
+      const rbx = await rust("roblox:ensure");
+      splash({ channel: rbx.channel || "production", version: rbx.version || "", step: "Starting Roblox…", progress: 70 });
+      if (await rust("splash:cancelled")) return;
+      const args = ["--app"];
+      if (parts.gameinfo) args.push("-t", parts.gameinfo);
+      if (parts.placelauncherurl) args.push("-j", decodeURIComponent(parts.placelauncherurl));
+      if (parts.browsertrackerid) args.push("-b", parts.browsertrackerid);
+      args.push(`--launchtime=${parts.launchtime || Date.now()}`, "--rloc", parts.robloxLocale || "en_us", "--gloc", parts.gameLocale || "en_us");
+      await rust("roblox:start-link", { dir: rbx.dir, args });
+      splash({ step: parts.placelauncherurl ? "Loading the game…" : "Opening Roblox…", progress: 85 });
+      if (!parts.placelauncherurl) rust("splash:close", 2500);
+      else { clearTimeout(splashTimer); splashTimer = setTimeout(() => rust("splash:close", 0), 45000); }
+    } catch (e) { splash({ step: String(e?.message || e), error: true, progress: 100 }); rust("splash:close", 4000); }
+    finally { splashOff?.(); splashOff = null; }
+  } else {
+    const q = new URLSearchParams(uri.replace(/^roblox:\/*/i, "").replace(/^\?/, ""));
+    const placeId = q.get("placeId") || q.get("placeid");
+    if (placeId) launch({ placeId, accountId: prefs.activeAccountId, jobId: q.get("gameInstanceId") || undefined, linkCode: q.get("linkCode") || undefined, name: "Roblox" });
+  }
+}
+
+// Feed the HUD once a second while it's showing.
+let hudPing = null, hudPingAt = 0;
+async function hudTick() {
+  const st = await rust("hud:status").catch(() => null);
+  if (!st?.showing) return;
+  const hp = prefs.hud || {};
+  if (hp.widgets?.ping?.on && Date.now() - hudPingAt > 5000) { hudPingAt = Date.now(); rust("net:ping").then((ms) => { hudPing = ms; }).catch(() => {}); }
+  const system = hp.widgets?.system?.on ? await rust("sys:usage").catch(() => null) : null;
+  rust("hud:push", { prefs: hp, now: nowPlaying, media: null, system, ping: hudPing, time: Date.now() }).catch(() => {});
+}
+
 if (window.__TAURI_INTERNALS__ && !window.orbit) {
   tracker.start();
+  setInterval(hudTick, 1000);
+  rust("app:argv").then((argv) => argv.slice(1).forEach(handleLink)).catch(() => {});
+  listen("app:argv", (e) => (e.payload || []).slice(1).forEach(handleLink));
   window.orbit = {
     isDesktop: true,
     runtime: "tauri",
-    update: { get: () => Promise.resolve({ status: "idle" }), check: () => Promise.resolve({ status: "latest" }), apply: () => Promise.resolve(), onState: off },
+    update: { get: () => rust("update:get"), check: () => rust("update:check"), apply: () => rust("update:apply"), onState: on("update:state") },
     win: {
       minimize: () => appWin.minimize(),
       toggleMaximize: () => appWin.toggleMaximize(),
@@ -122,7 +233,7 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
     },
     launch: (opts) => launch(typeof opts === "object" ? opts : { placeId: opts }),
     install: () => Promise.resolve(null),
-    setFps: unavailable("The FPS cap"),
+    setFps: (fps) => setFps(fps),
     playtime: { get: () => Promise.resolve(tracker.summary()), onUpdate: on("playtime:update"), onNow: on("game:now") },
     avatar: {
       model3d: (acc, uid) => withSession(acc, (c) => roblox.avatar3d(c, uid)),
@@ -134,12 +245,12 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
       wearOutfit: async (acc, id) => { await withSession(acc, (c) => roblox.wearOutfit(c, id)); await withSession(acc, (c) => roblox.redraw(c)); return true; },
     },
     openRobloxPage: (_acc, url) => rust("open:url", url),
-    setPrefs: (p) => { prefs = p || {}; return rust("store:set", "prefs", p).catch(() => {}); },
+    setPrefs: (p) => { prefs = p || {}; rust("hud:enabled", !!prefs.hud?.enabled).catch(() => {}); return rust("store:set", "prefs", p).catch(() => {}); },
     setZoom: () => Promise.resolve(true),
     setRadius: () => Promise.resolve(true),
-    protocol: { get: () => Promise.resolve(false), set: unavailable("Opening Roblox links with Moony") },
+    protocol: { get: () => rust("protocol:get"), set: (v) => rust("protocol:set", !!v) },
     media: { get: () => Promise.resolve(null), onChange: off },
-    hud: { status: () => Promise.resolve({ roblox: false, showing: false, enabled: false }), onStatus: off },
+    hud: { status: () => rust("hud:status"), onStatus: on("hud:status") },
     market: {
       details: (acc, item) => withSession(acc, (c) => roblox.itemDetails(c, acc, item)),
       buy: (acc, item, price) => withSession(acc, (c) => roblox.buyItem(c, acc, item, Number(price))),
@@ -153,7 +264,7 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
     },
     gameView: { frame: () => Promise.resolve(null), shots: () => Promise.resolve([]), openFolder: () => Promise.resolve(true), save: unavailable("Saving snapshots") },
     linkAccount: { take: () => Promise.resolve(false), onRequest: off },
-    feedback: { send: unavailable("Feedback") },
+    feedback: { send: (p) => rust("feedback:send", p) },
     clips: { now: unavailable("Clips"), folder: () => Promise.resolve(true), onSaved: off },
     versions: {
       info: (ch) => rust("versions:info", ch ?? null),
@@ -165,9 +276,17 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
       onProgress: on("versions:progress"),
     },
     fflags: { get: () => rust("fflags:get"), set: (f) => rust("fflags:set", f), presets: () => rust("fflags:presets") },
-    game: { onDisconnected: on("game:disconnected"), onRejoin: on("game:rejoin"), onOpen: on("game:open"), watchUpdates: () => Promise.resolve(true) },
-    mods: { status: () => Promise.resolve({ installed: false, kinds: {} }), pick: unavailable("Mods"), remove: unavailable("Mods"), preset: unavailable("Mods"), preview: unavailable("Mods"), apply: unavailable("Mods"), onReapplied: off },
-    notify: { friend: () => Promise.resolve(true), onClick: on("notify:click") },
+    game: { onDisconnected: on("game:disconnected"), onRejoin: on("game:rejoin"), onOpen: on("game:open"), watchUpdates: (ids, enabled) => { watchList = enabled ? (ids || []).filter((x) => /^\d+$/.test(String(x))).map(Number) : []; checkUpdates(); return Promise.resolve(true); } },
+    mods: {
+      status: () => mods.status(),
+      pick: (k) => mods.pick(k).catch((e) => ({ ok: false, error: e.message })),
+      remove: (k) => mods.remove(k).catch((e) => ({ ok: false, error: e.message })),
+      preset: (k, p) => mods.preset(k, p).catch((e) => ({ ok: false, error: e.message })),
+      preview: (k) => mods.preview(k),
+      apply: () => mods.apply().then((st) => ({ ok: true, status: st })).catch((e) => ({ ok: false, error: e.message })),
+      onReapplied: on("mods:reapplied"),
+    },
+    notify: { friend: (n) => notify(n?.title || "Moony", n?.body || "").then(() => true), onClick: on("notify:click") },
     discord: { configure: (p) => { discordPrefs = p || {}; updateDiscord(); return rust("discord:configure", p); }, status: () => rust("discord:status") },
     auth: {
       // Roblox's own login page opens in a separate window; Rust keeps the cookie.
@@ -179,6 +298,8 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
       logout: async (id) => { await withSession(id, (c) => roblox.logout(c)).catch(() => {}); await rust("vault:remove", Number(id)); return { ok: true }; },
       sessions: () => rust("vault:accounts").then((a) => a.map((x) => x.id)),
       restore: async () => {
+        // First run of the Rust build: bring over accounts from the old Moony.
+        if (!localStorage.getItem("moony-imported")) { await rust("vault:import").catch(() => 0); localStorage.setItem("moony-imported", "1"); }
         const out = [];
         for (const a of await rust("vault:accounts")) {
           try { out.push(await roblox.me(token(a.id))); }
