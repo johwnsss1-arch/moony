@@ -103,6 +103,15 @@ section { padding: 120px 0; }
 .trust { display: grid; grid-template-columns: 1.1fr 1fr; gap: 56px; align-items: center; }
 .ticks { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
 .ticks li { display: flex; gap: 12px; font-size: 17px; color: var(--text-2); }
+.signed { margin-top: 18px; font-size: 13px; color: var(--text-3); }
+.signed a { color: var(--text-2); }
+.proof { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 40px; }
+.proof .pf { border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 4px; color: inherit; text-decoration: none; }
+.proof a.pf:hover { border-color: var(--text-2); }
+.proof .pf b { font-size: 22px; color: var(--text); }
+.proof .pf small { color: var(--text-2); }
+.proof .hash { grid-column: 1 / -1; margin: 4px 0 0; color: var(--text-2); font-size: 13px; overflow-wrap: anywhere; }
+@media (max-width: 760px) { .proof { grid-template-columns: 1fr 1fr; } }
 .ticks li b { color: var(--text); font-weight: 600; }
 .ticks svg { flex: none; width: 22px; height: 22px; margin-top: 2px; }
 details { border-bottom: 1px solid var(--line); }
@@ -316,6 +325,13 @@ footer { border-color: #1a1a1a; }
         <li><svg><use href="#ok"/></svg><span><b>Every update is verified.</b></span></li>
       </ul>
     </div>
+    <div class="wrap proof reveal">
+      <div class="pf"><b data-dls>—</b><small>downloads</small></div>
+      <div class="pf"><b data-releases>—</b><small>releases</small></div>
+      <a class="pf" data-vt href="https://www.virustotal.com" target="_blank" rel="noopener"><b>VirusTotal</b><small>check the installer yourself</small></a>
+      <a class="pf" href="https://github.com/johwnsss1-arch/moony" target="_blank" rel="noopener"><b>Source code</b><small>read every line</small></a>
+      <p class="hash">Installer SHA-256: <code data-sha>loading…</code></p>
+    </div>
   </section>
 
   <section id="faq" style="border-top:1px solid var(--line)">
@@ -335,8 +351,9 @@ footer { border-color: #1a1a1a; }
     <div class="wrap">
       <img class="reveal" src="img/icon.png" alt="" />
       <h2 class="reveal">Make Roblox <em>yours.</em></h2>
-      <p class="reveal" style="--d:.06s">Free for Windows.</p>
+      <p class="reveal" style="--d:.06s" id="download">Free for Windows.</p>
       <div class="hero-cta reveal" style="--d:.12s"><a class="btn solid lg" data-download><svg><use href="#dl"/></svg> Download Moony</a><a class="btn lg" data-discord><svg><use href="#dc"/></svg> Discord</a></div>
+      <p class="reveal signed">Free code signing provided by <a href="https://about.signpath.io" target="_blank" rel="noopener">SignPath.io</a>, certificate by <a href="https://signpath.org" target="_blank" rel="noopener">SignPath Foundation</a>.</p>
     </div>
   </div>
 </main>
@@ -344,7 +361,7 @@ footer { border-color: #1a1a1a; }
 <footer>
   <div class="wrap">
     <span>© <span id="yr"></span> Moony · Not affiliated with Roblox Corporation.</span>
-    <nav><a href="https://github.com/johwnsss1-arch/moony">GitHub</a><a data-discord>Discord</a><a href="https://github.com/johwnsss1-arch/moony/releases">Changelog</a></nav>
+    <nav><a href="https://github.com/johwnsss1-arch/moony">GitHub</a><a data-discord>Discord</a><a href="https://github.com/johwnsss1-arch/moony/releases">Changelog</a><a href="privacy.html">Privacy</a></nav>
   </div>
 </footer>
 
@@ -359,6 +376,19 @@ fetch(`https://api.github.com/repos/${REPO}/releases/latest`).then((r) => r.ok &
   if (exe) document.querySelectorAll("[data-download]").forEach((a) => (a.href = exe.browser_download_url));
   document.querySelectorAll("[data-version]").forEach((e) => (e.textContent = rel.tag_name));
 }).catch(() => {});
+// Proof: total downloads across every release, and the installer's hash.
+fetch(`https://api.github.com/repos/${REPO}/releases?per_page=100`).then((r) => r.ok && r.json()).then((list) => {
+  if (!Array.isArray(list)) return;
+  const n = list.reduce((t, rel) => t + (rel.assets || []).filter((a) => /.exe$/i.test(a.name)).reduce((x, a) => x + a.download_count, 0), 0);
+  document.querySelectorAll("[data-dls]").forEach((e) => (e.textContent = n.toLocaleString()));
+  document.querySelectorAll("[data-releases]").forEach((e) => (e.textContent = list.length));
+}).catch(() => {});
+fetch(`https://api.github.com/repos/${REPO}/releases/latest`).then((r) => r.ok && r.json()).then((rel) => {
+  const sha = (rel?.assets?.find((x) => /.exe$/i.test(x.name))?.digest || "").replace(/^sha256:/, "");
+  if (!sha) throw 0;
+  document.querySelectorAll("[data-sha]").forEach((e) => (e.textContent = sha));
+  document.querySelectorAll("[data-vt]").forEach((x) => (x.href = "https://www.virustotal.com/gui/file/" + sha));
+}).catch(() => document.querySelectorAll("[data-sha]").forEach((e) => (e.textContent = "see the release page")));
 
 const nav = document.getElementById("nav");
 const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.15 });
