@@ -125,7 +125,7 @@ export default function Hud() {
 
             {/* The HUD at real size, scaled to the preview */}
             <div className="hud-real" style={{ width: size.width, height: size.height, transform: `scale(${k})`, opacity: hud.enabled ? hud.opacity : hud.opacity * 0.5 }}>
-              <div className="hud-root" style={{ position: "absolute", "--hud-scale": hud.scale, "--viz": "var(--accent)" }}>
+              <div className={"hud-root t-" + (settings.theme || "midnight")} style={{ position: "absolute", "--hud-scale": hud.scale, "--viz": "var(--accent)", "--hud-acc": "var(--accent)" }}>
                 {Object.entries(hud.widgets).filter(([, w]) => w.on).map(([id, w0]) => { const w = drag?.id === id ? { ...w0, x: drag.x, y: drag.y } : w0; return (
                   <div key={id} className={"hud-widget-pos" + (sel === id ? " sel" : "") + (drag?.id === id ? " dragging" : "")} style={{ left: `${w.x}%`, top: `${w.y}%`, pointerEvents: "auto" }} onPointerDown={startDrag(id)}>
                     <HudWidget id={id} state={state} demo />

@@ -314,7 +314,7 @@ export function AppProvider({ children }) {
   const friendsOnline = friends.data.filter((f) => f.presence?.type > 0).length;
   useEffect(() => {
     const accent = s.accent === "theme" || !ACCENTS[s.accent] ? themeById(s.theme).accent[0] : ACCENTS[s.accent][0];
-    window.orbit?.setPrefs?.({ autoCloseRoblox: s.autoCloseRoblox, hud: { ...s.hud, friendsOnline }, activeAccountId: launchAs?.id ?? null, accent });
+    window.orbit?.setPrefs?.({ autoCloseRoblox: s.autoCloseRoblox, hud: { ...s.hud, friendsOnline, theme: s.theme, accent }, activeAccountId: launchAs?.id ?? null, accent });
   }, [s.autoCloseRoblox, s.hud, friendsOnline, launchAs?.id, s.accent, s.theme]);
 
   // Game update alerts follow the favorites list.

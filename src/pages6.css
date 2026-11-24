@@ -431,3 +431,12 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 .frame.theme-midnight .tile-art, .frame.theme-midnight .item-img { box-shadow: none; }
 .frame.theme-midnight .item-tag.why.fy { background: #fff; color: #000; }
 .frame.theme-midnight ::-webkit-scrollbar-thumb:hover, .frame.theme-midnight ::-webkit-scrollbar-thumb:active { background: #8a8a8a; background-clip: padding-box; }
+
+/* Your own background (picture/GIF/video) shows through every panel, in every theme. */
+.frame.has-bg { background: #000 !important; }
+.frame.has-bg .content, .frame.has-bg.theme-midnight .content { background: color-mix(in srgb, var(--bg-1) 42%, transparent) !important; }
+.frame.has-bg .rpanel, .frame.has-bg.theme-midnight .rpanel { background: color-mix(in srgb, var(--bg-1) 55%, transparent) !important; }
+.frame.has-bg .titlebar, .frame.has-bg.theme-midnight .titlebar { background: color-mix(in srgb, var(--bg-0) 45%, transparent) !important; }
+.frame.has-bg .sidebar { background: transparent; }
+.frame.has-bg .theme-scene { display: none; }
+.frame.has-bg .settings-group, .frame.has-bg .card, .frame.has-bg .wide, .frame.has-bg .item-card { background: color-mix(in srgb, var(--surface) 70%, transparent) !important; backdrop-filter: blur(10px); }

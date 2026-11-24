@@ -15,7 +15,7 @@ function Hud() {
   if (!state?.prefs?.enabled) return null;
   const { widgets = {}, opacity = 0.92, scale = 1 } = state.prefs;
   return (
-    <div className="hud-root" style={{ opacity, "--hud-scale": scale }}>
+    <div className={"hud-root t-" + (state.prefs.theme || "midnight")} style={{ opacity, "--hud-scale": scale, "--hud-acc": state.prefs.accent || "#8b7dff", "--viz": state.prefs.accent || "#8b7dff" }}>
       {Object.entries(widgets).filter(([, w]) => w.on).map(([id, w]) => (
         <div key={id} className="hud-place" style={{ left: `${w.x}%`, top: `${w.y}%` }}>
           <HudWidget id={id} state={state} />
