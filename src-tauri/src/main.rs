@@ -155,6 +155,7 @@ async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result
         "splash:close" => { splash::close(&app, a(0).as_u64().unwrap_or(0)); Ok(json!(true)) }
         "splash:cancel" => { splash::cancel(&app); Ok(json!(true)) }
         "splash:cancelled" => Ok(json!(splash::CANCELLED.load(std::sync::atomic::Ordering::SeqCst))),
+        "ui:radius" => { let r = a(0).as_u64().unwrap_or(16).min(40) as i32; RADIUS.store(r, std::sync::atomic::Ordering::SeqCst); if let Some(w) = app.get_webview_window("main") { round(&w); } Ok(json!(true)) }
         "auth:login" => auth::login(&app).await,
         "vault:import" => Ok(json!(vault::import_electron(&app))),
         "vault:accounts" => Ok(json!(vault::accounts(&app))),
@@ -162,6 +163,31 @@ async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result
         _ => Err(format!("{channel} isn't available in this build yet")),
     }
 }
+
+/* Rounded corners: Windows 11 rounds Moony's window itself. Windows 10
+   doesn't, so the window is clipped to a rounded rectangle (redone on resize;
+   square when maximized). */
+static RADIUS: std::sync::atomic::AtomicI32 = std::sync::atomic::AtomicI32::new(16);
+#[cfg(windows)]
+fn round(w: &tauri::WebviewWindow) {
+    use windows::Win32::Foundation::HWND;
+    use windows::Win32::Graphics::Gdi::{CreateRoundRectRgn, SetWindowRgn, HRGN};
+    static BUILD: std::sync::OnceLock<u32> = std::sync::OnceLock::new();
+    let build = *BUILD.get_or_init(|| { let mut c = std::process::Command::new("cmd"); c.args(["/c", "ver"]); { use std::os::windows::process::CommandExt; c.creation_flags(0x0800_0000); } let v = c.output().ok().map(|o| String::from_utf8_lossy(&o.stdout).to_string()).unwrap_or_default(); v.split('.').nth(2).and_then(|x| x.trim_end_matches(']').trim().parse().ok()).unwrap_or(0) });
+    if build >= 22000 { return; }
+    let Ok(h) = w.hwnd() else { return };
+    let hwnd = HWND(h.0 as _);
+    let max = w.is_maximized().unwrap_or(false) || w.is_fullscreen().unwrap_or(false);
+    let size = w.outer_size().unwrap_or_default();
+    let r = (RADIUS.load(std::sync::atomic::Ordering::SeqCst) as f64 * w.scale_factor().unwrap_or(1.0)).round() as i32;
+    unsafe {
+        if max || r <= 0 { let _ = SetWindowRgn(hwnd, HRGN::default(), true); return; }
+        let rgn = CreateRoundRectRgn(0, 0, size.width as i32 + 1, size.height as i32 + 1, r * 2, r * 2);
+        let _ = SetWindowRgn(hwnd, rgn, true);
+    }
+}
+#[cfg(not(windows))]
+fn round(_w: &tauri::WebviewWindow) {}
 
 fn read_log(prev: Option<&str>, offset: i64) -> Value {
     use std::io::{Read, Seek, SeekFrom};
@@ -222,6 +248,11 @@ fn main() {
             let dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&dir)?;
             hud::start(app.handle().clone());
+            if let Some(w) = app.get_webview_window("main") {
+                round(&w);
+                let w2 = w.clone();
+                w.on_window_event(move |e| if matches!(e, tauri::WindowEvent::Resized(_) | tauri::WindowEvent::ScaleFactorChanged { .. }) { round(&w2); });
+            }
             updater::start(app.handle().clone());
             #[cfg(debug_assertions)]
             if std::env::var("MOONY_DEVTOOLS").is_ok() { if let Some(w) = app.get_webview_window("main") { w.open_devtools(); } }

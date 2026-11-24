@@ -72,6 +72,9 @@ export function Visualizer({ bars = 36, media, demo }) {
     let stream, ctx, analyser, raf, stopped = false;
     const data = new Uint8Array(256);
     (async () => {
+      // The Rust build can't capture sound silently (Windows would ask you to
+      // pick a screen to share), so the bars use their idle animation there.
+      if (window.__TAURI_INTERNALS__) return;
       try {
         stream = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: { width: 1, height: 1, frameRate: 1 } });
         stream.getVideoTracks().forEach((t) => t.stop());

@@ -37,16 +37,7 @@ function Midnight({ u }) {
       <Shooting n={3} color="#e3ddff" />
       <circle cx="420" cy="170" r="190" fill={`url(#${u}mg)`} />
       <circle cx="420" cy="175" r="110" fill={`url(#${u}mm)`} mask={`url(#${u}mk)`} />
-      {/* sleeping cat curled on the moon */}
-      <g transform="translate(330 248)">
-        <path d="M10 30c0-26 30-40 62-38 30 2 52 20 50 40-2 14-20 18-56 18S10 44 10 30z" fill="#1b1838" />
-        <path d="M112 36c14 2 26-6 24-18" stroke="#1b1838" strokeWidth="9" strokeLinecap="round" fill="none" />
-        <circle cx="24" cy="22" r="20" fill="#1b1838" />
-        <path d="M8 10l2-18 12 12zM28 4l10-16 4 18z" fill="#1b1838" />
-        <path className="ta-breathe" d="M14 22q4 3 8 0M28 22q4 3 8 0" stroke="#c9c3ff" strokeWidth="1.6" fill="none" strokeLinecap="round" />
-        <text x="58" y="-8" fill="#c9c3ff" fontSize="14" fontWeight="700" className="ta-zz">z</text>
-        <text x="70" y="-22" fill="#c9c3ff" fontSize="10" fontWeight="700" className="ta-zz" style={{ animationDelay: "1.4s" }}>z</text>
-      </g>
+      
       <g fill="#1a1838" opacity=".9">
         <path d="M0 420V360c60-20 120-24 180-10s110 10 170-6 130-30 200-14 90 30 90 30v60z" />
       </g>
@@ -86,32 +77,8 @@ function Kawaii({ u }) {
           <g fill="#ffe08a"><circle cx="-6" cy="2" r="1.4" /><circle cx="5" cy="0" r="1.4" /><circle cx="0" cy="10" r="1.4" /><circle cx="-9" cy="12" r="1.2" /><circle cx="8" cy="12" r="1.2" /></g>
         </g>
       ))}
-      {/* Moochi the bunny */}
-      <g transform="translate(330 250)"><g className="ta-breathe">
-        <ellipse cx="0" cy="118" rx="70" ry="10" fill="#e86aa3" opacity=".35" />
-        <g className="ta-ear-l"><path d="M-34 -10c-16-60-8-104 12-106 20-2 24 46 14 104z" fill={`url(#${u}kb)`} /><path d="M-26 -16c-10-44-6-78 6-80 12-1 14 34 8 78z" fill="#ffb3d1" /></g>
-        <g className="ta-ear-r"><path d="M34 -10c16-60 8-104-12-106-20-2-24 46-14 104z" fill={`url(#${u}kb)`} /><path d="M26 -16c10-44 6-78-6-80-12-1-14 34-8 78z" fill="#ffb3d1" /></g>
-        {/* bow on ear */}
-        <g transform="translate(30 -60) rotate(18)">
-          <path d="M0 0c-18-14-30-4-28 6 2 12 16 10 28-6zM0 0c18-14 30-4 28 6-2 12-16 10-28-6z" fill="#ff5fa2" />
-          <circle r="6" fill="#ff86bb" />
-        </g>
-        <path d="M-72 70c0-60 30-92 72-92s72 32 72 92c0 32-30 48-72 48S-72 102-72 70z" fill={`url(#${u}kb)`} />
-        <g className="ta-blink"><ellipse cx="-28" cy="36" rx="9" ry="12" fill="#2b1a28" /><ellipse cx="28" cy="36" rx="9" ry="12" fill="#2b1a28" />
-        <circle cx="-25" cy="31" r="3.6" fill="#fff" /><circle cx="31" cy="31" r="3.6" fill="#fff" />
-        <circle cx="-31" cy="40" r="1.6" fill="#fff" /><circle cx="25" cy="40" r="1.6" fill="#fff" /></g>
-        <ellipse cx="-46" cy="56" rx="11" ry="6" fill="#ff9cc8" opacity=".75" /><ellipse cx="46" cy="56" rx="11" ry="6" fill="#ff9cc8" opacity=".75" />
-        <path d="M-6 50q6 6 12 0" stroke="#2b1a28" strokeWidth="2.6" fill="none" strokeLinecap="round" />
-        <path d="M-3 46h6l-3 3z" fill="#ff6f9f" />
-        {/* holding a heart */}
-        <g transform="translate(0 86)">
-          <path d="M0 18C-30 0-30-22-14-24 -6-25 0-18 0-14 0-18 6-25 14-24 30-22 30 0 0 18z" fill={`url(#${u}kh)`} />
-          <path d="M-14-16c-6 0-10 6-8 10" stroke="#fff" strokeWidth="3" strokeLinecap="round" fill="none" opacity=".7" />
-          <ellipse cx="-24" cy="2" rx="12" ry="10" fill="#fff" /><ellipse cx="24" cy="2" rx="12" ry="10" fill="#fff" />
-        </g>
-      </g></g>
-      {/* hearts drifting up out of the heart */}
-      {[0, 1, 2].map((i) => <path key={i} className="ta-rise" style={{ animationDelay: `${i * 1.6}s` }} transform={`translate(${322 + i * 10} 330)`} d="M0 6C-10 0-10-7-5-8-2.5-8.4 0-6 0-5 0-6 2.5-8.4 5-8 10-7 10 0 0 6z" fill="#ff7eb6" />)}
+      
+      
       {/* sparkles */}
       <g fill="#fff">
         {[[210, 130], [470, 110], [520, 200], [170, 220]].map(([x, y], i) => (
@@ -184,23 +151,12 @@ function Halloween({ u }) {
       <Stars n={16} seed={7} h={180} />
       <circle cx="440" cy="140" r="130" fill={`url(#${u}hm)`} />
       <circle cx="440" cy="140" r="76" fill="#ffd08a" />
-      {/* bats */}
-      {[[330, 90, 1], [380, 60, 0.7], [520, 100, 0.8]].map(([x, y, s], i) => (
-        <path key={i} className="ta-fly" style={{ animationDelay: `${i * -4}s`, animationDuration: `${14 + i * 3}s` }} transform={`translate(${x} ${y}) scale(${s})`} d="M0 0c-6-8-16-10-26-6 6 2 8 6 8 10-6-2-12 0-16 4 10 0 18 4 22 10 2-4 6-6 12-6s10 2 12 6c4-6 12-10 22-10-4-4-10-6-16-4 0-4 2-8 8-10-10-4-20-2-26 6z" fill="#1a1020" />
-      ))}
+      
       {/* hill and tree */}
       <path d="M0 420V350c120-50 260-60 380-40s200 30 260 20v90z" fill="#1a1020" />
       <path d="M160 340c4-50-6-90-30-120M132 250c-24-10-40-30-44-50M140 230c20-20 50-24 70-16M146 280c-20 0-34-10-44-22" stroke="#1a1020" strokeWidth="9" fill="none" strokeLinecap="round" />
       <Pumpkin x={300} y={354} /><Pumpkin x={372} y={368} s={0.7} /><Pumpkin x={560} y={368} s={0.85} />
-      {/* Boo the ghost */}
-      <g transform="translate(470 230)"><g className="ta-haunt">
-        <path d="M-40 60V0c0-30 18-48 40-48S40-30 40 0v60l-10-10-10 10-10-10L0 60l-10-10-10 10-10-10z" fill="#f4f0ff" />
-        <g className="ta-blink"><ellipse cx="-13" cy="-6" rx="6" ry="9" fill="#1a1020" /><ellipse cx="13" cy="-6" rx="6" ry="9" fill="#1a1020" />
-        <circle cx="-11" cy="-10" r="2.2" fill="#fff" /><circle cx="15" cy="-10" r="2.2" fill="#fff" /></g>
-        <ellipse cx="-24" cy="8" rx="7" ry="4" fill="#ffb3d1" opacity=".7" /><ellipse cx="24" cy="8" rx="7" ry="4" fill="#ffb3d1" opacity=".7" />
-        <ellipse cx="0" cy="10" rx="5" ry="6" fill="#1a1020" />
-        <path d="M-40 20c-14 4-20 14-18 22M40 20c14 4 20 14 18 22" stroke="#f4f0ff" strokeWidth="9" strokeLinecap="round" fill="none" />
-      </g></g>
+      
     </g>
   );
 }
@@ -220,17 +176,7 @@ function Christmas() {
       <path d="M0 420V350c140-40 280-44 420-20s180 16 220 10v80z" fill="#eef4ff" />
       <path d="M0 420v-40c160-20 320-20 640 0v40z" fill="#d6e2f7" />
       <Tree x={150} y={340} /><Tree x={560} y={330} s={0.8} /><Tree x={230} y={350} s={0.6} />
-      {/* Frosty the snowman */}
-      <g transform="translate(400 300)">
-        <circle cy="40" r="44" fill="#fff" /><circle cy="-22" r="32" fill="#fff" /><circle cy="-70" r="24" fill="#fff" />
-        <path d="M-26-84h52l-6 6h-40z" fill="#1a1a24" /><rect x="-18" y="-118" width="36" height="36" rx="4" fill="#1a1a24" /><rect x="-18" y="-96" width="36" height="7" fill="#d4263a" />
-        <circle cx="-8" cy="-72" r="3" fill="#1a1a24" /><circle cx="8" cy="-72" r="3" fill="#1a1a24" />
-        <path d="M0-64l18 5-18 3z" fill="#ff8a1f" />
-        <path d="M-10-58q10 6 20 0" stroke="#1a1a24" strokeWidth="2" fill="none" strokeLinecap="round" />
-        <path d="M-26-46q26 12 52 0v10q-26 12-52 0z" fill="#d4263a" /><path d="M14-40l6 32h-12l-2-30z" fill="#d4263a" />
-        <circle cy="-20" r="3.4" fill="#1a1a24" /><circle cy="-4" r="3.4" fill="#1a1a24" /><circle cy="30" r="3.4" fill="#1a1a24" />
-        <path d="M-30-24l-40-24M-52-38l-8-14M30-24l40-20M54-34l10-12" stroke="#5a3520" strokeWidth="4" strokeLinecap="round" />
-      </g>
+      
       {/* gifts */}
       {[[290, 366, "#d4263a", "#ffd166"], [324, 374, "#1f9d55", "#fff"]].map(([x, y, c, r], i) => (
         <g key={i} transform={`translate(${x} ${y})`}><rect x="-18" y="-18" width="36" height="30" rx="3" fill={c} /><rect x="-3" y="-18" width="6" height="30" fill={r} /><rect x="-18" y="-8" width="36" height="6" fill={r} /><path d="M0-18c-10-12-18-4-10 0zM0-18c10-12 18-4 10 0z" fill={r} /></g>
@@ -244,21 +190,8 @@ function Ocean({ u }) {
     <g>
       <defs><linearGradient id={u + "or"} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#bdeaff" stopOpacity=".35" /><stop offset="1" stopColor="#bdeaff" stopOpacity="0" /></linearGradient></defs>
       {[[300, 40], [400, 60], [520, 50]].map(([x, w], i) => <path key={i} d={`M${x} 0h${w}l${w * 1.5} 360h-${w * 2}z`} fill={`url(#${u}or)`} />)}
-      {/* whale */}
-      <g className="ta-swim"><g transform="translate(250 130)">
-        <path d="M0 40C20 0 110-10 170 20c20 10 30 24 30 24s30-30 50-30c-10 14-14 30-10 44-16-4-30-6-40-4-30 30-110 40-170 20C10 70-10 60 0 40z" fill="#0f4c6e" />
-        <path d="M10 56c50 22 120 22 170 0-30 26-130 30-170 0z" fill="#6fc6e8" opacity=".6" />
-        <circle cx="40" cy="36" r="4" fill="#bdeaff" />
-        <path d="M80 62c-4 20-20 32-36 30 10-10 16-20 18-32z" fill="#0f4c6e" />
-      </g></g>
-      {/* jellyfish */}
-      {[[520, 210, 1], [180, 240, 0.7]].map(([x, y, s], i) => (
-        <g key={i} transform={`translate(${x} ${y}) scale(${s})`} ><g className="ta-pulse" style={{ animationDelay: `${i}s` }}>
-          <path d="M-30 0a30 26 0 0 1 60 0q-6 6-10 0-5 6-10 0-5 6-10 0-5 6-10 0-5 6-10 0-6 6-10 0z" fill="#ff9ce8" opacity=".85" />
-          <g stroke="#ff9ce8" strokeWidth="2.4" fill="none" opacity=".7" strokeLinecap="round"><path d="M-18 4q-6 20 2 40" /><path d="M-6 4q6 24-2 50" /><path d="M6 4q-6 22 2 46" /><path d="M18 4q6 18-2 36" /></g>
-          <ellipse cx="-10" cy="-12" rx="8" ry="5" fill="#fff" opacity=".4" />
-        </g></g>
-      ))}
+      
+      
       {/* sea floor */}
       <path d="M0 420v-50c120-20 250-26 380-10s200 10 260 4v56z" fill="#0b2a3a" />
       <g stroke="#14e0c4" strokeWidth="7" fill="none" strokeLinecap="round" opacity=".8" className="ta-sway">
@@ -284,17 +217,7 @@ function Forest() {
         </g>
       ))}
       <path d="M0 420v-70c160-16 320-18 640 0v70z" fill="#121a0e" />
-      {/* Maple the fox */}
-      <g transform="translate(400 300)">
-        <g className="ta-tail"><path d="M44 40c40 6 66-10 70-34-22 10-40 6-56 0z" fill="#e8722d" /><path d="M96 16c10-4 16-10 18-14-4 12-10 18-20 20z" fill="#fff" /></g>
-        <path d="M-30 50c-4-40 10-70 40-74 32-4 54 22 50 74z" fill="#e8722d" />
-        <path d="M-6 50c0-20 6-40 18-46 14 6 20 26 20 46z" fill="#fff3e0" />
-        <path d="M-30-30l-4-36 26 20zM26-30l12-34 10 30z" fill="#e8722d" /><path d="M-26-38l-2-18 12 10zM30-38l6-16 4 14z" fill="#3a1d10" />
-        <path d="M-34-20c0-26 22-40 40-40s40 14 40 40c0 18-18 30-40 30s-40-12-40-30z" fill="#e8722d" />
-        <path d="M-34-14c10 12 26 18 40 18s30-6 40-18c-6 20-20 28-40 28s-34-8-40-28z" fill="#fff3e0" />
-        <path className="ta-blink" d="M-18-22q6-5 10 0M14-22q6-5 10 0" stroke="#3a1d10" strokeWidth="2.6" fill="none" strokeLinecap="round" />
-        <ellipse cx="3" cy="-6" rx="4" ry="3" fill="#3a1d10" />
-      </g>
+      
       {/* mushrooms */}
       {[[250, 380], [280, 386]].map(([x, y], i) => (
         <g key={i} transform={`translate(${x} ${y}) scale(${i ? 0.7 : 1})`}><rect x="-5" y="-6" width="10" height="16" rx="3" fill="#fff3e0" /><path d="M-18-4c0-14 8-20 18-20s18 6 18 20z" fill="#d4572e" /><circle cx="-6" cy="-14" r="2.6" fill="#fff" /><circle cx="6" cy="-10" r="2" fill="#fff" /></g>

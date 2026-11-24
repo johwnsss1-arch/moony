@@ -319,3 +319,50 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 /* ---- Idle: Moony is in the background, so nothing decorative moves ---- */
 .frame.idle *, .frame.idle *::before, .frame.idle *::after { animation-play-state: paused !important; }
 .frame.idle .snow { visibility: hidden; }
+
+/* ===================== v2.0.1 ===================== */
+
+/* Sidebar: the highlight stays inside the button (no glow that the sidebar
+   cuts off at its edges). */
+.nav-scroll { padding: 4px 0; }
+.frame .sidebar .nav-btn.on { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent) !important; background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 26%, transparent), color-mix(in srgb, var(--accent-2) 14%, transparent)) !important; color: #fff; }
+.frame .sidebar .nav-btn.on::after { content: ""; position: absolute; left: 50%; bottom: 3px; width: 14px; height: 3px; margin-left: -7px; border-radius: 3px; background: var(--accent); }
+.frame .sidebar .nav-btn:hover:not(.on) { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+
+/* Scrollbar: thin and quiet, grows and lights up in the accent colour when
+   you reach for it. */
+.frame ::-webkit-scrollbar { width: 12px; height: 12px; }
+.frame ::-webkit-scrollbar-track { background: transparent; }
+.frame ::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--text) 14%, transparent); border: 4px solid transparent; border-radius: 99px; background-clip: padding-box; min-height: 40px; }
+.frame ::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--accent) 70%, transparent); border-width: 3px; background-clip: padding-box; }
+.frame ::-webkit-scrollbar-thumb:active { background: var(--accent); border-width: 3px; background-clip: padding-box; }
+.frame ::-webkit-scrollbar-corner { background: transparent; }
+.frame ::-webkit-scrollbar-button { display: none; height: 0; }
+
+/* Themes, reworked: every theme now builds its whole look from its own
+   colours, so each one feels like a different app rather than a tint.
+   - a soft colour mesh behind everything from the theme's three ambient colours
+   - surfaces tinted towards the accent, with a light top edge
+   - headings in the theme's wordmark gradient
+   - accent buttons with a matching glow */
+.frame { background:
+  radial-gradient(70% 55% at 0% 0%, color-mix(in srgb, var(--amb-1) 16%, transparent), transparent 70%),
+  radial-gradient(60% 50% at 100% 100%, color-mix(in srgb, var(--amb-2) 13%, transparent), transparent 70%),
+  radial-gradient(50% 40% at 85% 10%, color-mix(in srgb, var(--amb-3) 8%, transparent), transparent 70%),
+  var(--bg-0); }
+.frame .titlebar { background: color-mix(in srgb, var(--bg-0) 70%, transparent); }
+.frame .content { background: color-mix(in srgb, var(--bg-1) 62%, transparent); }
+.frame .rpanel { background: color-mix(in srgb, var(--bg-1) 70%, transparent); }
+.frame .settings-group, .frame .card, .frame .wide, .frame .item-card, .frame .preset-lib, .frame .ver-row, .frame .ver-mode, .frame .fflag-card {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 6%, var(--surface)), var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 16%, var(--line));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.frame .page-head h1 { background: linear-gradient(180deg, var(--wm-1), var(--wm-2) 55%, var(--wm-3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.frame .btn.primary { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, #fff), var(--accent-2)); box-shadow: 0 6px 18px -6px color-mix(in srgb, var(--accent) 70%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.25); border-color: transparent; }
+.frame .btn.primary:hover:not(:disabled) { filter: brightness(1.08); }
+.frame .chip.on, .frame .segmented button.on { background: color-mix(in srgb, var(--accent) 22%, var(--surface-2)); color: #fff; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 50%, transparent); }
+.frame .toggle.on { background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
+.frame .input:focus, .frame .search-field:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.frame .tile-art, .frame .item-img { box-shadow: 0 10px 26px -14px color-mix(in srgb, var(--accent) 60%, #000); }
+.frame .tag { background: color-mix(in srgb, var(--accent) 16%, transparent); color: color-mix(in srgb, var(--accent) 40%, #fff); }

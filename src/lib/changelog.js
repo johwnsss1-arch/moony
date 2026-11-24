@@ -24,10 +24,8 @@ export const CHANGELOG = [
   },
   {
     version: "1.0.10",
-    title: "Clips, and a smoother Moony",
+    title: "A smoother Moony",
     items: [
-      "Moony Clips: press Alt+C in game to save the last 30 seconds (Settings › Clips).",
-      "Every clip ends with a short Moony card with the website and Discord.",
       "Smoother scrolling and animations: Moony's window is drawn much more efficiently.",
       "The HUD ping widget works now.",
       "Kawaii theme: sidebar buttons fixed.",
@@ -64,7 +62,7 @@ export const CHANGELOG = [
     items: [
       "Send feedback straight to the Moony team from the speech-bubble button in the title bar.",
       "This popup, so you always know what changed.",
-      "New HUD widget: a small \"Made with Moony\" tag for your clips (HUD tab).",
+      "New HUD widget: a small \"Made with Moony\" tag (HUD tab).",
       "New installs can link a Roblox account straight from the installer.",
       "Moony is now open source on GitHub.",
     ],
@@ -74,7 +72,6 @@ export const CHANGELOG = [
     title: "Themes got a glow-up",
     items: [
       "Every theme has its own frame, buttons, toggles and chips.",
-      "Pets! Little animals wander along the bottom of the window (Settings > Appearance).",
     ],
   },
 ];

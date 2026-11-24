@@ -10,7 +10,7 @@ import { createMods } from "./mods";
 import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification";
 
 const rust = (channel, ...args) => invoke("ipc", { channel, args });
-const appWin = getCurrentWindow();
+const appWin = window.__TAURI_INTERNALS__ ? getCurrentWindow() : null;
 
 async function notify(title, body) {
   try {
@@ -247,7 +247,7 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
     openRobloxPage: (_acc, url) => rust("open:url", url),
     setPrefs: (p) => { prefs = p || {}; rust("hud:enabled", !!prefs.hud?.enabled).catch(() => {}); return rust("store:set", "prefs", p).catch(() => {}); },
     setZoom: () => Promise.resolve(true),
-    setRadius: () => Promise.resolve(true),
+    setRadius: (r) => rust("ui:radius", Number(r) || 0),
     protocol: { get: () => rust("protocol:get"), set: (v) => rust("protocol:set", !!v) },
     media: { get: () => Promise.resolve(null), onChange: off },
     hud: { status: () => rust("hud:status"), onStatus: on("hud:status") },
