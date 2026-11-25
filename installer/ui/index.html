@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moony Setup</title>
+<style>
+@font-face { font-family: "Bricolage"; src: url(fonts/bricolage-grotesque-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
+@font-face { font-family: "Bricolage"; src: url(fonts/bricolage-grotesque-latin-600-normal.woff2) format("woff2"); font-weight: 600; }
+@font-face { font-family: "Bricolage"; src: url(fonts/bricolage-grotesque-latin-800-normal.woff2) format("woff2"); font-weight: 800; }
+:root {
+  --night: #0c0d1f;
+  --rail: #101231;
+  --line: #24284f;
+  --moonlight: #ecebff;
+  --dust: #8d90b3;
+  --lilac: #8b7dff;
+  --lilac-hi: #b4a9ff;
+  --mint: #6ff2c2;
+  --amber: #ffc46b;
+  --rose: #ff7a9a;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; overflow: hidden; }
+body { background: var(--night); color: var(--moonlight); font: 400 14px/1.55 "Bricolage", system-ui, sans-serif; user-select: none; -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; color: inherit; }
+.app { display: grid; grid-template-columns: 248px 1fr; height: 100vh; }
+
+.rail { position: relative; background: var(--rail); border-right: 1px solid var(--line); display: flex; flex-direction: column; padding: 22px 0 18px; overflow: hidden; }
+.rail canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.brand { position: relative; display: flex; align-items: center; gap: 9px; padding: 0 24px; font-weight: 800; font-size: 17px; letter-spacing: -.02em; }
+.brand small { font-weight: 400; color: var(--dust); font-size: 12px; letter-spacing: 0; margin-left: auto; }
+.moon-wrap { position: relative; display: grid; place-items: center; height: 196px; margin: 10px 0 6px; }
+.moon-wrap svg { width: 150px; height: 150px; overflow: visible; }
+.moon-glow { transition: opacity .8s var(--ease); }
+.pct { position: absolute; bottom: 6px; font-size: 12px; color: var(--dust); font-variant-numeric: tabular-nums; opacity: 0; transition: opacity .3s; }
+.pct.on { opacity: 1; }
+
+.steps { position: relative; list-style: none; padding: 0 14px; display: grid; gap: 2px; }
+.steps .marker { position: absolute; left: 14px; right: 14px; top: 0; height: 42px; border-radius: 12px; background: rgba(139, 125, 255, .13); box-shadow: inset 0 0 0 1px rgba(139, 125, 255, .28); transition: transform .48s var(--ease); }
+.steps .marker::before { content: ""; position: absolute; left: 0; top: 11px; bottom: 11px; width: 3px; border-radius: 0 3px 3px 0; background: var(--lilac); }
+.step { position: relative; height: 42px; display: flex; align-items: center; gap: 12px; padding: 0 12px; color: var(--dust); transition: color .3s; }
+.step.on { color: var(--moonlight); font-weight: 600; }
+.step.past { color: #b9bbd9; }
+.dot { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #3a3f72; display: grid; place-items: center; flex: none; transition: border-color .3s, background .3s; }
+.step.on .dot { border-color: var(--lilac); background: radial-gradient(circle, var(--lilac) 0 4px, transparent 4.5px); }
+.step.past .dot { border-color: var(--mint); background: var(--mint); }
+.dot svg { width: 10px; height: 10px; opacity: 0; }
+.step.past .dot svg { opacity: 1; }
+.step.past .dot path { stroke-dashoffset: 0; }
+.dot path { stroke: var(--night); stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 16; stroke-dashoffset: 16; transition: stroke-dashoffset .4s .1s var(--ease); }
+.rail-foot { position: relative; margin-top: auto; padding: 0 24px; color: var(--dust); font-size: 12px; }
+
+.main { position: relative; display: flex; flex-direction: column; min-width: 0; }
+.bar { height: 44px; display: flex; justify-content: flex-end; align-items: center; padding: 0 8px; flex: none; }
+.bar button { width: 36px; height: 30px; border: 0; background: none; border-radius: 8px; display: grid; place-items: center; color: var(--dust); cursor: pointer; transition: background .15s, color .15s; }
+.bar button:hover { background: rgba(255, 255, 255, .06); color: var(--moonlight); }
+.bar button.x:hover { background: #c23a5a; color: #fff; }
+.bar svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 1.6; fill: none; }
+
+.pages { position: relative; flex: 1; }
+.page { position: absolute; inset: 0; padding: 18px 52px 34px 48px; display: flex; flex-direction: column; opacity: 0; transform: translateX(24px); pointer-events: none; transition: opacity .32s var(--ease), transform .48s var(--ease); }
+.page.left { transform: translateX(-24px); }
+.page.on { opacity: 1; transform: none; pointer-events: auto; }
+h1 { font-size: 40px; line-height: 1.02; letter-spacing: -.035em; font-weight: 800; max-width: 15ch; }
+.lead { margin-top: 14px; color: #b9bbd9; font-size: 15px; max-width: 46ch; }
+.note[hidden] { display: none; }
+.note { margin-top: 18px; display: inline-flex; gap: 10px; align-items: center; align-self: flex-start; padding: 9px 13px; border-radius: 10px; background: rgba(111, 242, 194, .08); color: var(--mint); font-size: 13px; }
+.actions { margin-top: auto; display: flex; gap: 10px; align-items: center; }
+.actions .grow { flex: 1; color: var(--dust); font-size: 12.5px; }
+.btn { height: 42px; padding: 0 22px; border-radius: 12px; border: 0; cursor: pointer; font-weight: 600; transition: transform .16s var(--ease), background .2s, box-shadow .2s; }
+.btn:active { transform: scale(.97); }
+.btn.primary { background: var(--lilac); color: #0c0b1d; box-shadow: 0 8px 28px -10px rgba(139, 125, 255, .8); }
+.btn.primary:hover { background: var(--lilac-hi); }
+.btn.ghost { background: rgba(255, 255, 255, .05); }
+.btn.ghost:hover { background: rgba(255, 255, 255, .09); }
+.btn.danger { background: var(--rose); color: #22060e; }
+.btn:focus-visible, .toggle:focus-visible, .path button:focus-visible { outline: 2px solid var(--lilac-hi); outline-offset: 2px; }
+.btn[disabled] { opacity: .5; pointer-events: none; }
+
+h2 { font-size: 26px; letter-spacing: -.03em; font-weight: 800; }
+.sub { color: var(--dust); margin-top: 4px; }
+.field { margin-top: 22px; }
+.field label { display: block; font-size: 12.5px; color: var(--dust); margin-bottom: 7px; }
+.path { display: flex; align-items: center; height: 44px; border-radius: 12px; background: rgba(0, 0, 0, .25); box-shadow: inset 0 0 0 1px var(--line); padding: 0 5px 0 14px; gap: 8px; }
+.path span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #d6d6f3; direction: rtl; text-align: left; }
+.path button { height: 34px; padding: 0 14px; border: 0; border-radius: 9px; background: rgba(255, 255, 255, .07); cursor: pointer; }
+.path button:hover { background: rgba(255, 255, 255, .12); }
+.opts { margin-top: 16px; display: grid; gap: 2px; }
+.toggle { display: flex; align-items: center; gap: 14px; padding: 11px 12px; margin: 0 -12px; border-radius: 12px; cursor: pointer; border: 0; background: none; text-align: left; width: calc(100% + 24px); }
+.toggle:hover { background: rgba(255, 255, 255, .03); }
+.toggle b { display: block; font-weight: 600; }
+.toggle small { display: block; color: var(--dust); font-size: 12.5px; }
+.toggle .grow { flex: 1; }
+.sw { width: 38px; height: 22px; border-radius: 11px; background: #2a2e58; position: relative; flex: none; transition: background .25s var(--ease); }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #c9c9ea; transition: transform .3s var(--ease), background .25s; }
+.toggle[aria-checked="true"] .sw { background: var(--lilac); }
+.toggle[aria-checked="true"] .sw::after { transform: translateX(16px); background: #fff; }
+
+.tasks { margin-top: 22px; display: grid; gap: 4px; }
+.task { display: grid; grid-template-columns: 26px 1fr; gap: 0 12px; padding: 9px 0; opacity: .38; transition: opacity .3s; }
+.task.run, .task.done, .task.warn, .task.error { opacity: 1; }
+.task .ic { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #3a3f72; display: grid; place-items: center; margin-top: 1px; }
+.task.run .ic { border-color: transparent; border-top-color: var(--lilac); border-right-color: var(--lilac); animation: spin .8s linear infinite; }
+.task.done .ic { border-color: var(--mint); background: var(--mint); }
+.task.warn .ic { border-color: var(--amber); background: var(--amber); }
+.task.error .ic { border-color: var(--rose); background: var(--rose); }
+.task .ic svg { width: 11px; height: 11px; stroke: var(--night); stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; display: none; }
+.task.done .ic .ok, .task.warn .ic .bang, .task.error .ic .bang { display: block; }
+.task.done .ic .ok path { stroke-dasharray: 16; stroke-dashoffset: 16; animation: draw .4s .05s var(--ease) forwards; }
+.task b { font-weight: 600; }
+.task small { grid-column: 2; color: var(--dust); font-size: 12.5px; min-height: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.task .mini { grid-column: 2; height: 3px; border-radius: 2px; background: #22264a; margin-top: 6px; overflow: hidden; display: none; }
+.task.run.has-pct .mini { display: block; }
+.task .mini i { display: block; height: 100%; width: 0; background: var(--lilac); border-radius: 2px; transition: width .3s linear; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.err { margin-top: 16px; padding: 12px 14px; border-radius: 12px; background: rgba(255, 122, 154, .1); color: #ffc2d0; display: none; max-width: 52ch; }
+.err.on { display: block; }
+
+.done-moon { margin-top: 8px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail">
+    <canvas id="stars"></canvas>
+    <div class="brand" data-tauri-drag-region>moony <small id="ver"></small></div>
+    <div class="moon-wrap" data-tauri-drag-region>
+      <svg viewBox="-80 -80 160 160" aria-hidden="true">
+        <defs>
+          <radialGradient id="g" r=".5"><stop offset=".55" stop-color="#8b7dff" stop-opacity=".45"/><stop offset="1" stop-color="#8b7dff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="lit" cx=".62" cy=".35" r=".8"><stop offset="0" stop-color="#fbfaff"/><stop offset=".7" stop-color="#d9d6ff"/><stop offset="1" stop-color="#a89cff"/></radialGradient>
+          <clipPath id="disc"><circle r="54"/></clipPath>
+        </defs>
+        <circle class="moon-glow" id="glow" r="80" fill="url(#g)"/>
+        <circle r="54" fill="#1b1e45"/>
+        <g clip-path="url(#disc)" opacity=".5"><circle cx="-18" cy="-14" r="9" fill="#151839"/><circle cx="16" cy="20" r="12" fill="#151839"/><circle cx="24" cy="-22" r="5" fill="#151839"/></g>
+        <path id="lit-path" fill="url(#lit)"/>
+        <g clip-path="url(#lit-clip)"><circle cx="-18" cy="-14" r="9" fill="#c3bcff" opacity=".35"/><circle cx="16" cy="20" r="12" fill="#c3bcff" opacity=".35"/><circle cx="24" cy="-22" r="5" fill="#c3bcff" opacity=".35"/></g>
+        <clipPath id="lit-clip"><path id="lit-clip-path"/></clipPath>
+      </svg>
+      <div class="pct" id="pct">0%</div>
+    </div>
+    <ol class="steps" id="steps"><div class="marker" id="marker"></div></ol>
+    <div class="rail-foot" id="foot">moonylauncher.xyz</div>
+  </aside>
+
+  <main class="main">
+    <div class="bar" data-tauri-drag-region>
+      <button onclick="win('min')" aria-label="Minimize"><svg viewBox="0 0 12 12"><path d="M2 6h8"/></svg></button>
+      <button class="x" onclick="win('close')" aria-label="Close"><svg viewBox="0 0 12 12"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg></button>
+    </div>
+    <div class="pages" id="pages"></div>
+  </main>
+</div>
+
+<template id="t-welcome">
+  <section class="page" data-step="0">
+    <h1 id="w-title">Roblox, launched your way.</h1>
+    <p class="lead" id="w-lead">Moony adds fast server joins, party mode, Boost and a lot more on top of Roblox. Setup grabs everything it needs to run and takes about a minute.</p>
+    <div class="note" id="w-note" hidden></div>
+    <div class="actions"><span class="grow">Free, with no ads.</span><button class="btn primary" onclick="go(1)">Continue</button></div>
+  </section>
+</template>
+<template id="t-options">
+  <section class="page" data-step="1">
+    <h2>Set it up</h2>
+    <p class="sub">These are the usual picks. You can change shortcuts later.</p>
+    <div class="field"><label>Install location</label><div class="path"><span id="o-dir"></span><button onclick="browse()">Change</button></div></div>
+    <div class="opts">
+      <button class="toggle" role="switch" data-k="startMenu" aria-checked="true"><span class="grow"><b>Start menu shortcut</b><small>Find Moony by pressing the Windows key and typing its name</small></span><span class="sw"></span></button>
+      <button class="toggle" role="switch" data-k="desktop" aria-checked="true"><span class="grow"><b>Desktop shortcut</b></span><span class="sw"></span></button>
+      <button class="toggle" role="switch" data-k="roblox" aria-checked="true"><span class="grow"><b>Download Roblox now</b><small id="o-rbx">About 250 MB, so your first game starts right away</small></span><span class="sw"></span></button>
+    </div>
+    <div class="actions"><button class="btn ghost" onclick="go(0)">Back</button><span class="grow"></span><button class="btn primary" id="o-go" onclick="startInstall()">Install</button></div>
+  </section>
+</template>
+<template id="t-install">
+  <section class="page" data-step="2">
+    <h2 id="i-title">Installing Moony</h2>
+    <p class="sub" id="i-sub">Keep this window open. It won't take long.</p>
+    <div class="tasks" id="tasks"></div>
+    <div class="err" id="i-err"></div>
+    <div class="actions"><span class="grow"></span><button class="btn primary" id="i-retry" hidden onclick="startInstall()">Try again</button></div>
+  </section>
+</template>
+<template id="t-done">
+  <section class="page" data-step="3">
+    <h1 id="d-title">Moony is ready.</h1>
+    <p class="lead" id="d-lead">Sign in with your Roblox account and pick a game. Your accounts stay encrypted on this PC.</p>
+    <div class="actions"><button class="btn ghost" onclick="win('close')">Close</button><span class="grow"></span><button class="btn primary" onclick="openMoony()">Open Moony</button></div>
+  </section>
+</template>
+<template id="t-uconfirm">
+  <section class="page" data-step="0">
+    <h1>Uninstall Moony?</h1>
+    <p class="lead">This removes the app, its shortcuts and its entry in Settings. Roblox links go back to opening the regular Roblox player.</p>
+    <div class="opts" style="margin-top:22px">
+      <button class="toggle" role="switch" data-k="wipe" aria-checked="false"><span class="grow"><b>Also delete my data</b><small>Saved accounts, settings, playtime, mods and downloaded Roblox files</small></span><span class="sw"></span></button>
+    </div>
+    <div class="actions"><button class="btn ghost" onclick="win('close')">Keep Moony</button><span class="grow"></span><button class="btn danger" onclick="startUninstall()">Uninstall</button></div>
+  </section>
+</template>
+<template id="t-uremove">
+  <section class="page" data-step="1">
+    <h2>Removing Moony</h2>
+    <p class="sub">This only takes a few seconds.</p>
+    <div class="tasks" id="tasks"></div>
+  </section>
+</template>
+<template id="t-udone">
+  <section class="page" data-step="2">
+    <h1>Moony is uninstalled.</h1>
+    <p class="lead" id="u-lead">Thanks for trying it. You can get it again any time at moonylauncher.xyz.</p>
+    <div class="actions"><span class="grow"></span><button class="btn primary" onclick="finish()">Close</button></div>
+  </section>
+</template>
+
+<script>
+const T = window.__TAURI__;
+const invoke = T ? T.core.invoke : async (c, a) => mock(c, a);
+const listen = T ? T.event.listen : (e, f) => (window.__mockListen = f);
+const $ = (s, r = document) => r.querySelector(s);
+const svgOk = '<svg class="ok" viewBox="0 0 12 12"><path d="M2.5 6.5l2.3 2.3 4.7-5"/></svg><svg class="bang" viewBox="0 0 12 12"><path d="M6 3v3.6M6 9h.01"/></svg>';
+
+let info, mode, step = 0, pages = [], opts = {}, installedDir = null;
+const FLOW = {
+  install: { labels: ["Welcome", "Options", "Install", "Ready"], pages: ["t-welcome", "t-options", "t-install", "t-done"], phases: [0.08, 0.28, null, 1] },
+  uninstall: { labels: ["Confirm", "Remove", "Goodbye"], pages: ["t-uconfirm", "t-uremove", "t-udone"], phases: [1, null, 0.02] },
+};
+const TASKS = {
+  install: [["deps", "Runtime"], ["close", "Make room"], ["files", "Moony app"], ["shortcuts", "Shortcuts"], ["register", "Apps & features"], ["roblox", "Roblox"]],
+  uninstall: [["close", "Close Moony"], ["files", "App files"], ["shortcuts", "Shortcuts"], ["register", "Windows settings"], ["data", "Your data"]],
+};
+
+let phase = 0, phaseTarget = 0;
+function moonPath(p, r) {
+  if (p <= 0.001) return "";
+  if (p >= 0.999) return `M0,${-r} A${r},${r} 0 1 1 0,${r} A${r},${r} 0 1 1 0,${-r}Z`;
+  const k = 1 - 2 * p, rx = Math.abs(k) * r, sweep = k > 0 ? 0 : 1;
+  return `M0,${-r} A${r},${r} 0 0 1 0,${r} A${rx},${r} 0 0 ${sweep} 0,${-r}Z`;
+}
+function moonTick() {
+  phase += (phaseTarget - phase) * 0.08;
+  if (Math.abs(phaseTarget - phase) < 0.0005) phase = phaseTarget;
+  const d = moonPath(phase, 54);
+  $("#lit-path").setAttribute("d", d); $("#lit-clip-path").setAttribute("d", d);
+  $("#glow").style.opacity = 0.25 + phase * 0.75;
+  requestAnimationFrame(moonTick);
+}
+function setPhase(p) { phaseTarget = Math.max(0, Math.min(1, p)); }
+
+function stars() {
+  const cv = $("#stars"), g = cv.getContext("2d"), dpr = devicePixelRatio || 1;
+  let w, h, pts;
+  const size = () => {
+    w = cv.width = cv.offsetWidth * dpr; h = cv.height = cv.offsetHeight * dpr;
+    pts = Array.from({ length: 70 }, () => ({ x: Math.random() * w, y: Math.random() * h, r: (Math.random() * 1 + .3) * dpr, t: Math.random() * 6.28, s: .4 + Math.random() }));
+  };
+  size(); new ResizeObserver(size).observe(cv);
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  (function f(now) {
+    g.clearRect(0, 0, w, h);
+    for (const p of pts) {
+      if (!still) p.y -= .04 * p.s * dpr; if (p.y < 0) p.y = h;
+      g.globalAlpha = .18 + .32 * (0.5 + 0.5 * Math.sin(now / 1400 * p.s + p.t));
+      g.fillStyle = "#cfcaff"; g.beginPath(); g.arc(p.x, p.y, p.r, 0, 6.3); g.fill();
+    }
+    if (!still) requestAnimationFrame(f);
+  })(0);
+}
+
+function buildSteps() {
+  const ol = $("#steps");
+  FLOW[mode].labels.forEach((l, i) => {
+    const li = document.createElement("li");
+    li.className = "step"; li.innerHTML = `<span class="dot"><svg viewBox="0 0 12 12"><path d="M2.5 6.5l2.3 2.3 4.7-5"/></svg></span>${l}`;
+    ol.appendChild(li);
+  });
+  FLOW[mode].pages.forEach((id) => { const n = $("#" + id).content.firstElementChild.cloneNode(true); $("#pages").appendChild(n); pages.push(n); });
+}
+function go(n) {
+  const prev = step; step = n;
+  pages.forEach((p, i) => { p.classList.toggle("on", i === n); p.classList.toggle("left", i < n); p.inert = i !== n; });
+  document.querySelectorAll(".step").forEach((s, i) => { s.classList.toggle("on", i === n); s.classList.toggle("past", i < n); });
+  $("#marker").style.transform = `translateY(${n * 44}px)`;
+  const ph = FLOW[mode].phases[n]; if (ph != null) setPhase(ph);
+  setTimeout(() => pages[n].querySelector(".btn.primary, .btn.danger")?.focus({ preventScroll: true }), 350);
+}
+
+function toggles(root) {
+  root.querySelectorAll(".toggle").forEach((b) => {
+    opts[b.dataset.k] = b.getAttribute("aria-checked") === "true";
+    b.onclick = () => { const v = b.getAttribute("aria-checked") !== "true"; b.setAttribute("aria-checked", v); opts[b.dataset.k] = v; };
+  });
+}
+function setToggle(k, v) { const b = document.querySelector(`.toggle[data-k="${k}"]`); if (b) { b.setAttribute("aria-checked", v); opts[k] = v; } }
+
+function renderTasks() {
+  const list = TASKS[mode].filter(([id]) => mode === "install" ? (id !== "roblox" || opts.roblox) : (id !== "data" || opts.wipe));
+  $("#tasks").innerHTML = list.map(([id, label]) => `<div class="task" id="task-${id}"><span class="ic">${svgOk}</span><b>${label}</b><small></small><div class="mini"><i></i></div></div>`).join("");
+  return list.length;
+}
+let total = 1, doneCount = 0, curPct = 0;
+function onTask({ id, state, detail, pct }) {
+  const el = $("#task-" + id); if (!el) return;
+  const was = el.className;
+  el.className = "task " + state + (state === "run" && pct > 0 && pct < 1 ? " has-pct" : "");
+  if (detail) el.querySelector("small").textContent = detail;
+  el.querySelector(".mini i").style.width = (pct * 100).toFixed(1) + "%";
+  if ((state === "done" || state === "warn") && !/done|warn/.test(was)) doneCount++;
+  curPct = state === "run" ? pct : 0;
+  const prog = Math.min(1, (doneCount + curPct) / total);
+  if (mode === "install") { setPhase(0.28 + prog * 0.72); $("#pct").textContent = Math.round(prog * 100) + "%"; }
+  else setPhase(1 - prog * 0.98);
+}
+
+async function startInstall() {
+  $("#i-err").classList.remove("on"); $("#i-retry").hidden = true;
+  total = renderTasks(); doneCount = 0; go(2); $("#pct").classList.add("on");
+  try {
+    installedDir = await invoke("install", { opts: { dir: info.dir, desktop: !!opts.desktop, start_menu: !!opts.startMenu, roblox: !!opts.roblox } });
+    $("#pct").textContent = "100%";
+    setTimeout(() => { $("#pct").classList.remove("on"); go(3); }, 650);
+  } catch (e) {
+    $("#i-title").textContent = "Setup hit a problem";
+    $("#i-sub").textContent = "Nothing was half-installed. Fix the issue below and try again.";
+    $("#i-err").textContent = String(e); $("#i-err").classList.add("on"); $("#i-retry").hidden = false;
+  }
+}
+async function startUninstall() {
+  total = renderTasks(); doneCount = 0; go(1);
+  installedDir = await invoke("uninstall", { keepData: !opts.wipe });
+  if (!opts.wipe) $("#u-lead").textContent = "Your accounts and settings are still on this PC, so they'll be back if you reinstall. Get Moony again any time at moonylauncher.xyz.";
+  setTimeout(() => go(2), 500);
+}
+async function browse() { const d = await invoke("pick_dir", { current: info.dir }); if (d) { info.dir = d; $("#o-dir").textContent = d; } }
+function openMoony() { invoke("launch", { dir: installedDir || info.dir }); }
+function finish() { invoke("finish", { dir: installedDir }); }
+function win(a) { if (mode === "uninstall" && step === 2) return finish(); invoke("win", { a }); }
+
+(async function init() {
+  info = await invoke("info");
+  mode = info.mode;
+  document.title = mode === "install" ? "Moony Setup" : "Uninstall Moony";
+  $("#ver").textContent = "v" + info.version;
+  buildSteps(); toggles(document);
+  if (mode === "install") {
+    $("#o-dir").textContent = info.dir;
+    setToggle("desktop", info.desktop);
+    if (info.robloxReady) { setToggle("roblox", false); $("#o-rbx").textContent = "Roblox is already downloaded. Turn this on to get the newest version now."; }
+    if (info.existing) {
+      $("#w-title").textContent = info.existing === info.version ? "Reinstall Moony." : `Update Moony to ${info.version}`;
+      $("#w-lead").textContent = "Your accounts, settings and playtime stay exactly as they are.";
+      const n = $("#w-note"); n.hidden = false; n.textContent = `Moony ${info.existing} is installed on this PC`;
+    }
+  } else { setPhase(1); }
+  listen("task", (e) => onTask(e.payload));
+  stars(); requestAnimationFrame(moonTick); go(0);
+})();
+
+async function mock(c, a) {
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  if (c === "info") return { version: "3.0.0", mode: new URLSearchParams(location.search).get("mode") || "install", dir: "C:\\Users\\you\\AppData\\Local\\Moony", existing: new URLSearchParams(location.search).get("existing"), desktop: true, robloxReady: false };
+  const emit = (id, state, detail, pct = 1) => window.__mockListen?.({ payload: { id, state, detail, pct } });
+  if (c === "install") {
+    for (const [id] of TASKS.install) { if (id === "roblox" && !a.opts.roblox) continue; emit(id, "run", "Working…", 0); await wait(500);
+      if (id === "roblox") for (let i = 1; i <= 20; i++) { emit(id, "run", `Downloading Roblox… ${i * 12} of 240 MB`, i / 20); await wait(120); }
+      emit(id, "done", "Done"); }
+    return a.opts.dir;
+  }
+  if (c === "uninstall") { for (const [id] of TASKS.uninstall) { if (id === "data" && a.keepData) continue; emit(id, "run", "Working…", 0); await wait(350); emit(id, "done", "Done"); } return "C:\\x"; }
+}
+</script>
+</body>
+</html>
