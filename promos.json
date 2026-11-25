@@ -1,14 +1,4 @@
 {
   "note": "Videos shown under Recently played in Moony. Edit this file to change them: no app update needed. Fields: video (https .webm/.mp4), poster, link (opened on click), label, ratio (e.g. \"1 / 1\", \"16 / 9\"), seconds (how long before the next one), until (optional end date, ISO).",
-  "items": [
-    {
-      "label": "Community",
-      "video": "https://moonylauncher.xyz/promo/moony-discord.webm",
-      "poster": "https://moonylauncher.xyz/promo/moony-discord.png",
-      "link": "https://discord.gg/moonylauncher",
-      "title": "Join the Moony Discord",
-      "ratio": "1 / 1",
-      "seconds": 16
-    }
-  ]
+  "items": []
 }

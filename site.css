@@ -63,8 +63,11 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -.035em; line-height: 
 .hero { position: relative; padding: 72px 0 0; overflow: hidden; isolation: isolate; }
 .hero-sky { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
 .hero-sky::before { content: ""; position: absolute; left: 50%; top: -30%; width: 1400px; height: 900px; transform: translateX(-50%); background: radial-gradient(ellipse at center, rgba(92, 141, 245, .16), transparent 62%); }
-.moonrise { position: absolute; right: max(-160px, calc(50% - 760px)); top: 40px; width: 520px; height: 520px; border-radius: 50%; background: radial-gradient(circle at 36% 32%, #f3f6ff 0%, #c9d9ff 34%, #7fa6f0 70%, #3b5fae 100%); box-shadow: 0 0 120px 30px rgba(120, 160, 255, .18); opacity: .9; }
-.moonrise::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; background: radial-gradient(circle at 64% 58%, var(--ink) 0 52%, transparent 52.5%); }
+.rush { position: absolute; right: max(-120px, calc(50% - 720px)); top: 30px; height: 540px; display: flex; gap: 46px; transform: skewX(-14deg); }
+.rush i { display: block; width: 104px; height: 100%; border-radius: 52px; background: linear-gradient(170deg, #f2f6ff 0%, #a6c8ff 38%, #4a78ee 80%, rgba(74,120,238,0) 100%); opacity: .9; box-shadow: 0 0 90px rgba(120,160,255,.16); animation: rushIn 1s cubic-bezier(.2,.8,.2,1) both; }
+.rush i:nth-child(1) { opacity: .35; animation-delay: .05s; } .rush i:nth-child(2) { opacity: .6; animation-delay: .15s; } .rush i:nth-child(3) { animation-delay: .25s; }
+@keyframes rushIn { from { transform: translateY(60px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .rush i { animation: none; } }
 .hero-copy { max-width: 660px; }
 .hero h1 { font-size: clamp(46px, 7.2vw, 92px); }
 .hero .lede { margin-top: 22px; }
@@ -230,7 +233,7 @@ footer { margin-top: 120px; border-top: 1px solid var(--line); padding: 56px 0 4
   .index > div:nth-child(3) { border-left: 0; padding-left: 0; }
   .theme-grid, .feature-list { grid-template-columns: 1fr; }
   .foot { grid-template-columns: 1fr 1fr; }
-  .moonrise { width: 300px; height: 300px; right: -170px; top: -110px; opacity: .45; }
+  .rush { height: 300px; gap: 24px; right: -120px; top: -60px; opacity: .45; } .rush i { width: 56px; }
   .hero .window { transform: none; margin-bottom: 0; }
   section.band { padding: 80px 0; }
   .cta { padding: 48px 28px; }
