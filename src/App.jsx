@@ -1,18 +1,17 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { RotateCcw, WifiOff, X } from "lucide-react";
-import { AppProvider, ACCENTS, useApp } from "./lib/store";
+import { AppProvider, useApp } from "./lib/store";
 import { isDesktop } from "./lib/bridge";
 import { cleanName } from "./lib/format";
 import { NAV, ResizeHandles, RightPanel, Sidebar, TitleBar, Toasts, Tour, useMaximized } from "./components/Shell";
-import { Lights, Particles } from "./components/Festive";
 import { themeById } from "./lib/themes";
-import { FrameDeco, SceneArt } from "./components/ThemeArt";
 import { loadBg, onBgChange } from "./lib/custombg";
 import { Img, Skeleton } from "./components/ui";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { UpdateBanner } from "./components/UpdateBanner";
 import { WhatsNew, FoundUs, FeedbackModal, FeedbackNudge, useLaunchCounter } from "./components/Engage";
 import Home from "./pages/Home";
+import { Boot } from "./components/Boot";
 
 const Discover = lazy(() => import("./pages/Discover"));
 const Favorites = lazy(() => import("./pages/Favorites"));
@@ -30,8 +29,6 @@ const AvatarPage = lazy(() => import("./pages/AvatarPage"));
 const Tweaks = lazy(() => import("./pages/Tweaks"));
 const Versions = lazy(() => import("./pages/Versions"));
 const Chat = lazy(() => import("./pages/Chat"));
-import { LiveBg } from "./components/LiveBg";
-import { applyUiFont } from "./lib/fonts";
 const Hud = lazy(() => import("./pages/Hud"));
 const Performance = lazy(() => import("./pages/Performance"));
 const Party = lazy(() => import("./pages/Party"));
@@ -67,8 +64,8 @@ function Frame() {
     return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("mouseup", onMouse); };
   });
 
-  const theme = themeById(settings.theme);
-  const [a, b] = settings.accent === "theme" || !ACCENTS[settings.accent] ? theme.accent : ACCENTS[settings.accent];
+  const theme = themeById("moonlight");
+  const [a, b] = theme.accent;
   useEffect(() => {
     const z = Math.min(1.5, Math.max(0.75, (settings.scale || 100) / 100));
     document.documentElement.style.setProperty("--ui-scale", String(z));
@@ -124,20 +121,13 @@ function Frame() {
     return () => { window.removeEventListener("mousemove", onMove); cancelAnimationFrame(raf); };
   }, [settings.reduceMotion]);
   const style = { "--win-r": `${settings.winRadius ?? 16}px`, ...theme.vars, "--accent": a, "--accent-2": b, "--amb-1": theme.ambient[0], "--amb-2": theme.ambient[1], "--amb-3": theme.ambient[2], "--wm-1": theme.wordmark[0], "--wm-2": theme.wordmark[1], "--wm-3": theme.wordmark[2] };
-  const festive = !!theme.festive;
-  const live = !!settings.liveBg && settings.liveBg !== "off";
-  useEffect(() => { applyUiFont(settings.uiFont); }, [settings.uiFont]);
-  const cls = ["frame", "nf", settings.navCollapsed && "nav-collapsed", live && !bgUrl && "has-bg", isDesktop && "desktop", max && "maximized", settings.reduceMotion && "reduce-motion", settings.ambience && "ambience", showPanel && "with-panel", festive && "festive", (settings.themeArt !== false || bgUrl) && "has-art", bgUrl && "has-bg", settings.reduceMotion && "no-anim", idle && "idle", `theme-${theme.id}`].filter(Boolean).join(" ");
+  const cls = ["frame", "nf", "theme-moonlight", settings.navCollapsed && "nav-collapsed", isDesktop && "desktop", max && "maximized", settings.reduceMotion && "reduce-motion no-anim", showPanel && "with-panel", bgUrl && "has-bg has-art", idle && "idle"].filter(Boolean).join(" ");
   const key = page + JSON.stringify(route.param?.id ?? route.param?.universeId ?? "");
 
   return (
     <div className={cls} style={style}>
-      <div className="ambient" aria-hidden><span /><span /><span /></div>
+      
       {bgUrl && <div className={"custom-bg fit-" + (settings.bgFit || "cover")} aria-hidden style={{ "--bg-dim": (settings.bgDim ?? 55) / 100, "--bg-blur": `${settings.bgBlur ?? 0}px` }}>{bgKind === "video" ? <video src={bgUrl} autoPlay loop muted playsInline /> : <img src={bgUrl} alt="" />}</div>}
-      {!bgUrl && live && <LiveBg kind={settings.liveBg} accent={a} paused={idle || settings.reduceMotion} />}
-      {settings.themeArt !== false && !bgUrl && !live && <SceneArt id={theme.id} />}
-      {settings.themeArt !== false && <FrameDeco id={theme.id} />}
-      {festive && <Lights />}
       <TitleBar onSearch={openSearch} />
       <Sidebar />
       <main className={"content" + (page === "game" ? " flush" : "")} key={key}>
@@ -168,7 +158,6 @@ function Frame() {
         </ErrorBoundary>
       </main>
       {showPanel && <RightPanel />}
-      {theme.particles && !settings.reduceMotion && settings.snow && <Particles key={theme.particles} kind={theme.particles} density={theme.particles === "stars" ? 0.6 : 1} />}
       <RejoinPrompt />
       <Tour />
       <WhatsNew />
@@ -177,6 +166,7 @@ function Frame() {
       <UpdateBanner />
       <Toasts />
       <ResizeHandles />
+      <Boot />
     </div>
   );
 }

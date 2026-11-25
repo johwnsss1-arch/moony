@@ -101,7 +101,7 @@ export default function Wrapped() {
   const [kind, setKind] = useState("month");
   const cv = useRef(null);
   const d = useMemo(() => compute(playtime, kind), [playtime, kind]);
-  const accent = settings.accent === "theme" || !ACCENTS[settings.accent] ? themeById(settings.theme).accent[0] : ACCENTS[settings.accent][0];
+  const accent = themeById("moonlight").accent[0];
   useEffect(() => { if (cv.current && d.total) document.fonts.ready.then(() => draw(cv.current, d, launchAs?.name, accent)); }, [d, launchAs?.name, accent]);
 
   const save = async () => {

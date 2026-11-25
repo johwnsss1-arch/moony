@@ -74,3 +74,12 @@
   .frame.nf .sv-quick { grid-template-columns: 1fr 1fr; }
   .frame.nf .sv-spread { grid-column: 1 / -1; }
 }
+
+/* Calmer server colours */
+.frame.nf .nf-servers { --t-great: #6fd3b0; --t-good: #a6c8ff; --t-ok: #e3c07a; --t-bad: #e58a96; }
+.frame.nf .sv-spread-bars { min-height: 40px; }
+.frame.nf .sv-bucket-bar { height: 24px; background: var(--surface-2); }
+.frame.nf .sv-bucket-bar i { opacity: .85; }
+.frame.nf .sv-bar i.busy { background: color-mix(in srgb, var(--accent) 80%, transparent); }
+.frame.nf .sv-row.full .sv-bar i, .frame.nf .sv-bar i.full { background: var(--t-bad); }
+.frame.nf .sv-spread-head small { color: var(--t-great); }

@@ -3,17 +3,17 @@ export function Logo({ size = 26, variant = null, festive = false }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden style={{ overflow: "visible" }}>
       <defs>
-        <linearGradient id="moony-g" x1="5" y1="4" x2="24" y2="28">
-          <stop stopColor="#fff6d8" />
-          <stop offset="0.55" stopColor={v ? "#d9dcf2" : "var(--accent)"} />
+        <linearGradient id="moony-g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#f2f6ff" />
+          <stop offset="0.45" stopColor={v ? "#d9dcf2" : "var(--accent)"} />
           <stop offset="1" stopColor={v ? "#9aa0c4" : "var(--accent-2)"} />
         </linearGradient>
-        <mask id="moony-m">
-          <rect width="32" height="32" fill="#fff" />
-          <circle cx="21" cy="11.5" r="10" fill="#000" />
-        </mask>
       </defs>
-      <circle cx="15" cy="17" r="12" fill="url(#moony-g)" mask="url(#moony-m)" />
+      <g fill="url(#moony-g)" transform="translate(4.5 -1) skewX(-14)">
+        <rect x="3" y="6" width="6" height="22" rx="3" />
+        <rect x="13" y="6" width="6" height="22" rx="3" />
+        <rect x="23" y="6" width="6" height="22" rx="3" />
+      </g>
       {v === "hat" && (
         <g transform="rotate(-28 9 7)">
           <path d="M2.5 9.5 C4 3 9 0.5 15 3.5 L12.5 6 C10 5 7 6.5 6 9.5 Z" fill="#e5384a" />
@@ -35,7 +35,6 @@ export function Logo({ size = 26, variant = null, festive = false }) {
           <rect x="6" y="6.4" width="5" height="1.6" fill="#ff8a1f" />
         </g>
       )}
-      {!v && <path d="M25.5 3.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill="#fff6d8" />}
     </svg>
   );
 }

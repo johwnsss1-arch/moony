@@ -24,6 +24,9 @@ import './pages6.css'
 import './design/nightfall.css'
 import './design/nf-settings.css'
 import './design/nf-servers.css'
+import './design/boot.css'
+import './design/home-hero.css'
+import './design/v41.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(

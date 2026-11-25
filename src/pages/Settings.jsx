@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { ImagePlus, Trash2, Bell, Check, ChevronRight, Cpu, Download, Gamepad2, Keyboard, LayoutDashboard, Lock, MessageCircle, Palette, Rocket, SlidersHorizontal, Swords, UsersRound, Wrench, Sparkles } from "lucide-react";
 import { ACCENTS, DEFAULT_SETTINGS, useApp } from "../lib/store";
-import { THEMES, THEME_FONTS, themeById } from "../lib/themes";
-import { SceneArt } from "../components/ThemeArt";
-import { LIVE_BGS } from "../components/LiveBg";
-import { UI_FONTS } from "../lib/fonts";
 import { clearBg, emitBgChange, loadBg, onBgChange, saveBg } from "../lib/custombg";
 
 function BackgroundCard({ s, u }) {
@@ -38,7 +34,7 @@ function BackgroundCard({ s, u }) {
       </label>
       <div className="ap-bg-side">
         {err && <small className="ap-err">{err}</small>}
-        {!url && <small className="muted-text">Your own wallpaper replaces the theme's scene. GIFs and videos play on a loop. It stays on this PC.</small>}
+        {!url && <small className="muted-text">GIFs and videos play on a loop. It stays on this PC.</small>}
         {url && <>
           <div className="ap-ctl"><span>Dim</span><Slider min={0} max={90} value={s.bgDim ?? 55} onChange={(v) => u({ bgDim: v })} format={(v) => v + "%"} /></div>
           <div className="ap-ctl"><span>Blur</span><Slider min={0} max={24} value={s.bgBlur ?? 0} onChange={(v) => u({ bgBlur: v })} format={(v) => v + "px"} /></div>
@@ -68,8 +64,7 @@ function UpdateRow() {
 
 const CATS = [
   { id: "general", label: "General", icon: SlidersHorizontal, group: "App" },
-  { id: "appearance", label: "Appearance", icon: Palette, group: "App" },
-  { id: "themes", label: "Themes", icon: Sparkles, group: "App" },
+  { id: "appearance", label: "Display", icon: Palette, group: "App" },
   { id: "updates", label: "Updates", icon: Download, group: "App" },
   { id: "roblox", label: "Roblox", icon: Swords, group: "Roblox" },
   { id: "launch", label: "Launching", icon: Gamepad2, group: "Roblox" },
@@ -83,8 +78,7 @@ const CATS = [
 ];
 const CAT_DESC = {
   general: "How Moony opens and lays itself out.",
-  appearance: "Backgrounds, fonts, colors and motion.",
-  themes: "Each theme restyles the whole app, its artwork and its loading screen.",
+  appearance: "Your background, interface size and motion.",
   updates: "Moony updates itself in the background and asks before restarting.",
   roblox: "The Roblox Player on this PC and the engine settings Moony can change.",
   launch: "What happens when you press Play.",
@@ -123,7 +117,6 @@ export default function Settings() {
           <header className="settings-head"><h2>{current.label}</h2><p>{CAT_DESC[current.id]}</p></header>
           {cat === "general" && <General />}
           {cat === "appearance" && <Appearance />}
-          {cat === "themes" && <Themes />}
           {cat === "updates" && <Updates />}
           {cat === "roblox" && <Performance />}
           {cat === "launch" && <Launch />}
@@ -136,45 +129,6 @@ export default function Settings() {
           {cat === "advanced" && <Advanced />}
         </div>
       </div>
-    </div>
-  );
-}
-
-function ThemePreview({ t }) {
-  const v = t.vars;
-  return (
-    <span className="nftp" style={{ "--p-bg": v["--bg-0"], "--p-side": v["--bg-1"], "--p-surface": v["--surface"], "--p-surface2": v["--surface-2"], "--p-text": v["--text"], "--p-text3": v["--text-3"], "--p-a": t.accent[0], "--p-b": t.accent[1], "--p-amb": t.ambient[0], "--p-font": `"${THEME_FONTS[t.id]}"` }}>
-      <span className="nftp-scene"><SceneArt id={t.id} className="nftp-art" /></span>
-      <span className="nftp-side"><i className="nftp-logo" /><i /><i className="on" /><i /><i /><i /></span>
-      <span className="nftp-main">
-        <span className="nftp-card"><b>Aa</b><span className="nftp-line" /><span className="nftp-btn" /></span>
-        <span className="nftp-row"><i /><i /><i /><i /></span>
-      </span>
-    </span>
-  );
-}
-
-function Themes() {
-  const { settings: s, updateSettings: u, toast } = useApp();
-  const current = themeById(s.theme);
-  const pick = (t) => {
-    if (t.id === current.id) return;
-    const prev = current.id;
-    u({ theme: t.id, accent: "theme" });
-    toast(`Switched to ${t.name}`, "success", { action: { label: "Undo", run: () => u({ theme: prev }) } });
-  };
-  return (
-    <div className="nf-themes">
-      {THEMES.map((t) => (
-        <button key={t.id} className={"nf-tcard" + (current.id === t.id ? " on" : "")} onClick={() => pick(t)} aria-pressed={current.id === t.id}>
-          <ThemePreview t={t} />
-          <span className="nf-tmeta">
-            <span className="nf-tname">{t.name}{current.id === t.id && <span className="nf-ton"><Check size={12} strokeWidth={3} /> In use</span>}</span>
-            <small>{t.desc}</small>
-            <span className="nf-tchips"><i style={{ background: t.accent[0] }} /><i style={{ background: t.ambient[1] }} /><i style={{ background: t.vars["--surface-2"] }} />{t.particles && <em>{EFFECT_NAMES[t.particles]}</em>}</span>
-          </span>
-        </button>
-      ))}
     </div>
   );
 }
@@ -240,73 +194,20 @@ function General() {
   );
 }
 
-const EFFECT_NAMES = { snow: "Snowfall", sakura: "Cherry blossoms", hearts: "Floating hearts", stars: "Twinkling stars", embers: "Rising embers", bubbles: "Bubbles", leaves: "Falling leaves" };
 
 const Section = ({ title, desc, children }) => (
   <section className="ap-sec"><header><h3>{title}</h3>{desc && <small>{desc}</small>}</header>{children}</section>
 );
 
-const LOAD_STYLES = [["classic", "Classic"], ["minimal", "Minimal"], ["neon", "Neon"], ["glass", "Glass"], ["retro", "Retro"]];
-function LoadingCard({ s, u }) {
-  const l = { style: "classic", tagline: "", gameArt: true, fx: "stars", ...s.loading };
-  const set = (p) => u({ loading: { ...l, ...p } });
-  return (
-    <div className="settings-group">
-      <Row title="Style"><div className="ap-chips">{LOAD_STYLES.map(([id, name]) => <button key={id} className={"chip" + (l.style === id ? " on" : "")} onClick={() => set({ style: id })}>{name}</button>)}</div></Row>
-      <Row title="Your text" desc="A line shown under the progress, like your name or a motto."><input className="input" style={{ width: 220 }} maxLength={60} placeholder="e.g. let's get this W" value={l.tagline} onChange={(e) => set({ tagline: e.target.value })} /></Row>
-      <Row title="Game art background" desc="Blurs the game's icon behind the window."><Toggle checked={l.gameArt !== false} onChange={(v) => set({ gameArt: v })} /></Row>
-      <Row title="Twinkling stars"><Toggle checked={l.fx === "stars"} onChange={(v) => set({ fx: v ? "stars" : "none" })} /></Row>
-      {window.orbit?.splashPreview && <Row title="Preview" desc="Opens it for 5 seconds."><button className="btn secondary sm" onClick={() => window.orbit.splashPreview(l)}>Show preview</button></Row>}
-    </div>
-  );
-}
 
 function Appearance() {
   const { settings: s, updateSettings: u } = useApp();
-  const current = themeById(s.theme);
   return (
     <div className="ap">
       <Section title="Background" desc="A picture, GIF or video behind the whole app.">
         <BackgroundCard s={s} u={u} />
       </Section>
-
-      <Section title="Live background" desc="An animated scene behind the app. It pauses while you're in a game, so it doesn't cost FPS.">
-        <div className="ap-chips">{LIVE_BGS.map((b) => <button key={b.id} className={"chip" + ((s.liveBg || "off") === b.id ? " on" : "")} onClick={() => u({ liveBg: b.id })}>{b.label}</button>)}</div>
-        {s.liveBg && s.liveBg !== "off" && <small className="muted">Replaces the theme's artwork. A custom picture or video background still wins if you've set one.</small>}
-      </Section>
-
-      <Section title="Font" desc="The font used across Moony.">
-        <div className="ap-chips">{UI_FONTS.map((f) => <button key={f.id} className={"chip" + ((s.uiFont || "inter") === f.id ? " on" : "")} onClick={() => u({ uiFont: f.id })}>{f.label}</button>)}</div>
-        <small className="muted">For Roblox's in-game font, use Tweaks → Mods → Font.</small>
-      </Section>
-
-      <Section title="Loading screen" desc="The window you see while a game launches.">
-        <LoadingCard s={s} u={u} />
-      </Section>
-
-      <Section title="Color">
-        <div className="settings-group">
-          <Row title="Accent color" desc="Buttons and highlights. The first swatch follows the theme.">
-            <div className="swatches">
-              <button aria-label="Match theme" title="Match theme" className={"swatch theme-sw" + (s.accent === "theme" ? " on" : "")} style={{ background: `conic-gradient(${current.accent[0]}, ${current.accent[1]}, ${current.accent[0]})` }} onClick={() => u({ accent: "theme" })} />
-              {Object.entries(ACCENTS).map(([k, [a, b]]) => (
-                <button key={k} aria-label={k} className={"swatch" + (s.accent === k ? " on" : "")} style={{ background: `linear-gradient(135deg, ${a}, ${b})` }} onClick={() => u({ accent: k })} />
-              ))}
-            </div>
-          </Row>
-        </div>
-      </Section>
-
-      <Section title="Effects">
-        <div className="settings-group">
-          <Row title="Theme artwork" desc="The illustrated scene and frame decorations."><Toggle checked={s.themeArt !== false} onChange={(v) => u({ themeArt: v })} /></Row>
-          <Row title="Background effect" desc={current.particles ? `${EFFECT_NAMES[current.particles]} for ${current.name}.` : "This theme has no background effect."}><Toggle checked={!!s.snow && !!current.particles} onChange={(v) => u({ snow: v })} /></Row>
-          <Row title="Background glow" desc="Soft animated light behind the interface."><Toggle checked={s.ambience} onChange={(v) => u({ ambience: v })} /></Row>
-          <Row title="Reduce motion" desc="Turns off most animations. Also saves CPU."><Toggle checked={s.reduceMotion} onChange={(v) => u({ reduceMotion: v })} /></Row>
-        </div>
-      </Section>
-
-      <Section title="Layout">
+      <Section title="Interface">
         <div className="settings-group">
           <Row title="Interface scale" desc="Makes everything larger or smaller.">
             <div className="ap-scale">
@@ -314,6 +215,7 @@ function Appearance() {
               <Slider value={s.scale} min={75} max={150} step={5} onChange={(v) => u({ scale: v })} format={(v) => v + "%"} />
             </div>
           </Row>
+          <Row title="Reduce motion" desc="Turns off most animations. Also saves CPU."><Toggle checked={s.reduceMotion} onChange={(v) => u({ reduceMotion: v })} /></Row>
         </div>
       </Section>
     </div>

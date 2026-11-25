@@ -25,7 +25,7 @@ function sanitize(html) {
   walk(doc.body);
   return doc.body.innerHTML;
 }
-const excerpt = (html) => new DOMParser().parseFromString(html, "text/html").body.textContent.replace(/\s+/g, " ").trim().slice(0, 220);
+const excerpt = (html) => new DOMParser().parseFromString(html, "text/html").body.textContent.replace(/\s+/g, " ").trim().replace(/^Key Takeaways:? */i, "").slice(0, 220);
 
 export default function News() {
   const [source, setSource] = useState("all");

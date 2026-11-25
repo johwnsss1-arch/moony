@@ -7,6 +7,7 @@ import { Carousel } from "../components/Carousel";
 import { NowPlaying, PlaytimeSection } from "../components/Playtime";
 import { Avatar, ErrorState, Img, Skeleton, Toggle } from "../components/ui";
 import { DiscordIcon } from "../components/DiscordIcon";
+import { HomeHero } from "../components/HomeHero";
 
 const pick = (sorts, id) => (sorts.find((s) => s.id === id)?.games ?? []).slice(0, 30);
 
@@ -17,6 +18,7 @@ export default function Home() {
 
   return (
     <div className="page home nf-home">
+      <HomeHero />
       <NowPlaying />
       <section className="deck">
         {sorts.status === "error" && !recent.length ? <ErrorState message={sorts.error} onRetry={loadSorts} /> : <LaunchCard game={recent[0]} fallback={popular[0]} loading={loading && !recent.length} />}

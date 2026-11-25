@@ -1,5 +1,18 @@
 export const CHANGELOG = [
   {
+    version: "4.1.0",
+    title: "A new Moony",
+    items: [
+      "A new logo and a new look built around it.",
+      "Moony now opens with a loading screen that fills up as your games and friends load.",
+      "Home opens with the Moony logo and quick links to the Discord, feedback and the FAQ.",
+      "Themes are gone. Moony has one dark look, and you can still set your own background and interface scale under Settings → Display.",
+      "Calmer, clearer pages: new empty screens, quieter news cards, softer server colours, and tidier Marketplace, Performance and game pages.",
+      "A redesigned installer.",
+      "Fixes: the sidebar no longer shrinks on wide screens, long Marketplace names no longer overflow, and the Versions page keeps its title.",
+    ],
+  },
+  {
     version: "4.0.0",
     title: "Moony 4.0: a whole new look",
     items: [

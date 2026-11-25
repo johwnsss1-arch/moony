@@ -15,7 +15,7 @@ export default function Versions() {
   const [prog, setProg] = useState({});
   const load = useCallback(() => api?.info().then((i) => { setInfo(i); setChan(i.channel); }), []);
   useEffect(() => { load(); return api?.onProgress((p) => setProg((o) => ({ ...o, [p.guid]: p }))); }, [load]);
-  if (!api) return <div className="page"><Empty icon={Layers} title="Desktop app only" text="Versions are managed by the desktop app." /></div>;
+  if (!api) return <div className="page"><div className="page-head"><h1>Versions</h1><p>Choose which Roblox build Moony launches, or download any version by its hash.</p></div><Empty icon={Layers} title="Desktop app only" text="Versions are managed by the desktop app." /></div>;
 
   const download = async (g) => {
     const guid = g.trim();

@@ -1,0 +1,60 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+@font-face { font-family: B; src: url(../../node_modules/@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-800-normal.woff2); font-weight: 800; }
+@font-face { font-family: B; src: url(../../node_modules/@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-500-normal.woff2); font-weight: 500; }
+html, body { margin: 0; width: 960px; height: 540px; overflow: hidden; background: #070a10; }
+#s { position: relative; width: 960px; height: 540px; overflow: hidden; font-family: B, sans-serif; color: #eef3ff;
+  background: radial-gradient(620px 420px at 50% 46%, #18264a 0%, #0b1222 55%, #070a10 100%); }
+.giant { position: absolute; top: -120px; height: 780px; width: 150px; border-radius: 75px; transform: skewX(-14deg); background: linear-gradient(180deg, #8db8ff, #4a78ee 70%, transparent); opacity: .06; }
+.lock { position: absolute; left: 50%; top: 50%; display: flex; align-items: center; gap: 26px; transform: translate(-50%, -58%); }
+.mark { width: 150px; height: 150px; overflow: visible; }
+.word { font-weight: 800; font-size: 128px; letter-spacing: -.055em; line-height: 1; }
+.tag { position: absolute; left: 0; right: 0; top: 352px; height: 34px; overflow: hidden; text-align: center; }
+.tag span { position: absolute; left: 0; right: 0; font-weight: 500; font-size: 25px; color: #a9b6cc; }
+.glow { position: absolute; left: 50%; top: 46%; width: 700px; height: 300px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(closest-side, rgba(110, 150, 255, .22), transparent); }
+</style></head><body>
+<div id="s">
+  <div class="giant" id="g1" style="left:40px"></div><div class="giant" id="g2" style="left:250px"></div><div class="giant" id="g3" style="left:640px"></div><div class="giant" id="g4" style="left:850px"></div>
+  <div class="glow" id="glow"></div>
+  <div class="lock">
+    <svg class="mark" viewBox="0 0 32 32"><defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse"><stop stop-color="#f2f6ff"/><stop offset=".45" stop-color="#a6c8ff"/><stop offset="1" stop-color="#4a78ee"/></linearGradient></defs>
+      <g transform="translate(4.5 -1) skewX(-14)">
+        <rect x="3" y="6" width="6" height="22" rx="3" fill="#16213b"/><rect x="13" y="6" width="6" height="22" rx="3" fill="#16213b"/><rect x="23" y="6" width="6" height="22" rx="3" fill="#16213b"/>
+        <rect class="f" x="3" y="6" width="6" height="22" rx="3" fill="url(#lg)"/><rect class="f" x="13" y="6" width="6" height="22" rx="3" fill="url(#lg)"/><rect class="f" x="23" y="6" width="6" height="22" rx="3" fill="url(#lg)"/>
+      </g></svg>
+    <div class="word">moony</div>
+  </div>
+  <div class="tag" id="tag"><span>Roblox, launched your way</span><span>Fast join, party mode and Boost</span><span>Free for Windows</span><span>moonylauncher.xyz</span></div>
+</div>
+<script>
+const D = 6; // loop seconds
+const ease = (x) => 1 - Math.pow(1 - x, 3);
+const cl = (x) => Math.max(0, Math.min(1, x));
+const F = [...document.querySelectorAll(".f")], T = [...document.querySelectorAll(".tag span")];
+window.seek = (t) => {
+  t = ((t % D) + D) % D;
+  // bars: each pulses in sequence, a wave that loops seamlessly
+  F.forEach((r, i) => {
+    const ph = (t / D) * Math.PI * 2 * 2 - i * 0.9;
+    const s = 0.72 + 0.28 * (0.5 + 0.5 * Math.cos(ph));
+    r.style.transformBox = "fill-box"; r.style.transformOrigin = "50% 100%"; r.style.transform = `scaleY(${s.toFixed(4)})`;
+  });
+  // giant bars drift and wrap
+  ["g1","g2","g3","g4"].forEach((id, i) => { const y = Math.sin((t / D) * Math.PI * 2 + i) * 26; document.getElementById(id).style.transform = `skewX(-14deg) translateY(${y.toFixed(2)}px)`; });
+  document.getElementById("glow").style.opacity = (0.75 + 0.25 * Math.sin((t / D) * Math.PI * 2)).toFixed(3);
+  // tagline: 4 lines, 1.5s each, slide up + fade
+  const per = D / T.length;
+  // each line owns a 1.5s slot; it eases in over the last 0.35s of the previous slot
+  // and eases out over the first 0.35s of the next, so lines crossfade with no gap
+  const X = 0.35, io = (x) => 0.5 - 0.5 * Math.cos(Math.PI * cl(x));
+  T.forEach((el, i) => {
+    let d = t - i * per;
+    d = ((d % D) + D) % D; if (d > D - X) d -= D; // time since this line's slot began
+    const a = io((d + X * 0.25) / X), b = io((d - per + X) / X);
+    const y = 26 * (1 - a) - 26 * b, o = Math.pow(a, 1.6) * Math.pow(1 - b, 1.6);
+    el.style.transform = `translateY(${y.toFixed(2)}px)`; el.style.opacity = o.toFixed(3);
+    el.style.filter = `blur(${((1 - o) * 2).toFixed(2)}px)`;
+  });
+};
+seek(0);
+</script></body></html>

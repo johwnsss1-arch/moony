@@ -42,7 +42,7 @@ export function Tour() {
   return (
     <div className="tour-root" onMouseDown={(e) => e.target === e.currentTarget && done()}>
       <div className="tour">
-        <h2><Logo size={26} variant={themeById(settings.theme).logo} /> Welcome to Moony</h2>
+        <h2><Logo size={26}  /> Welcome to Moony</h2>
         <p>Here's what each tab in the sidebar does. Hover any icon later to see its name.</p>
         <div className="tour-grid">
           {NAV.map((n) => (
@@ -202,8 +202,8 @@ export function Sidebar() {
   return (
     <nav className={"sidebar" + (collapsed ? " collapsed" : "")} aria-label="Main">
       <div className="side-brand" data-tauri-drag-region>
-        <Logo size={24} variant={themeById(settings.theme).logo} />
-        <span className="side-word" data-tauri-drag-region>Moony</span>
+        <Logo size={24}  />
+        <span className="side-word" data-tauri-drag-region>moony</span>
         <button className="side-collapse" onClick={() => updateSettings({ navCollapsed: !collapsed })} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}><PanelLeft size={15} /></button>
       </div>
       <div className="nav-scroll" ref={listRef}>
@@ -335,7 +335,17 @@ function PromoFrame() {
     const t = setTimeout(() => setI((n) => (n + 1) % items.length), (it.seconds || 12) * 1000);
     return () => clearTimeout(t);
   }, [i, items]);
-  if (!items.length) return null;
+  if (!items.length) return (
+    <section className="rp-section">
+      <div className="rp-head"><h3>Community</h3></div>
+      <a className="rp-community" href={DISCORD_URL} target="_blank" rel="noreferrer">
+        <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden><g fill="var(--accent)" transform="translate(4.5 -1) skewX(-14)"><rect x="3" y="6" width="6" height="22" rx="3" /><rect x="13" y="6" width="6" height="22" rx="3" /><rect x="23" y="6" width="6" height="22" rx="3" /></g></svg>
+        <b>Join the Moony Discord</b>
+        <small>Get help, share ideas and hear about updates first.</small>
+        <span className="btn primary sm"><DiscordIcon size={14} /> Join</span>
+      </a>
+    </section>
+  );
   const it = items[i % items.length];
   const open = () => { if (/^https:\/\//.test(it.link || "")) window.open(it.link, "_blank"); };
   return (
