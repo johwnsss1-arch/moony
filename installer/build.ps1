@@ -1,5 +1,5 @@
 param([string]$Notes = "")
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 $root = Split-Path $PSScriptRoot -Parent
 $env:PATH = "C:\Users\Administrator\Downloads\winlibs\mingw64\bin;$env:USERPROFILE\.cargo\bin;$env:PATH"
 $ver = (Get-Content "$root\src-tauri\tauri.conf.json" -Raw | ConvertFrom-Json).version
@@ -26,5 +26,5 @@ $size = (Get-Item $setup).Length
   sha256 = $sha
   size = $size
   notes = $Notes
-} | ConvertTo-Json | Set-Content "$out\latest.json" -Encoding utf8
+} | ConvertTo-Json | ForEach-Object { [IO.File]::WriteAllText("$out\latest.json", $_) }
 "Built $setup ($([math]::Round($size / 1MB, 1)) MB, sha256 $sha)"

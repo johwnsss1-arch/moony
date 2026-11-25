@@ -1,5 +1,15 @@
 export const CHANGELOG = [
   {
+    version: "3.0.1",
+    title: "A new installer",
+    items: [
+      "A brand-new setup app with an animated sidebar and a moon that fills up as it installs.",
+      "Setup now installs everything Moony needs, including the WebView2 runtime, and can download Roblox ahead of time.",
+      "Updates reopen Moony automatically when they finish.",
+      "A matching uninstaller that can keep or delete your data.",
+    ],
+  },
+  {
     version: "3.0.0",
     title: "Moony 3.0: play together, play faster",
     items: [
