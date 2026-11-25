@@ -3,7 +3,7 @@ import { LayoutDashboard, Magnet, RotateCcw } from "lucide-react";
 import { DEFAULT_SETTINGS, useApp } from "../lib/store";
 import { HudWidget, WIDGETS } from "../components/HudWidgets";
 import { CROSSHAIRS, CROSSHAIR_DEFAULT, Crosshair } from "../components/Crosshair";
-import { Empty, Slider, Toggle } from "../components/ui";
+import { Empty, Segmented, Slider, Toggle } from "../components/ui";
 import "../hud.css";
 
 const ZOOM = 2.2;
@@ -119,7 +119,7 @@ export default function Hud() {
             {drag?.snapY != null && <i className="hud-guide h" style={{ top: `${drag.snapY}%` }} />}
 
             <div className="hud-real" style={{ width: size.width, height: size.height, transform: `scale(${k})`, opacity: hud.enabled ? hud.opacity : hud.opacity * 0.5 }}>
-              <div className={"hud-root t-" + (settings.theme || "midnight")} style={{ position: "absolute", "--hud-scale": hud.scale, "--viz": "var(--accent)", "--hud-acc": "var(--accent)" }}>
+              <div className={"hud-root t-" + (settings.theme || "moonlight") + " s-" + (hud.style || "readout")} style={{ position: "absolute", "--hud-scale": hud.scale, "--viz": "var(--accent)", "--hud-acc": "var(--accent)" }}>
                 {Object.entries(hud.widgets).filter(([, w]) => w.on).map(([id, w0]) => { const w = drag?.id === id ? { ...w0, x: drag.x, y: drag.y } : w0; return (
                   <div key={id} className={"hud-widget-pos" + (sel === id ? " sel" : "") + (drag?.id === id ? " dragging" : "")} style={{ left: `${w.x}%`, top: `${w.y}%`, pointerEvents: "auto" }} onPointerDown={startDrag(id)}>
                     <HudWidget id={id} state={state} demo />
@@ -162,6 +162,7 @@ export default function Hud() {
             </div>
           </div>
           <div className="settings-group">
+            <div className="setting"><div><b>Style</b></div><Segmented value={hud.style || "readout"} onChange={(v) => save({ style: v })} options={[{ value: "readout", label: "Readout" }, { value: "bare", label: "Bare" }, { value: "plate", label: "Classic" }]} /></div>
             <div className="setting"><div><b>Size</b></div><Slider value={Math.round(hud.scale * 100)} min={70} max={150} step={5} onChange={(v) => save({ scale: v / 100 })} format={(v) => v + "%"} /></div>
             <div className="setting"><div><b>Opacity</b></div><Slider value={Math.round(hud.opacity * 100)} min={30} max={100} step={5} onChange={(v) => save({ opacity: v / 100 })} format={(v) => v + "%"} /></div>
           </div>

@@ -1,8 +1,8 @@
 import { DiscordIcon } from "./DiscordIcon";
 import { api } from "../lib/bridge";
 import { DISCORD_URL } from "../lib/links";
-import { useEffect, useRef, useState } from "react";
-import { MessageSquareHeart, LayoutDashboard, MessageSquare, Newspaper, Shirt, Wand2, ArrowLeft, LibraryBig, ShoppingBag, ChartNoAxesColumn, Server, CheckCircle2, ChevronDown, Compass, Heart, Home, Info, Minus, PanelRight, Play, Search, Settings, Square, Copy, UserPlus, Users, UsersRound, X, AlertCircle , Layers, Gauge, PartyPopper, Sparkles} from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { MessageSquareHeart, LayoutDashboard, MessageSquare, Newspaper, Shirt, Wand2, ArrowLeft, LibraryBig, ShoppingBag, ChartNoAxesColumn, Server, CheckCircle2, ChevronDown, Compass, Heart, Home, Info, Minus, PanelRight, Play, Search, Settings, Square, Copy, UserPlus, Users, UsersRound, X, AlertCircle, Layers, Gauge, PartyPopper, Sparkles, PanelLeft } from "lucide-react";
 import { useApp } from "../lib/store";
 import { win } from "../lib/bridge";
 import { cleanName } from "../lib/format";
@@ -13,26 +13,27 @@ import { NowPlaying, RecentServers } from "./Playtime";
 import { Robux } from "./RobuxIcon";
 
 export const NAV = [
-  { id: "home", label: "Home", icon: Home, group: 0, desc: "Featured games, your playtime and where you left off" },
+  { id: "home", label: "Home", icon: Home, group: 0, desc: "Pick up where you left off and launch Roblox" },
   { id: "discover", label: "Discover", icon: Compass, group: 0, desc: "Search Roblox and browse by genre" },
   { id: "charts", label: "Charts", icon: ChartNoAxesColumn, group: 0, desc: "Live rankings: most played, trending, rising" },
-  { id: "servers", label: "Servers", icon: Server, group: 0, desc: "Pick a server, rejoin old ones, private links" },
-  { id: "market", label: "Marketplace", icon: ShoppingBag, group: 0, desc: "Browse and buy catalog items" },
-  { id: "news", label: "News", icon: Newspaper, group: 0, desc: "Roblox announcements and game updates" },
-  { id: "library", label: "Library", icon: LibraryBig, group: 1, desc: "Every game you've played, with hours" },
-  { id: "favorites", label: "Favorites", icon: Heart, group: 1, desc: "Games you've saved" },
+  { id: "library", label: "Library", icon: LibraryBig, group: 0, desc: "Every game you've played, with hours" },
+  { id: "favorites", label: "Favorites", icon: Heart, group: 0, desc: "Games you've saved" },
   { id: "friends", label: "Friends", icon: Users, group: 1, desc: "Who's online and what they're playing" },
   { id: "chat", label: "Chat", icon: MessageSquare, group: 1, desc: "Message your Roblox friends" },
-  { id: "avatar", label: "Avatar", icon: Shirt, group: 1, desc: "Change your avatar in 3D" },
   { id: "party", label: "Party", icon: PartyPopper, group: 1, desc: "Follow a friend into every server they join" },
-  { id: "wrapped", label: "Wrapped", icon: Sparkles, group: 1, desc: "Your Roblox month and year, as a card to share" },
-  { id: "hud", label: "HUD", icon: LayoutDashboard, group: 2, desc: "The overlay you see on top of Roblox" },
-  { id: "performance", label: "Performance", icon: Gauge, group: 2, desc: "Boost mode, ping, CPU and RAM per session" },
-  { id: "tweaks", label: "Tweaks", icon: Wand2, group: 2, desc: "Mods and engine settings (FFlags)" },
-  { id: "versions", label: "Versions", icon: Layers, group: 2, desc: "Pick or download a Roblox version" },
-  { id: "accounts", label: "Accounts", icon: UsersRound, group: 2, desc: "Sign in and switch accounts" },
-  { id: "settings", label: "Settings", icon: Settings, group: 3, desc: "Theme, launching, notifications, Discord" },
+  { id: "servers", label: "Servers", icon: Server, group: 2, desc: "Pick a server, rejoin old ones, private links" },
+  { id: "avatar", label: "Avatar", icon: Shirt, group: 2, desc: "Change your avatar in 3D" },
+  { id: "market", label: "Marketplace", icon: ShoppingBag, group: 2, desc: "Browse and buy catalog items" },
+  { id: "news", label: "News", icon: Newspaper, group: 2, desc: "Roblox announcements and game updates" },
+  { id: "performance", label: "Performance", icon: Gauge, group: 3, desc: "Boost mode, ping, CPU and RAM per session" },
+  { id: "hud", label: "HUD", icon: LayoutDashboard, group: 3, desc: "The overlay you see on top of Roblox" },
+  { id: "tweaks", label: "Tweaks", icon: Wand2, group: 3, desc: "Mods and engine settings (FFlags)" },
+  { id: "versions", label: "Versions", icon: Layers, group: 3, desc: "Pick or download a Roblox version" },
+  { id: "wrapped", label: "Wrapped", icon: Sparkles, group: 3, desc: "Your Roblox month and year, as a card to share" },
+  { id: "accounts", label: "Accounts", icon: UsersRound, group: 4, desc: "Sign in and switch accounts" },
+  { id: "settings", label: "Settings", icon: Settings, group: 4, desc: "Theme, launching, notifications, Discord" },
 ];
+export const NAV_GROUPS = ["Play", "Together", "Roblox", "Tools"];
 
 export function Tour() {
   const { settings, updateSettings, setPage } = useApp();
@@ -68,52 +69,27 @@ export function useMaximized() {
 }
 
 export function TitleBar({ onSearch }) {
-  const { settings, updateSettings, activeAccount, accounts, setActiveId, setPage, back, canGoBack, robux, openProfile, toast } = useApp();
+  const { settings, updateSettings, setPage, back, canGoBack, robux, toast, page } = useApp();
   const max = useMaximized();
-  const [menu, setMenu] = useState(false);
-  const menuRef = useRef(null);
-  useEffect(() => {
-    if (!menu) return;
-    const close = (e) => !menuRef.current?.contains(e.target) && setMenu(false);
-    window.addEventListener("mousedown", close);
-    return () => window.removeEventListener("mousedown", close);
-  }, [menu]);
-
+  const here = NAV.find((n) => n.id === page);
+  const crumb = here ? here.label : page === "game" ? "Game" : page === "profile" ? "Profile" : "";
   return (
     <header className="titlebar" data-tauri-drag-region onDoubleClick={(e) => e.target === e.currentTarget && win?.toggleMaximize()}>
-      <div className="tb-brand"><Logo size={22} variant={themeById(settings.theme).logo} /><span>Moony</span></div>
-
+      <div className="tb-left" data-tauri-drag-region>
+        <button className="tb-icon" onClick={back} disabled={!canGoBack} aria-label="Back" title="Back (Alt+Left)"><ArrowLeft size={16} /></button>
+        <span className="tb-crumb" data-tauri-drag-region>{crumb}</span>
+      </div>
       <button className="tb-search" onClick={onSearch}>
-        <Search size={14} /><span>Search games</span>
+        <Search size={14} /><span>Search Roblox games</span><kbd>Ctrl K</kbd>
       </button>
-
       <div className="tb-right">
         {robux != null && <button className="robux-pill" title="Your Robux" onClick={() => setPage("market")}><Robux size={13} /> {robux.toLocaleString()}</button>}
-        <button className="tb-icon" title="Send feedback" onClick={() => window.dispatchEvent(new Event("moony:feedback"))}><MessageSquareHeart size={16} /></button>
-        {DISCORD_URL ? <a className="tb-icon discord" href={DISCORD_URL} target="_blank" rel="noreferrer" title="Join the Moony Discord"><DiscordIcon size={16} /></a>
-          : <button className="tb-icon discord" title="Moony Discord: coming soon" onClick={() => toast("The Moony Discord server is coming soon")}><DiscordIcon size={16} /></button>}
-        <button className={"tb-icon" + (settings.rightPanel ? " on" : "")} title="Toggle side panel" onClick={() => updateSettings({ rightPanel: !settings.rightPanel })}>
+        <button className="tb-icon" title="Send feedback" aria-label="Send feedback" onClick={() => window.dispatchEvent(new Event("moony:feedback"))}><MessageSquareHeart size={16} /></button>
+        {DISCORD_URL ? <a className="tb-icon discord" href={DISCORD_URL} target="_blank" rel="noreferrer" title="Join the Moony Discord" aria-label="Moony Discord"><DiscordIcon size={16} /></a>
+          : <button className="tb-icon discord" title="Moony Discord: coming soon" aria-label="Moony Discord" onClick={() => toast("The Moony Discord server is coming soon")}><DiscordIcon size={16} /></button>}
+        <button className={"tb-icon" + (settings.rightPanel ? " on" : "")} title="Side panel (Ctrl+B)" aria-label="Toggle side panel" onClick={() => updateSettings({ rightPanel: !settings.rightPanel })}>
           <PanelRight size={16} />
         </button>
-        <div className="tb-account" ref={menuRef}>
-          <button className={"tb-acct-btn" + (menu ? " open" : "")} onClick={() => setMenu((m) => !m)}>
-            {activeAccount ? <><Avatar src={activeAccount.avatar} size={22} alt={activeAccount.name} /><span>{activeAccount.label || activeAccount.displayName}</span></> : <><UserPlus size={15} /><span>Add account</span></>}
-            <ChevronDown size={14} />
-          </button>
-          <div className={"popover" + (menu ? " open" : "")}>
-            <div className="popover-label">Switch account</div>
-            {accounts.filter((a) => !a.hidden).map((a) => (
-              <button key={a.id} className="popover-item" onClick={() => { setActiveId(a.id); setMenu(false); }}>
-                <Avatar src={a.avatar} size={26} alt={a.name} />
-                <span className="grow"><b>{a.label || a.displayName}</b><small>@{a.name}</small></span>
-                {activeAccount?.id === a.id && <CheckCircle2 size={15} className="accent" />}
-              </button>
-            ))}
-            {accounts.length === 0 && <p className="popover-empty">No accounts linked yet.</p>}
-            {activeAccount && <button className="popover-item muted" onClick={() => { openProfile(activeAccount); setMenu(false); }}><UsersRound size={15} /> View my profile</button>}
-            <button className="popover-item muted" onClick={() => { setPage("accounts"); setMenu(false); }}><UserPlus size={15} /> Manage accounts</button>
-          </div>
-        </div>
         {win && (
           <div className="winctl">
             <button onClick={() => win.minimize()} aria-label="Minimize"><Minus size={15} /></button>
@@ -123,6 +99,61 @@ export function TitleBar({ onSearch }) {
         )}
       </div>
     </header>
+  );
+}
+
+function AccountMenu({ collapsed }) {
+  const { activeAccount, accounts, setActiveId, setPage, openProfile, isSignedIn } = useApp();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e) => !ref.current?.contains(e.target) && setOpen(false);
+    const esc = (e) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("mousedown", close); window.addEventListener("keydown", esc);
+    return () => { window.removeEventListener("mousedown", close); window.removeEventListener("keydown", esc); };
+  }, [open]);
+  const go = (fn) => { fn(); setOpen(false); };
+  return (
+    <div className="side-acct" ref={ref}>
+      <button className={"side-acct-btn" + (open ? " open" : "")} onClick={() => setOpen((o) => !o)} aria-haspopup="menu" aria-expanded={open} title={collapsed ? (activeAccount ? activeAccount.displayName : "Add account") : undefined}>
+        {activeAccount ? <Avatar src={activeAccount.avatar} size={30} alt={activeAccount.name} /> : <span className="side-acct-empty"><UserPlus size={15} /></span>}
+        <span className="side-acct-txt">
+          <b>{activeAccount ? activeAccount.label || activeAccount.displayName : "Add an account"}</b>
+          <small>{activeAccount ? (isSignedIn(activeAccount.id) ? "@" + activeAccount.name : "Profile only") : "Sign in to Roblox"}</small>
+        </span>
+        <ChevronDown size={14} className="side-acct-chev" />
+      </button>
+      <div className={"popover side-pop" + (open ? " open" : "")} role="menu">
+        <div className="popover-label">Switch account</div>
+        {accounts.filter((a) => !a.hidden).map((a) => (
+          <button key={a.id} className="popover-item" role="menuitem" onClick={() => go(() => setActiveId(a.id))}>
+            <Avatar src={a.avatar} size={26} alt={a.name} />
+            <span className="grow"><b>{a.label || a.displayName}</b><small>@{a.name}</small></span>
+            {activeAccount?.id === a.id && <CheckCircle2 size={15} className="accent" />}
+          </button>
+        ))}
+        {accounts.length === 0 && <p className="popover-empty">No accounts linked yet.</p>}
+        {activeAccount && <button className="popover-item muted" role="menuitem" onClick={() => go(() => openProfile(activeAccount))}><UsersRound size={15} /> View my profile</button>}
+        <button className="popover-item muted" role="menuitem" onClick={() => go(() => setPage("accounts"))}><UserPlus size={15} /> Manage accounts</button>
+      </div>
+    </div>
+  );
+}
+
+function SideNowPlaying() {
+  const { nowPlaying, openGame } = useApp();
+  const [, tick] = useState(0);
+  useEffect(() => { if (!nowPlaying) return; const t = setInterval(() => tick((x) => x + 1), 1000); return () => clearInterval(t); }, [nowPlaying]);
+  if (!nowPlaying) return null;
+  const secs = Math.max(0, Math.floor((Date.now() - nowPlaying.startedAt) / 1000));
+  const clock = `${Math.floor(secs / 3600) ? Math.floor(secs / 3600) + ":" : ""}${String(Math.floor(secs / 60) % 60).padStart(2, "0")}:${String(secs % 60).padStart(2, "0")}`;
+  return (
+    <button className="side-now" onClick={() => nowPlaying.universeId && openGame({ universeId: nowPlaying.universeId, placeId: nowPlaying.placeId, name: nowPlaying.name || "Roblox", icon: nowPlaying.icon })} title="Now playing">
+      <Img src={nowPlaying.icon} className="side-now-art" />
+      <span className="side-now-txt"><small><i className="live-dot" /> Playing</small><b>{nowPlaying.name ? cleanName(nowPlaying.name) : "Joining…"}</b></span>
+      <span className="side-now-clock">{clock}</span>
+    </button>
   );
 }
 
@@ -145,31 +176,50 @@ function useNewsDot(page) {
 }
 
 export function Sidebar() {
-  const { page, setPage, activeAccount, openProfile, route } = useApp();
+  const { page, setPage, settings, updateSettings } = useApp();
   const newsDot = useNewsDot(page);
+  const collapsed = !!settings.navCollapsed;
+  const listRef = useRef(null);
+  const [mark, setMark] = useState(null);
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = listRef.current?.querySelector(`[data-page="${page}"]`);
+      setMark(el ? { y: el.offsetTop, h: el.offsetHeight } : null);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (listRef.current) ro.observe(listRef.current);
+    return () => ro.disconnect();
+  }, [page, collapsed]);
   const navBtn = (n) => (
-    <button key={n.id} data-page={n.id} className={"nav-btn" + (page === n.id ? " on" : "")} onClick={() => setPage(n.id)} aria-label={n.label}>
-      <n.icon size={19} strokeWidth={page === n.id ? 2.2 : 1.8} />
+    <button key={n.id} data-page={n.id} className={"nav-btn" + (page === n.id ? " on" : "")} onClick={() => setPage(n.id)} aria-label={n.label} aria-current={page === n.id ? "page" : undefined}>
+      <n.icon size={17} strokeWidth={page === n.id ? 2.1 : 1.75} />
       <span className="nav-label">{n.label}</span>
       {n.id === "news" && newsDot && <span className="nav-dot" aria-label="New posts" />}
-      <span className="tip">{n.label}</span>
+      {collapsed && <span className="tip">{n.label}</span>}
     </button>
   );
   return (
-    <nav className="sidebar">
-      <div className="nav-scroll">
-        {[0, 1, 2].map((grp) => (
+    <nav className={"sidebar" + (collapsed ? " collapsed" : "")} aria-label="Main">
+      <div className="side-brand" data-tauri-drag-region>
+        <Logo size={24} variant={themeById(settings.theme).logo} />
+        <span className="side-word" data-tauri-drag-region>Moony</span>
+        <button className="side-collapse" onClick={() => updateSettings({ navCollapsed: !collapsed })} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}><PanelLeft size={15} /></button>
+      </div>
+      <div className="nav-scroll" ref={listRef}>
+        {mark && <span className="nav-mark" style={{ transform: `translateY(${mark.y}px)`, height: mark.h }} aria-hidden />}
+        {NAV_GROUPS.map((label, grp) => (
           <div key={grp} className="nav-group">
-            {grp > 0 && <span className="nav-sep" />}
-            <div className="nav-list">{NAV.filter((n) => n.group === grp).map(navBtn)}</div>
+            <span className="nav-h">{label}</span>
+            {NAV.filter((n) => n.group === grp).map(navBtn)}
           </div>
         ))}
       </div>
-      {navBtn(NAV.find((n) => n.id === "settings"))}
-      <button className={"nav-profile" + (page === "profile" && route.param?.id === activeAccount?.id ? " on" : "")} onClick={() => (activeAccount ? openProfile(activeAccount) : setPage("accounts"))} aria-label="My profile">
-        <Avatar src={activeAccount?.avatar} size={34} alt={activeAccount?.name || "?"} />
-        <span className="tip">{activeAccount ? "My profile" : "Add an account"}</span>
-      </button>
+      <SideNowPlaying />
+      <div className="side-foot">
+        <AccountMenu collapsed={collapsed} />
+        <button data-page="settings" className={"nav-btn side-settings" + (page === "settings" ? " on" : "")} onClick={() => setPage("settings")} aria-label="Settings" title="Settings (Ctrl+,)"><Settings size={17} /></button>
+      </div>
     </nav>
   );
 }
@@ -258,6 +308,7 @@ export function Toasts() {
         <div key={t.id} className={"toast " + t.kind}>
           {t.kind === "error" ? <AlertCircle size={16} /> : t.kind === "success" ? <CheckCircle2 size={16} /> : <Info size={16} />}
           <span>{t.text}</span>
+          {t.action && <button className="toast-action" onClick={t.action.run}>{t.action.label}</button>}
         </div>
       ))}
     </div>

@@ -5,6 +5,13 @@ const dark = (o = {}) => ({
 
 export const THEMES = [
   {
+    id: "moonlight", name: "Moonlight", desc: "Moony's own look: blue-black night with moonlight blue",
+    accent: ["#8db8ff", "#5c8df5"],
+    vars: dark({ "--bg-0": "#080b11", "--bg-1": "#0b0f17", "--surface": "#111723", "--surface-2": "#161e2c", "--surface-3": "#1d2737", "--text": "#e6ecf5", "--text-2": "#95a3b9", "--text-3": "#5f6c82", "--line": "rgba(150, 175, 215, 0.09)", "--line-2": "rgba(150, 175, 215, 0.15)" }),
+    ambient: ["#5c8df5", "#2a3f6e", "#8db8ff"], particles: null, logo: null,
+    wordmark: ["#ffffff", "#dbe7ff", "#8db8ff"],
+  },
+  {
     id: "midnight", name: "Midnight", desc: "Moony's clean black look, like the website",
     accent: ["#f5f5f5", "#d4d4d4"],
     vars: dark({ "--bg-0": "#050505", "--bg-1": "#0a0a0a", "--surface": "#111111", "--surface-2": "#171717", "--surface-3": "#202020", "--text": "#f5f5f5", "--text-2": "#a3a3a3", "--text-3": "#6b6b6b", "--line": "#1f1f1f", "--line-2": "#2a2a2a" }),
@@ -83,4 +90,4 @@ export const THEMES = [
 
 export const themeById = (id) => THEMES.find((t) => t.id === id) || THEMES[0];
 
-export const THEME_FONTS = { midnight: "Fredoka", kawaii: "Baloo 2", anime: "M PLUS Rounded 1c", halloween: "Creepster", christmas: "Mountains of Christmas", ocean: "Baloo 2", forest: "Baloo 2", cyberpunk: "Orbitron", galaxy: "Space Grotesk", sunset: "Pacifico", mono: "Space Grotesk" };
+export const THEME_FONTS = { moonlight: "Bricolage Grotesque", midnight: "Fredoka", kawaii: "Baloo 2", anime: "M PLUS Rounded 1c", halloween: "Creepster", christmas: "Mountains of Christmas", ocean: "Baloo 2", forest: "Baloo 2", cyberpunk: "Orbitron", galaxy: "Space Grotesk", sunset: "Pacifico", mono: "Space Grotesk" };

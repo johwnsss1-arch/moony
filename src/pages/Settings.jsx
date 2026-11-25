@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ImagePlus, Trash2, Bell, Brush, Check, Cpu, ExternalLink, Gamepad2, Keyboard, Lock, MessageCircle, Palette, SlidersHorizontal, UsersRound, Wrench } from "lucide-react";
+import { ImagePlus, Trash2, Bell, Check, ChevronRight, Cpu, Download, Gamepad2, Keyboard, LayoutDashboard, Lock, MessageCircle, Palette, Rocket, SlidersHorizontal, Swords, UsersRound, Wrench, Sparkles } from "lucide-react";
 import { ACCENTS, DEFAULT_SETTINGS, useApp } from "../lib/store";
 import { THEMES, THEME_FONTS, themeById } from "../lib/themes";
 import { SceneArt } from "../components/ThemeArt";
@@ -67,16 +67,35 @@ function UpdateRow() {
 }
 
 const CATS = [
-  { id: "general", label: "General", icon: SlidersHorizontal },
-  { id: "appearance", label: "Appearance", icon: Palette },
-  { id: "performance", label: "Performance", icon: Cpu },
-  { id: "launch", label: "Game Launch", icon: Gamepad2 },
-  { id: "accounts", label: "Accounts", icon: UsersRound },
-  { id: "notifications", label: "Notifications", icon: Bell },
-  { id: "discord", label: "Discord", icon: MessageCircle },
-  { id: "privacy", label: "Privacy", icon: Lock },
-  { id: "advanced", label: "Advanced", icon: Wrench },
+  { id: "general", label: "General", icon: SlidersHorizontal, group: "App" },
+  { id: "appearance", label: "Appearance", icon: Palette, group: "App" },
+  { id: "themes", label: "Themes", icon: Sparkles, group: "App" },
+  { id: "updates", label: "Updates", icon: Download, group: "App" },
+  { id: "roblox", label: "Roblox", icon: Swords, group: "Roblox" },
+  { id: "launch", label: "Launching", icon: Gamepad2, group: "Roblox" },
+  { id: "hud", label: "HUD", icon: LayoutDashboard, group: "Roblox" },
+  { id: "performance", label: "Performance", icon: Rocket, group: "Roblox" },
+  { id: "accounts", label: "Accounts", icon: UsersRound, group: "You" },
+  { id: "discord", label: "Discord", icon: MessageCircle, group: "You" },
+  { id: "notifications", label: "Notifications", icon: Bell, group: "You" },
+  { id: "privacy", label: "Privacy", icon: Lock, group: "You" },
+  { id: "advanced", label: "Advanced", icon: Wrench, group: "You" },
 ];
+const CAT_DESC = {
+  general: "How Moony opens and lays itself out.",
+  appearance: "Backgrounds, fonts, colors and motion.",
+  themes: "Each theme restyles the whole app, its artwork and its loading screen.",
+  updates: "Moony updates itself in the background and asks before restarting.",
+  roblox: "The Roblox Player on this PC and the engine settings Moony can change.",
+  launch: "What happens when you press Play.",
+  hud: "The overlay Moony shows on top of Roblox while you play.",
+  performance: "Boost mode and session stats.",
+  accounts: "The Roblox accounts linked on this computer.",
+  discord: "Show what you're playing on your Discord profile.",
+  notifications: "Windows notifications about friends and games.",
+  privacy: "What Moony remembers, and how to clear it.",
+  advanced: "Resets and keyboard shortcuts.",
+};
 
 const Row = ({ title, desc, children }) => (
   <div className="setting"><div><b>{title}</b>{desc && <small>{desc}</small>}</div><div className="setting-ctl">{children}</div></div>
@@ -84,21 +103,32 @@ const Row = ({ title, desc, children }) => (
 
 export default function Settings() {
   const [cat, setCat] = useState(() => new URLSearchParams(location.search).get("settings") || "general");
+  const groups = [...new Set(CATS.map((c) => c.group))];
+  const current = CATS.find((c) => c.id === cat) || CATS[0];
   return (
-    <div className="page settings">
-      <div className="page-head"><h1>Settings</h1><p>Changes save automatically.</p></div>
+    <div className="page settings nf-settings">
       <div className="settings-layout">
-        <nav className="settings-nav">
-          {CATS.map((c) => (
-            <button key={c.id} className={cat === c.id ? "on" : ""} onClick={() => setCat(c.id)}><c.icon size={16} /> {c.label}</button>
+        <nav className="settings-nav" aria-label="Settings sections">
+          <h1 className="settings-title">Settings</h1>
+          {groups.map((g) => (
+            <div key={g} className="settings-nav-group">
+              <span className="settings-nav-h">{g}</span>
+              {CATS.filter((c) => c.group === g).map((c) => (
+                <button key={c.id} className={cat === c.id ? "on" : ""} aria-current={cat === c.id ? "page" : undefined} onClick={() => setCat(c.id)}><c.icon size={15} /> {c.label}</button>
+              ))}
+            </div>
           ))}
         </nav>
         <div className="settings-panel" key={cat}>
-          <h2>{CATS.find((c) => c.id === cat).label}</h2>
+          <header className="settings-head"><h2>{current.label}</h2><p>{CAT_DESC[current.id]}</p></header>
           {cat === "general" && <General />}
           {cat === "appearance" && <Appearance />}
-          {cat === "performance" && <Performance />}
+          {cat === "themes" && <Themes />}
+          {cat === "updates" && <Updates />}
+          {cat === "roblox" && <Performance />}
           {cat === "launch" && <Launch />}
+          {cat === "hud" && <HudCat />}
+          {cat === "performance" && <BoostCat />}
           {cat === "accounts" && <AccountsCat />}
           {cat === "notifications" && <Notifications />}
           {cat === "discord" && <Discord />}
@@ -106,6 +136,92 @@ export default function Settings() {
           {cat === "advanced" && <Advanced />}
         </div>
       </div>
+    </div>
+  );
+}
+
+function ThemePreview({ t }) {
+  const v = t.vars;
+  return (
+    <span className="nftp" style={{ "--p-bg": v["--bg-0"], "--p-side": v["--bg-1"], "--p-surface": v["--surface"], "--p-surface2": v["--surface-2"], "--p-text": v["--text"], "--p-text3": v["--text-3"], "--p-a": t.accent[0], "--p-b": t.accent[1], "--p-amb": t.ambient[0], "--p-font": `"${THEME_FONTS[t.id]}"` }}>
+      <span className="nftp-scene"><SceneArt id={t.id} className="nftp-art" /></span>
+      <span className="nftp-side"><i className="nftp-logo" /><i /><i className="on" /><i /><i /><i /></span>
+      <span className="nftp-main">
+        <span className="nftp-card"><b>Aa</b><span className="nftp-line" /><span className="nftp-btn" /></span>
+        <span className="nftp-row"><i /><i /><i /><i /></span>
+      </span>
+    </span>
+  );
+}
+
+function Themes() {
+  const { settings: s, updateSettings: u, toast } = useApp();
+  const current = themeById(s.theme);
+  const pick = (t) => {
+    if (t.id === current.id) return;
+    const prev = current.id;
+    u({ theme: t.id, accent: "theme" });
+    toast(`Switched to ${t.name}`, "success", { action: { label: "Undo", run: () => u({ theme: prev }) } });
+  };
+  return (
+    <div className="nf-themes">
+      {THEMES.map((t) => (
+        <button key={t.id} className={"nf-tcard" + (current.id === t.id ? " on" : "")} onClick={() => pick(t)} aria-pressed={current.id === t.id}>
+          <ThemePreview t={t} />
+          <span className="nf-tmeta">
+            <span className="nf-tname">{t.name}{current.id === t.id && <span className="nf-ton"><Check size={12} strokeWidth={3} /> In use</span>}</span>
+            <small>{t.desc}</small>
+            <span className="nf-tchips"><i style={{ background: t.accent[0] }} /><i style={{ background: t.ambient[1] }} /><i style={{ background: t.vars["--surface-2"] }} />{t.particles && <em>{EFFECT_NAMES[t.particles]}</em>}</span>
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function Updates() {
+  const { settings: s, updateSettings: u, setPage } = useApp();
+  return (
+    <div className="settings-group">
+      <UpdateRow />
+      <Row title="Update notifications" desc="Show a banner when a new version is ready to install.">
+        <Toggle checked={s.alertsUpdates !== false} onChange={(v) => u({ alertsUpdates: v })} />
+      </Row>
+      <Row title="What's new" desc="The full list of changes in each version.">
+        <button className="btn ghost sm" onClick={() => window.dispatchEvent(new Event("moony:whatsnew"))}>Show changelog</button>
+      </Row>
+    </div>
+  );
+}
+
+function HudCat() {
+  const { settings: s, setPage } = useApp();
+  const on = !!(s.hud?.enabled);
+  return (
+    <div className="settings-group">
+      <Row title="In-game HUD" desc={isDesktop ? (on ? "The overlay is on. Widgets show while Roblox is focused." : "The overlay is off.") : "The HUD works in the desktop app."}>
+        <span className={"pill " + (on ? "active" : "")}>{on ? "On" : "Off"}</span>
+      </Row>
+      <Row title="Widgets, layout and crosshair" desc="Pick widgets, drag them into place and design a crosshair in the HUD editor.">
+        <button className="btn secondary sm" onClick={() => setPage("hud")}>Open HUD editor <ChevronRight size={14} /></button>
+      </Row>
+    </div>
+  );
+}
+
+function BoostCat() {
+  const { settings: s, updateSettings: u, setPage } = useApp();
+  return (
+    <div className="settings-group">
+      <Row title="Boost mode" desc="While a game runs, Roblox gets high CPU priority and Windows uses the High performance power plan. Both go back to normal when you leave.">
+        <Toggle checked={!!s.boost} onChange={(v) => u({ boost: v })} label="Boost mode" />
+      </Row>
+      <Row title="Session stats" desc="Ping, CPU and RAM for every game you play.">
+        <button className="btn secondary sm" onClick={() => setPage("performance")}>Open Performance <ChevronRight size={14} /></button>
+      </Row>
+      <Row title="Engine tweaks" desc="Mods and FFlags that change how Roblox runs.">
+        <button className="btn ghost sm" onClick={() => setPage("tweaks")}>Open Tweaks <ChevronRight size={14} /></button>
+      </Row>
     </div>
   );
 }
@@ -150,20 +266,6 @@ function Appearance() {
   const current = themeById(s.theme);
   return (
     <div className="ap">
-      <Section title="Theme" desc={`${current.name} · ${current.desc}`}>
-        <div className="ap-themes">
-          {THEMES.map((t) => (
-            <button key={t.id} data-t={t.id} title={t.desc} className={"ap-tile" + (current.id === t.id ? " on" : "")} onClick={() => u({ theme: t.id })}
-              style={{ "--t-bg": t.vars["--bg-1"], "--t-surface": t.vars["--surface-2"], "--t-a": t.accent[0], "--t-b": t.accent[1], "--t-amb1": t.ambient[0], "--t-amb2": t.ambient[1], "--t-wm1": t.wordmark[1], "--t-wm2": t.wordmark[2], "--t-font": `"${THEME_FONTS[t.id]}"` }}>
-              <span className="ap-tile-art"><span className="tp-glow" /><span className="tp-glow two" /><SceneArt id={t.id} className="tp-art" /></span>
-              <span className="ap-tile-ui"><i /><i /><i className="dot" /></span>
-              <span className="ap-tile-name">{t.name}</span>
-              {current.id === t.id && <span className="ap-check"><Check size={12} strokeWidth={3} /></span>}
-            </button>
-          ))}
-        </div>
-      </Section>
-
       <Section title="Background" desc="A picture, GIF or video behind the whole app.">
         <BackgroundCard s={s} u={u} />
       </Section>

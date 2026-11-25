@@ -337,7 +337,7 @@ fn main() {
                 .decorations(false)
                 .shadow(false)
                 .center()
-                .background_color(tauri::webview::Color(12, 13, 31, 255))
+                .background_color(tauri::webview::Color(10, 14, 21, 255))
                 .build()?;
             Ok(())
         })

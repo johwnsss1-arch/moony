@@ -127,7 +127,7 @@ function Frame() {
   const festive = !!theme.festive;
   const live = !!settings.liveBg && settings.liveBg !== "off";
   useEffect(() => { applyUiFont(settings.uiFont); }, [settings.uiFont]);
-  const cls = ["frame", live && !bgUrl && "has-bg", isDesktop && "desktop", max && "maximized", settings.reduceMotion && "reduce-motion", settings.ambience && "ambience", showPanel && "with-panel", festive && "festive", (settings.themeArt !== false || bgUrl) && "has-art", bgUrl && "has-bg", settings.reduceMotion && "no-anim", idle && "idle", `theme-${theme.id}`].filter(Boolean).join(" ");
+  const cls = ["frame", "nf", settings.navCollapsed && "nav-collapsed", live && !bgUrl && "has-bg", isDesktop && "desktop", max && "maximized", settings.reduceMotion && "reduce-motion", settings.ambience && "ambience", showPanel && "with-panel", festive && "festive", (settings.themeArt !== false || bgUrl) && "has-art", bgUrl && "has-bg", settings.reduceMotion && "no-anim", idle && "idle", `theme-${theme.id}`].filter(Boolean).join(" ");
   const key = page + JSON.stringify(route.param?.id ?? route.param?.universeId ?? "");
 
   return (

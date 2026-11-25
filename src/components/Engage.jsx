@@ -23,10 +23,12 @@ function Modal({ onClose, children, className = "" }) {
 export function WhatsNew() {
   const { settings, updateSettings } = useApp();
   const seen = settings.lastSeenVersion ?? (settings.tourDone ? "1.0.6" : null);
+  const [all, setAll] = useState(false);
   useEffect(() => { if (!seen && settings.tourDone === undefined) updateSettings({ lastSeenVersion: VERSION }); }, []);
-  if (!settings.tourDone || !seen || seen === VERSION) return null;
-  const entries = CHANGELOG.filter((c) => cmp(c.version, seen) > 0);
-  const close = () => updateSettings({ lastSeenVersion: VERSION });
+  useEffect(() => { const h = () => setAll(true); window.addEventListener("moony:whatsnew", h); return () => window.removeEventListener("moony:whatsnew", h); }, []);
+  if (!all && (!settings.tourDone || !seen || seen === VERSION)) return null;
+  const entries = all ? CHANGELOG : CHANGELOG.filter((c) => cmp(c.version, seen) > 0);
+  const close = () => { setAll(false); updateSettings({ lastSeenVersion: VERSION }); };
   if (!entries.length) return null;
   return (
     <Modal onClose={close} className="eng-new">

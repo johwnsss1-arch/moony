@@ -17,7 +17,8 @@ export const DEFAULT_SETTINGS = {
   startPage: "home",
   rightPanel: true,
   accent: "theme",
-  theme: "midnight",
+  theme: "moonlight",
+  navCollapsed: false,
   reduceMotion: false,
   ambience: true,
   scale: 100,
@@ -102,14 +103,15 @@ export function AppProvider({ children }) {
 
   const s = useMemo(() => ({ ...DEFAULT_SETTINGS, ...settings }), [settings]);
   useEffect(() => { if (!settings.festiveV1) setSettings((p) => ({ ...p, festiveV1: true, christmas: true })); }, [settings.festiveV1, setSettings]);
-  useEffect(() => { if (!settings.theme) setSettings((p) => ({ ...p, theme: p.christmas === false ? "midnight" : "christmas", accent: "theme" })); }, [settings.theme, setSettings]);
+  useEffect(() => { if (!settings.theme) setSettings((p) => ({ ...p, theme: "moonlight", accent: "theme" })); }, [settings.theme, setSettings]);
   useEffect(() => { if (!settings.discordV1) setSettings((p) => ({ ...p, discordV1: true, discordEnabled: true, discordClientId: "1133419230113566730" })); }, [settings.discordV1, setSettings]);
   const updateSettings = useCallback((patch) => setSettings((p) => ({ ...p, ...patch })), [setSettings]);
 
-  const toast = useCallback((text, kind = "info") => {
+  const toast = useCallback((text, kind = "info", opts = {}) => {
     const id = ++toastId.current;
-    setToasts((t) => [...t, { id, text, kind }]);
-    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 3600);
+    const dismiss = () => setToasts((t) => t.filter((x) => x.id !== id));
+    setToasts((t) => [...t, { id, text, kind, action: opts.action ? { label: opts.action.label, run: () => { opts.action.run(); dismiss(); } } : null }]);
+    setTimeout(dismiss, opts.action ? 6000 : 3600);
   }, []);
 
   const loadSorts = useCallback(() => {

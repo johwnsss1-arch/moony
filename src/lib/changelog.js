@@ -1,5 +1,17 @@
 export const CHANGELOG = [
   {
+    version: "4.0.0",
+    title: "Moony 4.0: a whole new look",
+    items: [
+      "A new design across the app: a labeled sidebar, cleaner pages and the new Moonlight theme.",
+      "Home starts with your last game, ready to play, next to your account, friends online, Boost and Discord status.",
+      "A new server picker: big Fast join and Server hop buttons, a ping chart, signal bars and clear selection.",
+      "Settings are reorganised into App, Roblox and You, with a new theme browser that shows every theme.",
+      "The in-game HUD has a new Readout style, plus Bare for minimal clutter. Pick it in the HUD editor.",
+      "Your theme, accounts and settings carry over.",
+    ],
+  },
+  {
     version: "3.0.1",
     title: "A new installer",
     items: [

@@ -1,0 +1,76 @@
+/* Nightfall: server selection */
+.frame.nf .nf-servers { --t-great: var(--nf-good); --t-good: #9bd86a; --t-ok: var(--nf-warn); --t-bad: var(--nf-bad); }
+.frame.nf .sv-quick { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 10px; margin-bottom: 16px; }
+.frame.nf .nf-servers.compact .sv-quick { grid-template-columns: 1fr 1fr; }
+.frame.nf .nf-servers.compact .sv-spread { grid-column: 1 / -1; }
+.frame.nf .sv-quick-btn {
+  display: flex; align-items: center; gap: 14px; padding: 14px 16px; text-align: left; border-radius: var(--nf-r-lg);
+  background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); color: var(--text-2);
+  transition: background var(--nf-fast), box-shadow var(--nf-fast), transform var(--nf-fast) var(--nf-ease);
+}
+.frame.nf .sv-quick-btn:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
+.frame.nf .sv-quick-btn:active:not(:disabled) { transform: scale(.985); }
+.frame.nf .sv-quick-btn.primary { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); color: var(--accent); }
+.frame.nf .sv-quick-btn.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 20%, var(--surface)); }
+.frame.nf .sv-quick-btn span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.frame.nf .sv-quick-btn b { font-size: 14px; font-weight: 600; color: var(--text); }
+.frame.nf .sv-quick-btn small { font-size: 12px; color: var(--text-2); }
+.frame.nf .sv-quick-btn:disabled { opacity: .7; }
+
+.frame.nf .sv-spread { padding: 12px 14px; border-radius: var(--nf-r-lg); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); display: flex; flex-direction: column; gap: 8px; }
+.frame.nf .sv-spread-head { display: flex; align-items: baseline; justify-content: space-between; }
+.frame.nf .sv-spread-head b { font-size: 12.5px; font-weight: 600; }
+.frame.nf .sv-spread-head small { font-size: 12px; color: var(--nf-good); font-variant-numeric: tabular-nums; }
+.frame.nf .sv-spread-bars { flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; align-items: end; min-height: 48px; }
+.frame.nf .sv-bucket { display: grid; grid-template-rows: 1fr auto; grid-template-columns: 1fr auto; gap: 3px 4px; height: 100%; }
+.frame.nf .sv-bucket-bar { grid-column: 1 / -1; display: flex; align-items: flex-end; height: 30px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.frame.nf .sv-bucket-bar i { display: block; width: 100%; border-radius: 4px; transition: height var(--nf-slow) var(--nf-ease); min-height: 2px; }
+.frame.nf .sv-bucket.t4 i { background: var(--t-great); } .frame.nf .sv-bucket.t3 i { background: var(--t-good); }
+.frame.nf .sv-bucket.t2 i { background: var(--t-ok); } .frame.nf .sv-bucket.t1 i, .frame.nf .sv-bucket.t0 i { background: var(--t-bad); }
+.frame.nf .sv-bucket small { font-size: 10.5px; color: var(--text-3); white-space: nowrap; }
+.frame.nf .sv-bucket em { font-style: normal; font-size: 10.5px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+
+.frame.nf .nf-servers .servers-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.frame.nf .sv-totals { color: var(--text-3); font-size: 12.5px; }
+.frame.nf .sv-head, .frame.nf .sv-row { display: grid; grid-template-columns: 96px minmax(150px, 1.1fr) minmax(140px, 1.4fr) 150px 96px; align-items: center; gap: 16px; padding: 0 14px; }
+.frame.nf .nf-servers.compact .sv-head, .frame.nf .nf-servers.compact .sv-row { grid-template-columns: 88px minmax(110px, 1fr) minmax(110px, 1.2fr) 120px 90px; gap: 10px; }
+.frame.nf .sv-head { height: 30px; font-size: 11.5px; font-weight: 600; color: var(--text-3); }
+.frame.nf .sv-rows { display: flex; flex-direction: column; border-radius: var(--nf-r-lg); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; background: var(--surface); }
+.frame.nf .sv-row { min-height: 52px; border-top: 1px solid var(--line); cursor: pointer; outline: none; position: relative; animation: nf-rise var(--nf-mid) var(--nf-ease) both; transition: background var(--nf-fast); }
+.frame.nf .sv-row:first-child { border-top: 0; }
+.frame.nf .sv-row:hover { background: var(--surface-2); }
+.frame.nf .sv-row:focus-visible { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 60%, transparent); }
+.frame.nf .sv-row.sel { background: color-mix(in srgb, var(--accent) 9%, var(--surface)); }
+.frame.nf .sv-row.sel::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 0 3px 3px 0; background: var(--accent); }
+.frame.nf .sv-row.full { opacity: .55; }
+.frame.nf .sv-ping { display: flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+.frame.nf .sv-ping b { font-size: 14px; font-weight: 600; }
+.frame.nf .sv-ping small { font-size: 11px; color: var(--text-3); margin-left: -4px; }
+.frame.nf .sv-signal { display: inline-flex; align-items: flex-end; gap: 2px; height: 16px; }
+.frame.nf .sv-signal i { width: 3px; border-radius: 1px; background: var(--surface-3); }
+.frame.nf .sv-signal.great i.on { background: var(--t-great); } .frame.nf .sv-signal.good i.on { background: var(--t-good); }
+.frame.nf .sv-signal.ok i.on { background: var(--t-ok); } .frame.nf .sv-signal.bad i.on { background: var(--t-bad); }
+.frame.nf .sv-id { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.frame.nf .sv-id code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12.5px; color: var(--text); }
+.frame.nf .sv-id small { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; color: var(--text-3); white-space: nowrap; }
+.frame.nf .sv-here { font-style: normal; font-size: 11px; font-weight: 600; color: var(--nf-good); white-space: nowrap; }
+.frame.nf .sv-copy { opacity: 0; width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center; color: var(--text-3); transition: opacity var(--nf-fast), background var(--nf-fast); }
+.frame.nf .sv-row:hover .sv-copy, .frame.nf .sv-row.sel .sv-copy, .frame.nf .sv-copy:focus-visible { opacity: 1; }
+.frame.nf .sv-copy:hover { background: var(--surface-3); color: var(--text); }
+.frame.nf .sv-fill { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.frame.nf .sv-bar { flex: 1; height: 5px; border-radius: 3px; background: var(--surface-3); overflow: hidden; }
+.frame.nf .sv-bar i { display: block; height: 100%; border-radius: 3px; background: color-mix(in srgb, var(--accent) 80%, transparent); }
+.frame.nf .sv-bar i.busy { background: var(--nf-warn); } .frame.nf .sv-bar i.full { background: var(--nf-bad); }
+.frame.nf .sv-fill small { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.frame.nf .sv-region { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.frame.nf .sv-region.muted { color: var(--text-3); }
+.frame.nf .sv-region-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-3); padding: 4px 8px; border-radius: 6px; justify-self: start; transition: background var(--nf-fast), color var(--nf-fast); }
+.frame.nf .sv-region-btn:hover { background: var(--surface-3); color: var(--text); }
+.frame.nf .sv-join { justify-self: end; min-width: 84px; justify-content: center; }
+.frame.nf .nf-servers .servers-note { margin-top: 12px; font-size: 12px; color: var(--text-3); }
+.frame.nf .nf-servers .load-more { margin: 12px auto 0; display: flex; }
+
+@media (max-width: 1180px) {
+  .frame.nf .sv-quick { grid-template-columns: 1fr 1fr; }
+  .frame.nf .sv-spread { grid-column: 1 / -1; }
+}
