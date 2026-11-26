@@ -37,75 +37,59 @@
 <main id="main">
 
 <section class="hero">
-  <div class="hero-sky" aria-hidden="true"><div class="rush"><i></i><i></i><i></i></div></div>
-  <div class="wrap">
+  <div class="wrap hero-grid">
     <div class="hero-copy">
       <h1>Roblox, launched your way.</h1>
-      <p class="lede">Moony is a free Roblox launcher for Windows. Pick the server you join, follow friends into games, boost performance while you play, and play on a launcher that stays out of your way.</p>
+      <p class="lede">Moony is a free Roblox launcher for Windows. Pick the server you join, follow friends into games and boost performance while you play.</p>
       <div class="hero-cta"><a class="btn primary lg" data-download><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5 10.5 4.4v7.1H3zm0 13L10.5 19.6v-7.1H3zm8.5 1.2L21 21v-8.5h-9.5zm0-15.4V11.5H21V3z"/></svg> Download for Windows</a><a class="btn ghost lg" href="features.html">See every feature</a></div>
       <div class="release-line"><span>Version <b data-version>3.0.1</b></span><span><b data-size>10.3 MB</b></span><span>Windows 10 and 11, 64-bit</span><span>Free</span></div>
     </div>
-    <div class="hero-shot">
-      <div class="horizon" aria-hidden="true"></div>
-      <div class="window"><img src="img/app2/theme-moonlight.webp" alt="Moony's home screen: your last game ready to play, next to your account, friends, Boost mode and Discord status" width="1440" height="900" loading="lazy" decoding="async" fetchpriority="high" loading="eager"></div>
+  </div>
+  <div class="wrap">
+    <div class="stage" aria-hidden="false">
+      <div class="stage-img"><img src="img/v41/home.webp" alt="Moony's home screen: the Moony logo above your next game, with Play and Pick a server" width="1440" height="900" loading="lazy" decoding="async" fetchpriority="high" loading="eager"></div>
+      <div class="stage-edge" aria-hidden="true"></div>
     </div>
   </div>
 </section>
 
-<section class="band" style="padding-top:180px">
+<section class="band showcase">
   <div class="wrap">
     <div class="sec-head reveal"><h2>Built around the moment you press Play.</h2><p>Most launchers stop at opening Roblox. Moony helps with what comes right before and right after.</p></div>
-
-    <div class="split reveal">
-      <div class="split-copy">
-        <h3>Choose the server, not the queue.</h3>
-        <p>Moony lists every open server with its ping and how full it is, so you can see where the good games are before you join.</p>
-        <ul class="ticks"><li>Fast join picks the lowest-ping server with room</li><li>Server hop moves you somewhere new in one click</li><li>Look up which city a server is in</li><li>Rejoin the same server automatically if you drop</li></ul>
-      </div>
-      <div class="crop focus-servers"><img src="img/app2/app-servers.webp" alt="Moony's server list: Fast join, Server hop, a ping chart and servers with signal bars" width="1440" height="900" loading="lazy" decoding="async"></div>
+    <div class="tabs reveal" role="tablist" aria-label="Moony features">
+      <button role="tab" id="tab-servers" aria-controls="pane-servers" aria-selected="true" tabindex="0">Fast join</button><button role="tab" id="tab-discover" aria-controls="pane-discover" aria-selected="false" tabindex="-1">Discover</button><button role="tab" id="tab-charts" aria-controls="pane-charts" aria-selected="false" tabindex="-1">Charts</button><button role="tab" id="tab-launch" aria-controls="pane-launch" aria-selected="false" tabindex="-1">Launching</button>
     </div>
-
-    <div class="split flip reveal">
-      <div class="split-copy">
-        <h3>Play with friends without the back-and-forth.</h3>
-        <p>Party mode follows a friend into every server they join. Your Discord profile can show the game you're in with a Join my server button, and Moony tells you when friends come online.</p>
-        <ul class="ticks"><li>Follow a party leader across servers</li><li>Join any friend's game from Moony</li><li>Message friends without opening Roblox</li></ul>
+    <div class="panes reveal">
+      <div class="pane on" role="tabpanel" id="pane-servers" aria-labelledby="tab-servers">
+        <div class="pane-copy"><h3>Choose the server, not the queue.</h3><p>Every open server with its ping and how full it is. Fast join picks the lowest-ping one with room, Server hop moves you somewhere new.</p><ul class="ticks"><li>Signal bars and a ping chart</li><li>Look up a server's city</li><li>Rejoin automatically if you drop</li></ul></div>
+        <div class="crop"><img src="img/v41/servers.webp" alt="Moony's server list with Fast join, Server hop and a ping chart" width="1440" height="900" loading="lazy" decoding="async"></div>
       </div>
-      <div class="crop"><img src="img/app2/app-discover.webp" alt="Moony's Discover page with genre filters and recommended games" width="1440" height="900" loading="lazy" decoding="async"></div>
-    </div>
-
-    <div class="split reveal">
-      <div class="split-copy">
-        <h3>Smoother games with one switch.</h3>
-        <p>Boost mode gives Roblox high CPU priority and the High performance power plan while you play, then puts everything back. Moony records ping, CPU and RAM for every session so you can see what changed.</p>
-        <ul class="ticks"><li>Boost mode, automatic per game</li><li>Session graphs for ping, CPU and RAM</li><li>An in-game HUD and custom crosshair</li></ul>
+      <div class="pane" role="tabpanel" id="pane-discover" aria-labelledby="tab-discover" hidden>
+        <div class="pane-copy"><h3>Find something worth playing.</h3><p>Search all of Roblox, filter by genre, and dig into hidden gems that are loved by players but not crowded yet.</p><ul class="ticks"><li>Genre filters</li><li>Hidden gems</li><li>Library of everything you've played</li></ul></div>
+        <div class="crop"><img src="img/v41/discover.webp" alt="Moony's Discover page with genre filters and hidden gems" width="1440" height="900" loading="lazy" decoding="async"></div>
       </div>
-      <div class="crop"><img src="img/app2/app-launch.webp" alt="Moony's launch settings: what happens after a game launches, auto close and auto-rejoin" width="1440" height="900" loading="lazy" decoding="async"></div>
-    </div>
-  </div>
-</section>
-
-<section class="band tight">
-  <div class="wrap">
-    <div class="split reveal">
-      <div class="split-copy">
-        <h3>One look, your backdrop.</h3>
-        <p>Moony has one carefully tuned dark interface. Put any picture, GIF or video behind it, and scale the whole app up or down to fit your screen.</p>
+      <div class="pane" role="tabpanel" id="pane-charts" aria-labelledby="tab-charts" hidden>
+        <div class="pane-copy"><h3>See what everyone's playing.</h3><p>Live rankings for most played, trending and up-and-coming games, with Play and server picking right in the list.</p><ul class="ticks"><li>Most played, trending, up and coming</li><li>Favorite in one click</li><li>Play from the list</li></ul></div>
+        <div class="crop"><img src="img/v41/charts.webp" alt="Moony's Charts page ranking the most played games" width="1440" height="900" loading="lazy" decoding="async"></div>
       </div>
-      <div class="crop"><img src="img/app2/theme-moonlight.webp" alt="Moony's home screen" width="1440" height="900" loading="lazy" decoding="async"></div>
+      <div class="pane" role="tabpanel" id="pane-launch" aria-labelledby="tab-launch" hidden>
+        <div class="pane-copy"><h3>Decide what happens after Play.</h3><p>Keep Moony open, minimize it or close it when a game starts. Close Roblox when you leave a game, and rejoin automatically when you get disconnected.</p><ul class="ticks"><li>Auto-close and auto-rejoin</li><li>Boost mode while you play</li><li>Your own background and scale</li></ul></div>
+        <div class="crop"><img src="img/v41/settings.webp" alt="Moony's launch settings" width="1440" height="900" loading="lazy" decoding="async"></div>
+      </div>
     </div>
   </div>
 </section>
 
 <section class="band">
   <div class="wrap">
-    <div class="sec-head reveal"><h2>Everything else Moony does.</h2></div>
+    <div class="sec-head reveal"><h2>And the rest.</h2><p>Everything else Moony adds on top of the official Roblox player.</p></div>
     <div class="index reveal">
       <div><h4>Play</h4><dl><div><dt>A home screen that starts with your game</dt><dd>Your last game sits at the top with Play and Pick a server, next to your account, friends, Boost and Discord status.</dd></div><div><dt>Discover and Charts</dt><dd>Search all of Roblox, browse by genre, and see live rankings for most played, trending and up-and-coming games.</dd></div><div><dt>Library and Favorites</dt><dd>Every game you've played with your hours, plus the games you've saved.</dd></div><div><dt>Playtime</dt><dd>Moony tracks how long you play each game, even when you didn't launch it from Moony.</dd></div></dl></div>
       <div><h4>Servers</h4><dl><div><dt>Fast join</dt><dd>Joins the lowest-ping server that still has room, in one click.</dd></div><div><dt>Server hop</dt><dd>Moves you to a different open server, never the one you're already in.</dd></div><div><dt>Ping at a glance</dt><dd>Signal bars and ping for every server, plus a chart of how ping is spread across all of them.</dd></div><div><dt>Region lookup and private servers</dt><dd>See which city a server is in, and save VIP or friends' private server links.</dd></div></dl></div>
       <div><h4>Together</h4><dl><div><dt>Party mode</dt><dd>Pick a leader and Moony follows them into every server they join or hop to.</dd></div><div><dt>Friends and chat</dt><dd>See who's online and what they're playing, join them, and message them from Moony.</dd></div><div><dt>Discord status</dt><dd>Show the game you're playing on your Discord profile, with a Join my server button for friends.</dd></div><div><dt>Notifications</dt><dd>A Windows notification when a friend comes online or joins a game you can join.</dd></div></dl></div>
       <div><h4>Tools</h4><dl><div><dt>Boost mode</dt><dd>While you play, Roblox gets high CPU priority and Windows switches to the High performance power plan. Both go back when you leave.</dd></div><div><dt>Performance</dt><dd>Ping, CPU and RAM recorded for every session, so you can see where lag came from.</dd></div><div><dt>In-game HUD</dt><dd>An overlay with widgets like session time, ping, server region, PC usage and a music visualiser, plus a custom crosshair.</dd></div><div><dt>Tweaks and versions</dt><dd>Mods and engine settings (FFlags) for the Roblox player, and a choice of which Roblox version to run.</dd></div></dl></div>
     </div>
+    <p style="margin-top:28px"><a class="btn ghost sm" href="features.html">Every feature</a></p>
   </div>
 </section>
 
@@ -117,7 +101,7 @@
       <p style="margin-top:24px"><a class="btn ghost" href="https://github.com/johwnsss1-arch/moony"><svg viewBox="0 0 24 24" fill="currentColor" width="19" height="19" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2"/></svg> View the source</a></p>
     </div>
     <dl class="facts reveal">
-      <div class="fact"><dt>Latest version</dt><dd class="big-n" data-version>3.0.1</dd></div>
+      <div class="fact"><dt>Latest version</dt><dd class="big-n" data-version>4.0.0</dd></div>
       <div class="fact"><dt>Installer SHA-256</dt><dd class="mono" data-sha>Loading…</dd></div>
       <div class="fact"><dt>Scan it yourself</dt><dd><a data-vt href="https://www.virustotal.com">Open the VirusTotal report</a></dd></div>
       <div class="fact"><dt>Your data</dt><dd>Settings, favorites and playtime stay on your PC. No ads, no analytics. <a href="privacy.html">Privacy</a></dd></div>

@@ -72,3 +72,23 @@ if (releasesEl) {
     }).join("");
   }).catch(() => { releasesEl.innerHTML = `<p class="lede">Couldn't load the release list right now. See every release on <a style="color:var(--moon)" href="https://github.com/${REPO}/releases">GitHub</a>.</p>`; });
 }
+
+const tabs = [...document.querySelectorAll('.tabs [role="tab"]')];
+const pick = (t, focus) => {
+  tabs.forEach((b) => {
+    const on = b === t;
+    b.setAttribute("aria-selected", on); b.tabIndex = on ? 0 : -1;
+    const p = document.getElementById(b.getAttribute("aria-controls"));
+    p.hidden = !on; p.classList.toggle("on", on);
+  });
+  if (focus) t.focus();
+};
+tabs.forEach((t, i) => {
+  t.addEventListener("click", () => pick(t));
+  t.addEventListener("keydown", (e) => {
+    const k = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+    if (k) { e.preventDefault(); pick(tabs[(i + k + tabs.length) % tabs.length], true); }
+    if (e.key === "Home") { e.preventDefault(); pick(tabs[0], true); }
+    if (e.key === "End") { e.preventDefault(); pick(tabs[tabs.length - 1], true); }
+  });
+});
