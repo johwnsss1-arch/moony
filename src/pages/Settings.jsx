@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ImagePlus, Trash2, Bell, Check, ChevronRight, Cpu, Download, Gamepad2, Keyboard, LayoutDashboard, Lock, MessageCircle, Palette, Rocket, SlidersHorizontal, Swords, UsersRound, Wrench, Sparkles } from "lucide-react";
 import { ACCENTS, DEFAULT_SETTINGS, useApp } from "../lib/store";
 import { clearBg, emitBgChange, loadBg, onBgChange, saveBg } from "../lib/custombg";
+const START_PAGES = ["home", "discover", "favorites", "friends"];
 
 function BackgroundCard({ s, u }) {
   const [url, setUrl] = useState(null);
@@ -185,7 +186,7 @@ function General() {
   return (
     <div className="settings-group">
       <Row title="Start page" desc="The page Moony opens on.">
-        <Select value={s.startPage} onChange={(v) => u({ startPage: v })} options={[{ value: "home", label: "Home" }, { value: "discover", label: "Discover" }, { value: "favorites", label: "Favorites" }, { value: "friends", label: "Friends" }]} />
+        <Select value={START_PAGES.includes(s.startPage) ? s.startPage : "home"} onChange={(v) => u({ startPage: v })} options={[{ value: "home", label: "Home" }, { value: "discover", label: "Discover" }, { value: "favorites", label: "Favorites" }, { value: "friends", label: "Friends" }]} />
       </Row>
       <Row title="Side panel" desc="Accounts, players online and recent games on the right. Toggle with Ctrl+B.">
         <Toggle checked={s.rightPanel} onChange={(v) => u({ rightPanel: v })} />

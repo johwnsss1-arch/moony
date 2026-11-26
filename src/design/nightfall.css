@@ -1,7 +1,7 @@
 /* Nightfall: Moony's design system. Loaded last so it sets the base for every page. */
 
 :root {
-  --nf-display: "Bricolage Grotesque", "Inter Variable", system-ui, sans-serif;
+  --nf-display: "Sora Variable", "Outfit Variable", system-ui, sans-serif;
   --nf-ease: cubic-bezier(.2, .8, .2, 1);
   --nf-ease-in: cubic-bezier(.4, 0, 1, 1);
   --nf-fast: 140ms;

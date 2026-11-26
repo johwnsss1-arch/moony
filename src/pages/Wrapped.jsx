@@ -47,7 +47,7 @@ const loadImg = (src) => new Promise((ok) => { if (!src) return ok(null); const 
 
 async function draw(cv, d, user, accent) {
   const g = cv.getContext("2d");
-  const font = (w, s) => `${w} ${s}px "Inter Variable", Inter, "Segoe UI", sans-serif`;
+  const font = (w, s) => `${w} ${s}px "Outfit Variable", Inter, "Segoe UI", sans-serif`;
   g.fillStyle = "#08080b"; g.fillRect(0, 0, W, H);
   let gr = g.createRadialGradient(W * 0.85, 80, 0, W * 0.85, 80, 900); gr.addColorStop(0, accent + "cc"); gr.addColorStop(1, "transparent");
   g.fillStyle = gr; g.fillRect(0, 0, W, H);
@@ -121,7 +121,7 @@ export default function Wrapped() {
         <Segmented value={kind} onChange={setKind} options={[{ value: "month", label: "This month" }, { value: "last", label: "Last month" }, { value: "year", label: "This year" }]} />
       </div>
       {!d.total ? (
-        <Empty icon={Sparkles} title="Nothing played yet" text={`Play some games through Moony and your ${kind === "year" ? "year" : "month"} shows up here.`} />
+        <Empty icon={Sparkles} title="Nothing played yet" text={`Play some games through Moony and your ${kind === "year" ? "year" : "month"} shows up here.`.replace(/ (S+)$/, " $1")} />
       ) : (
         <div className="wrapped-layout">
           <canvas ref={cv} width={W} height={H} className="wrapped-card" />

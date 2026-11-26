@@ -1,0 +1,33 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+@font-face { font-family: S; src: url(../../node_modules/@fontsource-variable/sora/files/sora-latin-wght-normal.woff2); font-weight: 100 800; }
+@font-face { font-family: O; src: url(../../node_modules/@fontsource-variable/outfit/files/outfit-latin-wght-normal.woff2); font-weight: 100 900; }
+html, body { margin: 0; width: 1920px; height: 640px; overflow: hidden; }
+#b { position: relative; width: 1920px; height: 640px; overflow: hidden; background: #0a0d14; color: #eef3ff; font-family: O; }
+.shot { position: absolute; left: 1090px; top: 70px; width: 1240px; height: 775px; border-radius: 14px; overflow: hidden; border: 1px solid #26314d; box-shadow: 0 30px 80px rgba(0,0,0,.55); }
+.shot img { width: 100%; display: block; }
+.fade { position: absolute; inset: 0; background: linear-gradient(90deg, #0a0d14 0%, #0a0d14 54%, rgba(10,13,20,.6) 63%, rgba(10,13,20,0) 73%); }
+.bar { position: absolute; top: -60px; height: 780px; transform: skewX(-14deg); }
+.copy { position: absolute; left: 110px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; width: 860px; }
+.lock { display: flex; align-items: center; gap: 18px; }
+.lock svg { width: 64px; height: 64px; overflow: visible; }
+.lock span { font-family: S; font-weight: 700; font-size: 56px; letter-spacing: -.05em; }
+h1 { font-family: S; font-weight: 700; font-size: 88px; line-height: .98; letter-spacing: -.045em; margin: 34px 0 22px; }
+p { font-size: 30px; color: #a9b6cc; margin: 0; line-height: 1.4; max-width: 700px; }
+.row { display: flex; gap: 14px; margin-top: 40px; align-items: center; }
+.cta { background: #a6c8ff; color: #06101f; font-weight: 700; font-size: 28px; padding: 18px 30px; border-radius: 6px; }
+.alt { font-weight: 600; font-size: 26px; color: #eef3ff; padding: 17px 26px; border: 1.5px solid #2e3a5a; border-radius: 6px; }
+</style></head><body>
+<div id="b">
+  <div class="shot"><img src="../../website/img/v41/home.webp"></div>
+  <div class="fade"></div>
+  <div class="bar" style="left:1000px;width:50px;background:#eef3ff"></div>
+  <div class="bar" style="left:1072px;width:50px;background:#a6c8ff"></div>
+  <div class="bar" style="left:1144px;width:50px;background:#4a78ee"></div>
+  <div class="copy">
+    <div class="lock"><svg viewBox="0 0 32 32"><defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse"><stop stop-color="#f2f6ff"/><stop offset=".45" stop-color="#a6c8ff"/><stop offset="1" stop-color="#4a78ee"/></linearGradient></defs><g fill="url(#lg)" transform="translate(4.5 -1) skewX(-14)"><rect x="3" y="6" width="6" height="22" rx="3"/><rect x="13" y="6" width="6" height="22" rx="3"/><rect x="23" y="6" width="6" height="22" rx="3"/></g></svg><span>moony</span></div>
+    <h1>Pick your server.<br>Not the queue.</h1>
+    <p>A free Roblox launcher for Windows. Fast join, party up with friends and boost your FPS.</p>
+    <div class="row"><span class="cta">moonylauncher.xyz</span><span class="alt">discord.gg/moonylauncher</span></div>
+  </div>
+</div></body></html>

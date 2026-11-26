@@ -39,7 +39,7 @@ export default function Hud() {
     return () => ro.disconnect();
   }, []);
 
-  if (!window.orbit) return <div className="page"><Empty icon={LayoutDashboard} title="Desktop app only" text="The in-game HUD works in the desktop app." /></div>;
+  if (!window.orbit) return <div className="page"><div className="page-head"><h1>HUD</h1><p>Widgets that sit on top of Roblox while you play.</p></div><Empty icon={LayoutDashboard} title="Desktop app only" text="The in-game HUD works in the desktop app." /></div>;
 
   const screenSize = window.screen.width > 0 && window.screen.height > 0 ? { width: window.screen.width, height: window.screen.height } : { width: 1920, height: 1080 };
   const size = status?.size?.width > 0 ? status.size : screenSize;

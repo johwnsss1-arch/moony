@@ -83,7 +83,7 @@ export function AppProvider({ children }) {
   const [favorites, setFavorites] = usePersisted("favorites", []);
   const [recent, setRecent] = usePersisted("recent", []);
   const [tracked, setTracked] = usePersisted("tracked", []);
-  const [nav, setNav] = useState(() => ({ stack: [{ page: read("settings", DEFAULT_SETTINGS).startPage || "home", param: null }] }));
+  const [nav, setNav] = useState(() => ({ stack: [{ page: ["home", "discover", "favorites", "friends"].find((p) => p === read("settings", DEFAULT_SETTINGS).startPage) || "home", param: null }] }));
   const route = nav.stack[nav.stack.length - 1];
   const page = route.page;
   const go = useCallback((pageId, param = null) => setNav((n) => {

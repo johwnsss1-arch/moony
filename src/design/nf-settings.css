@@ -47,7 +47,7 @@
 .frame.nf .nf-tcard.on .nftp { box-shadow: 0 0 0 2px var(--accent), 0 14px 34px rgba(0, 0, 0, .45); }
 .frame.nf .nf-tmeta { display: flex; flex-direction: column; gap: 4px; padding: 0 2px; }
 .frame.nf .nf-tname { display: flex; align-items: center; gap: 8px; font-family: var(--display); font-size: 15.5px; font-weight: 700; letter-spacing: -.015em; }
-.frame.nf .nf-ton { display: inline-flex; align-items: center; gap: 4px; font-family: "Inter Variable", sans-serif; font-size: 11px; font-weight: 600; color: var(--accent); }
+.frame.nf .nf-ton { display: inline-flex; align-items: center; gap: 4px; font-family: "Outfit Variable", sans-serif; font-size: 11px; font-weight: 600; color: var(--accent); }
 .frame.nf .nf-tmeta small { color: var(--text-2); font-size: 12.5px; line-height: 1.4; }
 .frame.nf .nf-tchips { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
 .frame.nf .nf-tchips i { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .15); }

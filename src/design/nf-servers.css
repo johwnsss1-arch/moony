@@ -83,3 +83,10 @@
 .frame.nf .sv-bar i.busy { background: color-mix(in srgb, var(--accent) 80%, transparent); }
 .frame.nf .sv-row.full .sv-bar i, .frame.nf .sv-bar i.full { background: var(--t-bad); }
 .frame.nf .sv-spread-head small { color: var(--t-great); }
+
+/* narrow content area (side panel open on a laptop): stack the ping chart under the two buttons */
+.frame.nf .nf-servers { container-type: inline-size; }
+@container (max-width: 760px) {
+  .frame.nf .sv-quick { grid-template-columns: 1fr 1fr; }
+  .frame.nf .sv-spread { grid-column: 1 / -1; }
+}

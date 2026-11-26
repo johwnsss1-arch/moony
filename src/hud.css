@@ -1,5 +1,5 @@
 html:has(#hud), html:has(#hud) body, #hud { margin: 0; height: 100%; background: transparent !important; overflow: hidden; }
-.hud-root { position: fixed; inset: 0; pointer-events: none; font-family: "Inter Variable", "Segoe UI", sans-serif; color: #fff; --viz: #8b7dff; }
+.hud-root { position: fixed; inset: 0; pointer-events: none; font-family: "Outfit Variable", "Segoe UI", sans-serif; color: #fff; --viz: #8b7dff; }
 .hud-place, .hud-widget-pos { position: absolute; transform: translate(-50%, -50%) scale(var(--hud-scale, 1)); }
 .hw { display: inline-flex; flex-direction: column; gap: 1px; padding: 7px 12px; border-radius: 11px; background: rgba(12, 13, 18, 0.62); border: 1px solid rgba(255, 255, 255, 0.12); backdrop-filter: blur(10px); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35); white-space: nowrap; font-size: 13px; line-height: 1.2; color: #fff; }
 .hw small { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.6); }
@@ -49,7 +49,7 @@ html:has(#hud), html:has(#hud) body, #hud { margin: 0; height: 100%; background:
 .t-kawaii .hw { background: rgba(58,24,44,.72); border: 2px dashed rgba(255,156,200,.6); border-radius: 18px; }
 .t-kawaii .hw b { color: #ffe3f0; } .t-kawaii .hw small { color: #ff9cc8; }
 .t-cyberpunk .hw { background: rgba(10,10,14,.82); border: 1px solid #f5e400; border-radius: 0; clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)); box-shadow: 0 0 14px rgba(245,228,0,.25); }
-.t-cyberpunk .hw b { color: #f5e400; font-family: "Orbitron", "Inter Variable", sans-serif; letter-spacing: .04em; } .t-cyberpunk .hw small { color: #ff2fd6; text-transform: uppercase; letter-spacing: .12em; }
+.t-cyberpunk .hw b { color: #f5e400; font-family: "Orbitron", "Outfit Variable", sans-serif; letter-spacing: .04em; } .t-cyberpunk .hw small { color: #ff2fd6; text-transform: uppercase; letter-spacing: .12em; }
 .t-ocean .hw { background: rgba(6,28,44,.7); border: 1px solid rgba(120,210,255,.45); border-radius: 999px; padding-left: 16px; padding-right: 16px; }
 .t-ocean .hw b { color: #e9f7ff; } .t-ocean .hw small { color: #5cd0ff; }
 .t-halloween .hw { background: rgba(26,14,6,.8); border: 1px solid rgba(255,138,31,.55); border-radius: 8px; box-shadow: 0 0 16px rgba(255,138,31,.2); }
@@ -82,7 +82,7 @@ html:has(#hud), html:has(#hud) body, #hud { margin: 0; height: 100%; background:
 .s-readout .hw::before { content: ""; position: absolute; left: 0; top: 7px; bottom: 7px; width: 2px; border-radius: 0 2px 2px 0; background: var(--hud-acc, #8db8ff); opacity: .9; }
 .s-readout .hw small { text-transform: none; letter-spacing: 0; font-size: 10.5px; font-weight: 600; color: rgba(205, 218, 240, .62); }
 .s-readout .hw b { font-size: 15px; letter-spacing: -.01em; }
-.s-readout.t-moonlight .hw b { font-family: "Bricolage Grotesque", "Inter Variable", sans-serif; font-weight: 700; }
+.s-readout.t-moonlight .hw b { font-family: "Sora Variable", "Outfit Variable", sans-serif; font-weight: 700; }
 .s-readout .hw-game { padding: 5px 12px 5px 6px; }
 .s-readout .hw-game::before, .s-readout .hw-mark::before, .s-readout .hw-cross::before { display: none; }
 .s-readout .hw-game img { width: 30px; height: 30px; border-radius: 5px; }

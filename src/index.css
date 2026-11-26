@@ -17,7 +17,7 @@
   --radius: 12px;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --spring: cubic-bezier(0.34, 1.4, 0.5, 1);
-  font-family: "Inter Variable", "Segoe UI", system-ui, sans-serif;
+  font-family: "Outfit Variable", "Segoe UI", system-ui, sans-serif;
   font-size: 13px;
   line-height: 1.45;
   color: var(--text);
@@ -466,7 +466,7 @@ small.signed { color: var(--good); }
 .servers.compact .server-row { background: var(--surface-2); }
 .server-id { display: flex; align-items: center; gap: 7px; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12.5px; color: var(--text-2); min-width: 0; }
 .server-id svg { color: var(--text-3); flex: none; }
-.server-id small { white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; font-family: "Inter Variable", sans-serif; margin-left: 4px; }
+.server-id small { white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; font-family: "Outfit Variable", sans-serif; margin-left: 4px; }
 .server-fill { display: flex; align-items: center; gap: 10px; }
 .server-fill small { display: inline-flex; align-items: center; gap: 4px; width: 62px; font-variant-numeric: tabular-nums; color: var(--text-2); }
 .bar { flex: 1; height: 6px; border-radius: 6px; background: var(--surface-3); overflow: hidden; }
@@ -643,3 +643,4 @@ small.signed { color: var(--good); }
 .rs-row b { display: block; font-weight: 600; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rs-row small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .settings-foot { margin-top: 12px; color: var(--text-3); font-size: 12px; max-width: 640px; line-height: 1.55; }
+.empty-state p, .empty-state h3 { text-wrap: pretty; }
