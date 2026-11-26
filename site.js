@@ -43,6 +43,7 @@ if (document.querySelector("[data-dls]")) {
     if (!Array.isArray(list)) return;
     const n = list.reduce((t, rel) => t + (rel.assets || []).filter((a) => /\.exe$/i.test(a.name)).reduce((x, a) => x + a.download_count, 0), 0);
     fill("[data-dls]", n.toLocaleString());
+    if (n >= 500) document.querySelectorAll("[data-dl-wrap]").forEach((e) => (e.hidden = false));
     fill("[data-releases]", list.length);
   }).catch(() => {});
 }
@@ -92,3 +93,22 @@ tabs.forEach((t, i) => {
     if (e.key === "End") { e.preventDefault(); pick(tabs[tabs.length - 1], true); }
   });
 });
+
+// Hero demo: the screenshot is clickable like the real sidebar.
+const demo = document.querySelector("[data-demo]");
+if (demo) {
+  const im = demo.querySelector("[data-demo-img]"), toast = demo.querySelector("[data-demo-toast]");
+  const SRC = { home: "img/v41/home.webp", discover: "img/v41/discover.webp", charts: "img/v41/charts.webp", servers: "img/v41/servers.webp", settings: "img/v41/settings.webp" };
+  const SAY = { home: "Home: your next game, friends and Boost", discover: "Discover: search, genres and hidden gems", charts: "Charts: what everyone's playing", servers: "Servers: ping, players and Fast join", settings: "Settings: themes, FPS cap and launch options" };
+  let cur = "home", t;
+  Object.values(SRC).forEach((u) => { const p = new Image(); p.src = u; });
+  demo.addEventListener("click", (e) => {
+    const b = e.target.closest(".hot"); if (!b) return;
+    const v = b.dataset.view; toast.textContent = SAY[v]; toast.hidden = false;
+    clearTimeout(t); t = setTimeout(() => (toast.hidden = true), 2600);
+    if (v === cur) return; cur = v;
+    im.classList.add("swap");
+    setTimeout(() => { im.src = SRC[v]; im.alt = SAY[v]; im.classList.remove("swap"); }, 140);
+    demo.querySelectorAll(".hot").forEach((h) => h.classList.toggle("on", h.dataset.view === v && h.getAttribute("aria-label") !== "Show Pick a server"));
+  });
+}

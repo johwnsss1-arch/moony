@@ -253,3 +253,13 @@ footer { margin-top: 140px; border-top: 1px solid var(--line); padding: 56px 0 4
   .btn.lg { min-width: 0; width: 100%; }
   .tabs [role="tab"] { padding: 0 14px; font-size: 14px; }
 }
+
+/* hero demo */
+.demo img { transition: opacity .14s ease; }
+.demo img.swap { opacity: .35; }
+.demo .hot { position: absolute; border: 0; padding: 0; background: transparent; border-radius: 6px; cursor: pointer; }
+.demo .hot:hover { box-shadow: 0 0 0 1.5px rgba(166, 200, 255, .55); }
+.demo .hot:focus-visible { outline: 2px solid #a6c8ff; outline-offset: 2px; }
+.demo-toast { position: absolute; left: 50%; bottom: 5%; transform: translateX(-50%); background: rgba(10, 14, 24, .92); border: 1px solid var(--line-2); color: #eef3ff; font-size: 14px; padding: 9px 14px; border-radius: 8px; white-space: nowrap; pointer-events: none; }
+.demo-hint { margin: 14px 0 0; text-align: center; font-size: 14px; color: var(--mute, #8f9bb3); }
+@media (max-width: 720px) { .demo .hot { display: none; } .demo-hint { display: none; } }
