@@ -2078,7 +2078,7 @@ dependencies = [
 
 [[package]]
 name = "moony-setup"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
  "dirs 5.0.1",
  "futures-util",
