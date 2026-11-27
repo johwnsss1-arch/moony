@@ -263,3 +263,52 @@ footer { margin-top: 140px; border-top: 1px solid var(--line); padding: 56px 0 4
 .demo-toast { position: absolute; left: 50%; bottom: 5%; transform: translateX(-50%); background: rgba(10, 14, 24, .92); border: 1px solid var(--line-2); color: #eef3ff; font-size: 14px; padding: 9px 14px; border-radius: 8px; white-space: nowrap; pointer-events: none; }
 .demo-hint { margin: 14px 0 0; text-align: center; font-size: 14px; color: var(--mute, #8f9bb3); }
 @media (max-width: 720px) { .demo .hot { display: none; } .demo-hint { display: none; } }
+
+/* ---- Moony Tweaks look: navy glow, centred hero, pill buttons, lifted cards ---- */
+:root { --ink: #080b12; --pill-light: #e9eefb; --deep: #0f2246; --deep-line: #2c4d8e; }
+.hero { padding-top: 96px; text-align: center; }
+.hero::before { inset: -64px 0 auto; height: 760px;
+  background: radial-gradient(70% 90% at 50% 0%, #17305e 0%, #0d1a34 45%, transparent 80%),
+    repeating-linear-gradient(90deg, rgba(120, 160, 255, .035) 0 1px, transparent 1px 88px);
+  -webkit-mask-image: linear-gradient(#000 60%, transparent); mask-image: linear-gradient(#000 60%, transparent); }
+.hero-copy { max-width: 920px; margin: 0 auto; }
+.hero h1 { font-weight: 500; font-size: clamp(44px, 7vw, 88px); line-height: 1.02; }
+.hero h1 b { font-weight: 800; background: linear-gradient(180deg, #fff, #b9d2ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero .lede { margin-left: auto; margin-right: auto; max-width: 58ch; }
+.hero-cta { justify-content: center; }
+.release-line { justify-content: center; gap: 0; font-size: 14px; }
+.release-line > span { padding: 0 16px; }
+.release-line > span + span { border-left: 1px solid var(--line-2); }
+.release-line > span:first-child::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: #4fd18b; vertical-align: 1px; animation: dotPing 2.2s infinite; }
+@keyframes dotPing { 0% { box-shadow: 0 0 0 0 rgba(79, 209, 139, .6); } 70%, 100% { box-shadow: 0 0 0 7px rgba(79, 209, 139, 0); } }
+
+/* hero lines rise in one after another */
+.hero-copy > * { animation: heroIn .7s var(--ease) both; }
+.hero-copy > :nth-child(2) { animation-delay: .07s; } .hero-copy > :nth-child(3) { animation-delay: .14s; }
+.hero-copy > :nth-child(4) { animation-delay: .21s; } .hero-copy > :nth-child(5) { animation-delay: .28s; }
+@keyframes heroIn { from { opacity: 0; transform: translateY(14px); filter: blur(4px); } }
+
+/* pill buttons */
+.btn { border-radius: 999px; }
+.btn.lg { height: 54px; padding: 0 28px; }
+.btn.primary { background: var(--pill-light); color: #06101f; }
+.btn.primary:hover { background: #fff; box-shadow: 0 0 0 5px rgba(166, 200, 255, .15); }
+.btn.ghost { background: var(--deep); box-shadow: inset 0 0 0 1px var(--deep-line); }
+.btn.ghost:hover { background: #14305f; }
+.btn:active { transform: scale(.97); }
+
+/* feature tabs as pills */
+.tabs { justify-content: center; }
+.tabs [role="tab"]::before { transform: none; border-radius: 10px; }
+.tabs [role="tab"][aria-selected="true"]::before { background: var(--pill-light); }
+
+/* screens and cards: rounder, lift on hover */
+.stage-img, .stage-edge { border-radius: 16px; }
+.crop, .cta { border-radius: 16px; }
+.crop { transition: transform .35s var(--ease), box-shadow .35s var(--ease); }
+.crop:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -18px rgba(40, 90, 200, .5); }
+.sec-head { margin-left: auto; margin-right: auto; text-align: center; }
+.sec-head p { margin-left: auto; margin-right: auto; }
+
+@media (prefers-reduced-motion: reduce) { .hero-copy > *, .release-line > span:first-child::before { animation: none; } }
+@media (max-width: 600px) { .release-line { gap: 4px 0; } .release-line > span + span { border-left: 0; } .release-line > span { padding: 0 10px; } }
