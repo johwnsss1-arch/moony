@@ -1,7 +1,7 @@
 import { DiscordIcon } from "./DiscordIcon";
 import { api } from "../lib/bridge";
 import { DISCORD_URL } from "../lib/links";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MessageSquareHeart, LayoutDashboard, MessageSquare, Newspaper, Shirt, Wand2, ArrowLeft, LibraryBig, ShoppingBag, ChartNoAxesColumn, Server, CheckCircle2, ChevronDown, Compass, Heart, Home, Info, Minus, PanelRight, Play, Search, Settings, Square, Copy, UserPlus, Users, UsersRound, X, AlertCircle, Layers, Gauge, PartyPopper, Sparkles, PanelLeft } from "lucide-react";
 import { useApp } from "../lib/store";
 import { win } from "../lib/bridge";
@@ -43,7 +43,7 @@ export function Tour() {
     <div className="tour-root" onMouseDown={(e) => e.target === e.currentTarget && done()}>
       <div className="tour">
         <h2><Logo size={26}  /> Welcome to Moony</h2>
-        <p>Here's what each tab in the sidebar does. Hover any icon later to see its name.</p>
+        <p>Here's what each page does. The main ones are in the bar at the bottom, and the rest are under More.</p>
         <div className="tour-grid">
           {NAV.map((n) => (
             <button key={n.id} className="tour-item" onClick={() => done(n.id)}>
@@ -76,6 +76,7 @@ export function TitleBar({ onSearch }) {
   return (
     <header className="titlebar" data-tauri-drag-region onDoubleClick={(e) => e.target === e.currentTarget && win?.toggleMaximize()}>
       <div className="tb-left" data-tauri-drag-region>
+        <button className="tb-logo" onClick={() => setPage("home")} aria-label="Moony home"><Logo size={20} /><span>moony</span></button>
         <button className="tb-icon" onClick={back} disabled={!canGoBack} aria-label="Back" title="Back (Alt+Left)"><ArrowLeft size={16} /></button>
         <span className="tb-crumb" data-tauri-drag-region>{crumb}</span>
       </div>
@@ -175,50 +176,55 @@ function useNewsDot(page) {
   return newest > 0 && seen != null && newest > seen && page !== "news";
 }
 
-export function Sidebar() {
-  const { page, setPage, settings, updateSettings } = useApp();
+const DOCK_MAIN = ["home", "discover", "servers", "friends", "library"];
+
+export function Dock() {
+  const { page, setPage } = useApp();
   const newsDot = useNewsDot(page);
-  const collapsed = !!settings.navCollapsed;
-  const listRef = useRef(null);
-  const [mark, setMark] = useState(null);
-  useLayoutEffect(() => {
-    const measure = () => {
-      const el = listRef.current?.querySelector(`[data-page="${page}"]`);
-      setMark(el ? { y: el.offsetTop, h: el.offsetHeight } : null);
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    if (listRef.current) ro.observe(listRef.current);
-    return () => ro.disconnect();
-  }, [page, collapsed]);
-  const navBtn = (n) => (
-    <button key={n.id} data-page={n.id} className={"nav-btn" + (page === n.id ? " on" : "")} onClick={() => setPage(n.id)} aria-label={n.label} aria-current={page === n.id ? "page" : undefined}>
-      <n.icon size={17} strokeWidth={page === n.id ? 2.1 : 1.75} />
-      <span className="nav-label">{n.label}</span>
-      {n.id === "news" && newsDot && <span className="nav-dot" aria-label="New posts" />}
-      {collapsed && <span className="tip">{n.label}</span>}
-    </button>
-  );
+  const [more, setMore] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!more) return;
+    const close = (e) => !ref.current?.contains(e.target) && setMore(false);
+    const esc = (e) => e.key === "Escape" && setMore(false);
+    window.addEventListener("mousedown", close); window.addEventListener("keydown", esc);
+    return () => { window.removeEventListener("mousedown", close); window.removeEventListener("keydown", esc); };
+  }, [more]);
+  const go = (id) => { setPage(id); setMore(false); };
+  const main = DOCK_MAIN.map((id) => NAV.find((n) => n.id === id));
+  const rest = NAV.filter((n) => !DOCK_MAIN.includes(n.id) && n.id !== "settings");
+  const inMore = rest.some((n) => n.id === page);
   return (
-    <nav className={"sidebar" + (collapsed ? " collapsed" : "")} aria-label="Main">
-      <div className="side-brand" data-tauri-drag-region>
-        <Logo size={24}  />
-        <span className="side-word" data-tauri-drag-region>moony</span>
-        <button className="side-collapse" onClick={() => updateSettings({ navCollapsed: !collapsed })} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}><PanelLeft size={15} /></button>
+    <nav className="dock" aria-label="Main" ref={ref}>
+      <div className={"dock-more" + (more ? " open" : "")} role="menu" aria-hidden={!more}>
+        {NAV_GROUPS.map((label, grp) => {
+          const items = rest.filter((n) => n.group === grp);
+          return items.length ? (
+            <div key={grp} className="dm-group">
+              <span className="dm-h">{label}</span>
+              {items.map((n) => (
+                <button key={n.id} role="menuitem" tabIndex={more ? 0 : -1} className={"dm-item" + (page === n.id ? " on" : "")} onClick={() => go(n.id)}>
+                  <span className="dm-ic"><n.icon size={16} /></span>
+                  <span><b>{n.label}{n.id === "news" && newsDot && <i className="nav-dot" aria-label="New posts" />}</b><small>{n.desc}</small></span>
+                </button>
+              ))}
+            </div>
+          ) : null;
+        })}
       </div>
-      <div className="nav-scroll" ref={listRef}>
-        {mark && <span className="nav-mark" style={{ transform: `translateY(${mark.y}px)`, height: mark.h }} aria-hidden />}
-        {NAV_GROUPS.map((label, grp) => (
-          <div key={grp} className="nav-group">
-            <span className="nav-h">{label}</span>
-            {NAV.filter((n) => n.group === grp).map(navBtn)}
-          </div>
+      <div className="dock-in">
+        <SideNowPlaying />
+        {main.map((n) => (
+          <button key={n.id} className={"dock-btn" + (page === n.id ? " on" : "")} onClick={() => go(n.id)} aria-current={page === n.id ? "page" : undefined}>
+            <n.icon size={17} strokeWidth={page === n.id ? 2.1 : 1.75} /><span>{n.label}</span>
+          </button>
         ))}
-      </div>
-      <SideNowPlaying />
-      <div className="side-foot">
-        <AccountMenu collapsed={collapsed} />
-        <button data-page="settings" className={"nav-btn side-settings" + (page === "settings" ? " on" : "")} onClick={() => setPage("settings")} aria-label="Settings" title="Settings (Ctrl+,)"><Settings size={17} /></button>
+        <button className={"dock-btn" + (inMore ? " on" : "")} onClick={() => setMore((m) => !m)} aria-haspopup="menu" aria-expanded={more}>
+          <LayoutDashboard size={17} /><span>{inMore ? NAV.find((n) => n.id === page).label : "More"}</span>{newsDot && <i className="nav-dot" aria-hidden />}
+        </button>
+        <span className="dock-sep" aria-hidden />
+        <AccountMenu collapsed />
+        <button className={"dock-btn icon" + (page === "settings" ? " on" : "")} onClick={() => go("settings")} aria-label="Settings" title="Settings (Ctrl+,)"><Settings size={17} /></button>
       </div>
     </nav>
   );

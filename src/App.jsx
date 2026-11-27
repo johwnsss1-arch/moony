@@ -3,7 +3,7 @@ import { RotateCcw, WifiOff, X } from "lucide-react";
 import { AppProvider, useApp } from "./lib/store";
 import { isDesktop } from "./lib/bridge";
 import { cleanName } from "./lib/format";
-import { NAV, ResizeHandles, RightPanel, Sidebar, TitleBar, Toasts, Tour, useMaximized } from "./components/Shell";
+import { NAV, ResizeHandles, RightPanel, Dock, TitleBar, Toasts, Tour, useMaximized } from "./components/Shell";
 import { themeById } from "./lib/themes";
 import { loadBg, onBgChange } from "./lib/custombg";
 import { Img, Skeleton } from "./components/ui";
@@ -129,7 +129,6 @@ function Frame() {
       
       {bgUrl && <div className={"custom-bg fit-" + (settings.bgFit || "cover")} aria-hidden style={{ "--bg-dim": (settings.bgDim ?? 55) / 100, "--bg-blur": `${settings.bgBlur ?? 0}px` }}>{bgKind === "video" ? <video src={bgUrl} autoPlay loop muted playsInline /> : <img src={bgUrl} alt="" />}</div>}
       <TitleBar onSearch={openSearch} />
-      <Sidebar />
       <main className={"content" + (page === "game" ? " flush" : "")} key={key}>
         <ErrorBoundary resetKey={key}>
         <Suspense fallback={<PageLoading />}>
@@ -158,6 +157,7 @@ function Frame() {
         </ErrorBoundary>
       </main>
       {showPanel && <RightPanel />}
+      <Dock />
       <RejoinPrompt />
       <Tour />
       <WhatsNew />

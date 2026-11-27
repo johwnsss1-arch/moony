@@ -1,13 +1,11 @@
 import { useMemo } from "react";
-import { ChevronRight, Heart, History, Play, Rocket, Server, Sparkles, ThumbsUp, TrendingUp, Users } from "lucide-react";
+import { History, Play, Rocket, Server, Sparkles, TrendingUp, Users } from "lucide-react";
 import { useApp } from "../lib/store";
-import { isDesktop } from "../lib/bridge";
 import { ago, cleanName, compact, duration } from "../lib/format";
+import { dayKey } from "../lib/stats";
 import { Carousel } from "../components/Carousel";
 import { NowPlaying, PlaytimeSection } from "../components/Playtime";
-import { Avatar, ErrorState, Img, Skeleton, Toggle } from "../components/ui";
-import { DiscordIcon } from "../components/DiscordIcon";
-import { HomeHero } from "../components/HomeHero";
+import { ErrorState, Img, Skeleton } from "../components/ui";
 
 const pick = (sorts, id) => (sorts.find((s) => s.id === id)?.games ?? []).slice(0, 30);
 
@@ -15,17 +13,21 @@ export default function Home() {
   const { sorts, loadSorts, recent } = useApp();
   const loading = sorts.status === "loading";
   const popular = pick(sorts.data, "top-playing-now");
+  const shelf = recent.length ? recent.slice(0, 12) : popular.slice(0, 12);
 
   return (
     <div className="page home nf-home">
-      <HomeHero />
+      <Hero game={recent[0] || popular[0]} isRecent={!!recent[0]} />
       <NowPlaying />
-      <section className="deck">
-        {sorts.status === "error" && !recent.length ? <ErrorState message={sorts.error} onRetry={loadSorts} /> : <LaunchCard game={recent[0]} fallback={popular[0]} loading={loading && !recent.length} />}
-        <StatusPanel />
-      </section>
-
-      {recent.length > 1 && <Carousel title="Jump back in" icon={History} games={recent.slice(1)} />}
+      {sorts.status === "error" && !recent.length ? <ErrorState message={sorts.error} onRetry={loadSorts} /> : (
+        <section className="covers-sec">
+          <header className="section-head"><h2>{recent.length ? <><History size={16} />Jump back in</> : <><Users size={16} />Popular right now</>}</h2></header>
+          <div className="covers">
+            {loading && !shelf.length ? Array.from({ length: 6 }, (_, i) => <Skeleton key={i} w="100%" h={0} r={14} style={{ aspectRatio: "1" }} />)
+              : shelf.map((g, i) => <Cover key={g.universeId} game={g} i={i} />)}
+          </div>
+        </section>
+      )}
       <PlaytimeSection />
       <Ranked games={popular.slice(0, 10)} loading={loading} />
       <Carousel title="Trending" icon={TrendingUp} games={pick(sorts.data, "top-trending")} loading={loading} />
@@ -35,76 +37,45 @@ export default function Home() {
   );
 }
 
-function LaunchCard({ game, fallback, loading }) {
-  const { play, openGame, isFavorite, toggleFavorite, playtime } = useApp();
-  const g = game || fallback;
-  if (loading || !g) {
-    return (
-      <div className="launch launch-loading">
-        <div className="launch-body">
-          <Skeleton w={120} h={12} />
-          <Skeleton w="60%" h={40} style={{ marginTop: 16 }} />
-          <Skeleton w={200} h={12} style={{ marginTop: 16 }} />
-          <Skeleton w={170} h={44} r={10} style={{ marginTop: 28 }} />
-        </div>
-      </div>
-    );
-  }
-  const mine = game ? playtime.games?.[g.universeId]?.seconds : 0;
-  const fav = isFavorite(g.universeId);
+function Hero({ game, isRecent }) {
+  const { play, openGame, launchAs, friends, settings, playtime } = useApp();
+  const online = launchAs ? friends.data.filter((f) => f.presence?.type > 0).length : null;
+  let week = 0;
+  for (let i = 0; i < 7; i++) week += playtime.days?.[dayKey(new Date(Date.now() - i * 86400000))] || 0;
   return (
-    <article className="launch" key={g.universeId}>
-      <Img src={g.banner || g.icon} className={"launch-art" + (g.banner ? "" : " from-icon")} />
-      <div className="launch-shade" />
-      <div className="launch-body">
-        <span className="launch-kicker">{game ? <><History size={13} /> Continue playing{game.playedAt ? ` · ${ago(game.playedAt)}` : ""}</> : <><Users size={13} /> Most played on Roblox right now</>}</span>
-        <h2 title={g.name}>{cleanName(g.name)}</h2>
-        <div className="launch-meta">
-          {g.playing != null && <span><Users size={13} /> {compact(g.playing)} playing</span>}
-          {g.rating != null && <span><ThumbsUp size={13} /> {g.rating}%</span>}
-          {mine > 0 && <span>You've played {duration(mine)}</span>}
-          {g.creator && <span>by {g.creator}</span>}
-        </div>
-        <div className="launch-actions">
-          <button className="btn primary lg launch-play" onClick={() => play(g)}><Play size={17} fill="currentColor" /> Play</button>
-          <button className="btn secondary lg" onClick={() => openGame(g)}><Server size={15} /> Pick a server</button>
-          <button className={"btn secondary lg icon-only" + (fav ? " fav-on" : "")} aria-label={fav ? "Remove from favorites" : "Add to favorites"} aria-pressed={fav} onClick={() => toggleFavorite(g)}><Heart size={16} fill={fav ? "currentColor" : "none"} /></button>
-        </div>
+    <header className="tw-hero">
+      <h1>Roblox, <b>launched your way.</b></h1>
+      <p>
+        {game ? <>{isRecent ? "Pick up " : "Try "}<b>{cleanName(game.name)}</b>{isRecent ? " where you left off" : ", the most played game right now"}</> : "Loading games…"}
+        {week > 0 && <>, after <b>{duration(week)}</b> of play this week</>}.
+      </p>
+      <div className="tw-cta">
+        <button className="btn primary lg" disabled={!game} onClick={() => play(game)}><Play size={16} fill="currentColor" /> Play</button>
+        <button className="btn secondary lg" disabled={!game} onClick={() => openGame(game)}><Server size={15} /> Pick a server</button>
       </div>
-    </article>
+      <ul className="tw-stats">
+        <li><i className="tw-dot" /><b>{online ?? "–"}</b> {online == null ? "sign in for friends" : "friends online"}</li>
+        {game?.playing != null && <li><b>{compact(game.playing)}</b> playing {isRecent ? "it" : "now"}</li>}
+        <li>Boost <b>{settings.boost ? "on" : "off"}</b></li>
+      </ul>
+    </header>
   );
 }
 
-function StatusPanel() {
-  const { activeAccount, launchAs, friends, settings, updateSettings, setPage, discordState } = useApp();
-  const online = launchAs ? friends.data.filter((f) => f.presence?.type > 0) : [];
-  const inGame = online.filter((f) => f.presence?.type === 2);
-  const discordText = { on: "Showing your game", connected: "Showing your game", off: "Off", unavailable: "Discord isn't running" }[discordState] || (settings.discordEnabled ? "Waiting for Discord" : "Off");
+function Cover({ game, i }) {
+  const { play, openGame } = useApp();
   return (
-    <aside className="status">
-      <button className="status-row" onClick={() => setPage("accounts")}>
-        {activeAccount ? <Avatar src={activeAccount.avatar} size={32} alt={activeAccount.name} /> : <span className="status-ic"><Users size={15} /></span>}
-        <span className="grow"><small>Account</small><b>{activeAccount ? activeAccount.displayName : "Not signed in"}</b></span>
-        <span className="status-go">{activeAccount ? (launchAs ? "Signed in" : "Profile only") : "Sign in"}<ChevronRight size={14} /></span>
-      </button>
-      <button className="status-row" onClick={() => setPage("friends")} disabled={!launchAs}>
-        <span className="status-ic"><Users size={15} /></span>
-        <span className="grow"><small>Friends</small><b>{!launchAs ? "Sign in to see friends" : friends.status === "loading" ? "Checking…" : `${online.length} online`}</b></span>
-        {launchAs && inGame.length > 0 && (
-          <span className="status-faces">{inGame.slice(0, 3).map((f) => <Avatar key={f.id} src={f.avatar} size={22} alt={f.name} />)}<em>{inGame.length} in game</em></span>
-        )}
-      </button>
-      <div className="status-row static">
-        <span className="status-ic boost"><Rocket size={15} /></span>
-        <span className="grow"><small>Boost mode</small><b>{settings.boost ? "On while you play" : "Off"}</b></span>
-        {isDesktop ? <Toggle checked={!!settings.boost} onChange={(v) => updateSettings({ boost: v })} label="Boost mode" /> : <span className="status-go muted">Desktop app</span>}
+    <article className="cover-card" style={{ "--i": i }}>
+      <div className="cover-art">
+        <Img src={game.icon} />
+        <div className="cover-actions">
+          <button className="btn primary sm" onClick={() => play(game)}><Play size={13} fill="currentColor" /> Play</button>
+          <button className="btn secondary sm" onClick={() => openGame(game)}><Server size={13} /> Servers</button>
+        </div>
       </div>
-      <button className="status-row" onClick={() => setPage("settings")}>
-        <span className="status-ic discord"><DiscordIcon size={15} /></span>
-        <span className="grow"><small>Discord status</small><b>{discordText}</b></span>
-        <span className="status-go"><ChevronRight size={14} /></span>
-      </button>
-    </aside>
+      <h3 title={game.name}>{cleanName(game.name)}</h3>
+      <small>{game.playedAt ? ago(game.playedAt) : game.playing != null ? `${compact(game.playing)} playing` : ""}</small>
+    </article>
   );
 }
 
