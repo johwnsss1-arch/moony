@@ -289,6 +289,7 @@ if (window.__TAURI_INTERNALS__ && !window.orbit) {
     gameView: { frame: () => Promise.resolve(null), shots: () => Promise.resolve([]), openFolder: () => Promise.resolve(true), save: unavailable("Saving snapshots") },
     linkAccount: { take: () => Promise.resolve(false), onRequest: off },
     feedback: { send: (p) => rust("feedback:send", p) },
+    shareWrapped: (p) => rust("wrapped:share", p),
     versions: {
       info: (ch) => rust("versions:info", ch ?? null),
       install: (g) => rust("versions:install", g),

@@ -66,6 +66,23 @@ async fn ipc(app: tauri::AppHandle, channel: String, args: Vec<Value>) -> Result
             if !r.status().is_success() { return Err("Couldn't send feedback. Try again later.".into()); }
             Ok(json!(true))
         }
+        "wrapped:share" => {
+            use base64::{engine::general_purpose::STANDARD as B64, Engine};
+            let Some(hook) = option_env!("MOONY_SHOWCASE_WEBHOOK") else { return Err("Sharing isn't set up yet. Save the image and post it in #showcase instead.".into()) };
+            static LASTW: std::sync::Mutex<Option<std::time::Instant>> = std::sync::Mutex::new(None);
+            { let mut l = LASTW.lock().unwrap(); if l.map(|t| t.elapsed().as_secs() < 120).unwrap_or(false) { return Err("You just shared one. Try again in a couple of minutes.".into()); } *l = Some(std::time::Instant::now()); }
+            let p = a(0);
+            let png = B64.decode(p["png"].as_str().unwrap_or_default()).map_err(|_| "Bad image".to_string())?;
+            if png.len() > 8_000_000 { return Err("Image too big".into()); }
+            let who: String = p["name"].as_str().unwrap_or("A Moony player").chars().filter(|c| !"@#*_~`|<>".contains(*c)).take(40).collect();
+            let label: String = p["label"].as_str().unwrap_or_default().chars().take(40).collect();
+            let payload = json!({ "username": "Moony Wrapped", "allowed_mentions": { "parse": [] }, "embeds": [{ "title": format!("{who}'s Wrapped"), "description": label, "color": 0xa6c8ff, "image": { "url": "attachment://wrapped.png" }, "footer": { "text": "Made in Moony · moonylauncher.xyz" } }] });
+            let form = reqwest::multipart::Form::new().text("payload_json", payload.to_string())
+                .part("files[0]", reqwest::multipart::Part::bytes(png).file_name("wrapped.png").mime_str("image/png").map_err(|e| e.to_string())?);
+            let r = reqwest::Client::new().post(hook).multipart(form).send().await.map_err(|e| e.to_string())?;
+            if !r.status().is_success() { return Err("Couldn't share it. Try again later.".into()); }
+            Ok(json!(true))
+        }
         "app:version" => Ok(json!(app.package_info().version.to_string())),
         "http" => http::request(&app, a(0)).await,
         "store:get" => store::get(&app, a(0).as_str().unwrap_or_default()),

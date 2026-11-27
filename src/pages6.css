@@ -460,3 +460,25 @@ kbd { padding: 1px 7px; border-radius: 6px; background: var(--surface-3); border
 html[style*="--ui-font"] body, html[style*="--ui-font"] button, html[style*="--ui-font"] input, html[style*="--ui-font"] select, html[style*="--ui-font"] textarea { font-family: var(--ui-font) !important; }
 html.font-small body { font-size: 85%; }
 .ap-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* release notes (What's new) */
+.eng-new.eng-modal { width: 540px; padding: 0; background: #11141b; border: 1px solid var(--line-2); overflow: hidden; }
+.eng-new .modal-close { top: 16px; right: 16px; }
+.rn-head { position: relative; padding: 26px 28px 20px; border-bottom: 1px solid var(--line); overflow: hidden; }
+.rn-mark { position: absolute; right: -18px; bottom: -34px; width: 150px; height: 150px; fill: #a6c8ff; opacity: .07; }
+.rn-head p { margin: 0; font-size: 13px; color: var(--text-3); }
+.rn-head h2 { margin: 2px 0 0; font-family: var(--display, inherit); font-size: 34px; line-height: 1.05; letter-spacing: -.03em; font-weight: 700; }
+.rn-body { max-height: min(56vh, 460px); overflow-y: auto; padding: 6px 28px; }
+.rn-sec { padding: 18px 0; }
+.rn-sec + .rn-sec { border-top: 1px solid var(--line); }
+.rn-ver { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+.rn-ver b { font-size: 12px; font-weight: 600; color: #a6c8ff; font-variant-numeric: tabular-nums; padding: 2px 7px; border-radius: 5px; background: rgba(166, 200, 255, .1); }
+.rn-ver span { font-size: 15px; font-weight: 650; color: var(--text); }
+.rn-sec ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+.rn-sec li { position: relative; padding-left: 16px; font-size: 13.5px; line-height: 1.5; color: var(--text-2); text-wrap: pretty; }
+.rn-sec li::before { content: ""; position: absolute; left: 1px; top: .72em; width: 7px; height: 1.5px; background: var(--text-3); }
+.rn-sec li b { color: var(--text); font-weight: 600; }
+.rn-foot { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px 18px; border-top: 1px solid var(--line); }
+.rn-link { border: 0; background: none; padding: 0; font: inherit; font-size: 13px; color: var(--text-3); cursor: pointer; }
+.rn-link:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.rn-foot .btn.primary { min-width: 92px; }

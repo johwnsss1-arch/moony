@@ -32,15 +32,25 @@ export function WhatsNew() {
   if (!entries.length) return null;
   return (
     <Modal onClose={close} className="eng-new">
-      <div className="eng-hero"><Sparkles size={22} /><div><small>What's new</small><h2>Moony {VERSION}</h2></div></div>
-      {entries.map((c) => (
-        <section key={c.version} className="eng-sec">
-          <h3>{c.title} <span>v{c.version}</span></h3>
-          {c.video && <video className="eng-vid" src={c.video} poster={c.poster} controls autoPlay muted loop playsInline />}
-          <ul>{c.items.map((t, i) => <li key={i} style={{ animationDelay: `${i * 60}ms` }}>{t}</li>)}</ul>
-        </section>
-      ))}
-      <div className="eng-actions"><button className="btn primary" onClick={close}>Nice!</button></div>
+      <header className="rn-head">
+        <svg className="rn-mark" viewBox="0 0 32 32" aria-hidden="true"><g transform="translate(4.5 -1) skewX(-14)"><rect x="3" y="6" width="6" height="22" rx="3"/><rect x="13" y="6" width="6" height="22" rx="3"/><rect x="23" y="6" width="6" height="22" rx="3"/></g></svg>
+        <p>You're on</p>
+        <h2>Moony {VERSION}</h2>
+      </header>
+      <div className="rn-body">
+        {entries.map((c) => (
+          <section key={c.version} className="rn-sec">
+            <div className="rn-ver"><b>{c.version}</b><span>{c.title}</span></div>
+            {c.video && <video className="eng-vid" src={c.video} poster={c.poster} controls autoPlay muted loop playsInline />}
+            <ul>{c.items.map((t, i) => { const k = t.indexOf(": "); const lead = k > 0 && k < 28 ? t.slice(0, k + 1) : null;
+              return <li key={i}>{lead ? <><b>{lead}</b>{t.slice(k + 1)}</> : t}</li>; })}</ul>
+          </section>
+        ))}
+      </div>
+      <footer className="rn-foot">
+        <button className="rn-link" onClick={() => window.open("https://moonylauncher.xyz/changelog.html")}>All release notes</button>
+        <button className="btn primary" onClick={close}>Got it</button>
+      </footer>
     </Modal>
   );
 }

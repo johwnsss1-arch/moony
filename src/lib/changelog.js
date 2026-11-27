@@ -1,5 +1,26 @@
 export const CHANGELOG = [
   {
+    version: "4.2.0",
+    title: "A new home for Moony",
+    items: [
+      "Navigation: the sidebar is now a bar at the bottom. Home, Discover, Servers, Friends and Library are one click away, and everything else is under More.",
+      "Home: a new start screen with your last game, Play and Pick a server up front, and your recent games as covers. Hover a cover to play or pick a server.",
+      "Look: a navy glow behind every page, rounder buttons, and cards that lift when you point at them.",
+      "Wrapped: a Share to Discord button posts your card straight to #showcase in the Moony Discord.",
+      "What's new: this window got a cleaner design.",
+    ],
+  },
+  {
+    version: "4.1.1",
+    title: "Sharper text and small fixes",
+    items: [
+      "New fonts: cleaner headings and easier-to-read text everywhere.",
+      "Servers: on smaller windows the ping chart moves under Fast join and Server hop instead of getting squashed.",
+      "Start page: picking a page that no longer exists falls back to Home instead of a blank screen.",
+      "HUD: the page keeps its title outside the desktop app.",
+    ],
+  },
+  {
     version: "4.1.0",
     title: "A new Moony",
     items: [

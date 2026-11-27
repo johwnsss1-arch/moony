@@ -114,6 +114,19 @@ export default function Wrapped() {
     } else { const a = document.createElement("a"); a.href = url; a.download = name + ".png"; a.click(); }
   };
 
+  const [sharing, setSharing] = useState(false);
+  const share = async () => {
+    if (!window.orbit?.shareWrapped || sharing) return;
+    setSharing(true);
+    try {
+      let url; try { url = cv.current.toDataURL("image/png"); }
+      catch { await draw(cv.current, { ...d, top: d.top.map((t) => ({ ...t, icon: null })) }, launchAs?.name, accent); url = cv.current.toDataURL("image/png"); }
+      await window.orbit.shareWrapped({ png: url.split(",")[1], name: launchAs?.name, label: d.label });
+      toast("Posted in #showcase on the Moony Discord", "success");
+    } catch (e) { toast(e.message || String(e), "error"); }
+    setSharing(false);
+  };
+
   return (
     <div className="page wrapped-page">
       <div className="page-head row">
@@ -127,6 +140,7 @@ export default function Wrapped() {
           <canvas ref={cv} width={W} height={H} className="wrapped-card" />
           <div className="wrapped-side">
             <button className="btn primary lg" onClick={save}><Download size={15} /> Save image</button>
+            {window.orbit?.shareWrapped && <button className="btn lg" onClick={share} disabled={sharing}>{sharing ? "Posting…" : "Share to Discord"}</button>}
             <small>Saved as a PNG (1080×1350), the right size for TikTok, Instagram and Discord.</small>
             <div className="wrapped-facts">
               {d.bestDay && <div><small>Best day</small><b>{new Date(d.bestDay.day).toLocaleDateString([], { month: "short", day: "numeric" })} · {hrs(d.bestDay.secs)}</b></div>}
