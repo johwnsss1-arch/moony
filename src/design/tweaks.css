@@ -1,0 +1,44 @@
+/* Moony 4.2 look, shared with Moony Tweaks and the website:
+   navy glow behind each page, pill buttons, light pill for the active item, cards that lift on hover. */
+
+.frame.nf:not(.has-art):not(.has-bg) .content {
+  background:
+    radial-gradient(70% 420px at 50% 0%, rgba(23, 48, 94, .9) 0%, rgba(13, 26, 52, .55) 45%, transparent 80%),
+    repeating-linear-gradient(90deg, rgba(120, 160, 255, .03) 0 1px, transparent 1px 88px) top / 100% 460px no-repeat,
+    var(--bg-0);
+}
+
+/* page titles: bigger, with the white-to-blue sheen */
+.frame.nf .page-head h1 {
+  font-size: 38px; background: linear-gradient(180deg, #fff, #b9d2ff); -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.frame.nf .page-head > *, .frame.nf .page-head > div > * { animation: tw-rise .55s var(--nf-ease) both; }
+.frame.nf .page-head > :nth-child(2), .frame.nf .page-head > div > :nth-child(2) { animation-delay: .06s; }
+@keyframes tw-rise { from { opacity: 0; transform: translateY(10px); filter: blur(3px); } }
+
+/* pill buttons */
+.frame.nf .btn { border-radius: 999px; }
+.frame.nf .btn.primary { background: #e9eefb; color: #06101f; box-shadow: none; filter: none; }
+.frame.nf .btn.primary:hover:not(:disabled) { background: #fff; box-shadow: 0 0 0 4px rgba(166, 200, 255, .15); filter: none; }
+.frame.nf .btn.secondary { background: #0f2246; border-color: #2c4d8e; }
+.frame.nf .btn.secondary:hover:not(:disabled) { background: #14305f; }
+
+/* sidebar: the current page is a light pill */
+.frame.nf .sidebar .nav-btn.on { background: #e9eefb !important; color: #06101f !important; border-radius: 10px !important; }
+.frame.nf .sidebar .nav-btn.on svg { color: #06101f !important; }
+.frame.nf .sidebar .nav-btn { border-radius: 10px !important; }
+
+/* segmented controls and chips read as pills too */
+.frame.nf .segmented { border-radius: 999px; }
+.frame.nf .segmented button { border-radius: 999px; }
+.frame.nf .chip { border-radius: 999px; }
+
+/* cards lift a little on hover */
+.frame.nf .tile, .frame.nf .item-card, .frame.nf .news-card { transition: transform .3s var(--nf-ease), box-shadow .3s var(--nf-ease) !important; }
+.frame.nf .tile:hover, .frame.nf .item-card:hover, .frame.nf .news-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -16px rgba(40, 90, 200, .5), inset 0 0 0 1px #3a5288 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .frame.nf .page-head > *, .frame.nf .page-head > div > * { animation: none; }
+  .frame.nf .tile:hover, .frame.nf .item-card:hover, .frame.nf .news-card:hover { transform: none; }
+}
