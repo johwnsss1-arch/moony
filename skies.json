@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "clear-day",
+      "name": "Clear Day",
+      "mood": "Bright blue sky with soft clouds",
+      "preview": "skies/clear-day/preview.jpg",
+      "files": [
+        "skies/clear-day/sky512_bk.tex",
+        "skies/clear-day/sky512_rt.tex",
+        "skies/clear-day/sky512_ft.tex",
+        "skies/clear-day/sky512_lf.tex",
+        "skies/clear-day/sky512_up.tex",
+        "skies/clear-day/sky512_dn.tex"
+      ]
+    },
+    {
+      "id": "sunset",
+      "name": "Golden Sunset",
+      "mood": "Warm sun low on the horizon, pink clouds",
+      "preview": "skies/sunset/preview.jpg",
+      "files": [
+        "skies/sunset/sky512_bk.tex",
+        "skies/sunset/sky512_rt.tex",
+        "skies/sunset/sky512_ft.tex",
+        "skies/sunset/sky512_lf.tex",
+        "skies/sunset/sky512_up.tex",
+        "skies/sunset/sky512_dn.tex"
+      ]
+    },
+    {
+      "id": "midnight",
+      "name": "Midnight",
+      "mood": "Deep blue night, thousands of stars, a faint galaxy",
+      "preview": "skies/midnight/preview.jpg",
+      "files": [
+        "skies/midnight/sky512_bk.tex",
+        "skies/midnight/sky512_rt.tex",
+        "skies/midnight/sky512_ft.tex",
+        "skies/midnight/sky512_lf.tex",
+        "skies/midnight/sky512_up.tex",
+        "skies/midnight/sky512_dn.tex"
+      ]
+    },
+    {
+      "id": "aurora",
+      "name": "Aurora",
+      "mood": "Green and violet northern lights over a starry night",
+      "preview": "skies/aurora/preview.jpg",
+      "files": [
+        "skies/aurora/sky512_bk.tex",
+        "skies/aurora/sky512_rt.tex",
+        "skies/aurora/sky512_ft.tex",
+        "skies/aurora/sky512_lf.tex",
+        "skies/aurora/sky512_up.tex",
+        "skies/aurora/sky512_dn.tex"
+      ]
+    },
+    {
+      "id": "nebula",
+      "name": "Nebula",
+      "mood": "Deep space with violet and blue nebula clouds",
+      "preview": "skies/nebula/preview.jpg",
+      "files": [
+        "skies/nebula/sky512_bk.tex",
+        "skies/nebula/sky512_rt.tex",
+        "skies/nebula/sky512_ft.tex",
+        "skies/nebula/sky512_lf.tex",
+        "skies/nebula/sky512_up.tex",
+        "skies/nebula/sky512_dn.tex"
+      ]
+    },
+    {
+      "id": "storm",
+      "name": "Storm",
+      "mood": "Heavy grey clouds rolling in",
+      "preview": "skies/storm/preview.jpg",
+      "files": [
+        "skies/storm/sky512_bk.tex",
+        "skies/storm/sky512_rt.tex",
+        "skies/storm/sky512_ft.tex",
+        "skies/storm/sky512_lf.tex",
+        "skies/storm/sky512_up.tex",
+        "skies/storm/sky512_dn.tex"
+      ]
+    },
+    {
+      "id": "moony",
+      "name": "Moony Night",
+      "mood": "Moony's blue night with a big glowing moon",
+      "preview": "skies/moony/preview.jpg",
+      "files": [
+        "skies/moony/sky512_bk.tex",
+        "skies/moony/sky512_rt.tex",
+        "skies/moony/sky512_ft.tex",
+        "skies/moony/sky512_lf.tex",
+        "skies/moony/sky512_up.tex",
+        "skies/moony/sky512_dn.tex"
+      ]
+    }
+  ]
+}
