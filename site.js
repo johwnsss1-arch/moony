@@ -1,4 +1,4 @@
-const REPO = "johwnsss1-arch/moony";
+const REPO = "saintfeeling/moony";
 const DISCORD = "https://discord.gg/moonylauncher";
 
 document.querySelectorAll("[data-discord]").forEach((a) => { a.href = DISCORD; a.target = "_blank"; a.rel = "noopener"; });
